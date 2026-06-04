@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(killall -9 node)",
+      "Bash(npm run *)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s http://localhost:3001)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(pkill -f \"node.*index.js\")",
+      "Bash(pkill -f \"vite\")"
+    ]
+  }
+}

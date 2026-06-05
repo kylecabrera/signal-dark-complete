@@ -136,7 +136,23 @@ async function applyRebelAction(sessionId, playerId, action) {
 
     const econ = CONFIG.PLANET_ECON[planetId];
     const config = CONFIG.EARN_MONEY[type];
-    covert = (type === 'steal_money');
+
+    // Determine covert status
+    if (type === 'steal_money') {
+      covert = true; // Theft is always covert
+    } else {
+      // Honest work has small chance of being detected
+      let detectChance = 0.15; // 15% base chance of being overt
+
+      // Reduce detection chance if player has hidden units
+      const playerUnits = units.filter(u => u.owner?.includes(playerId));
+      const hasHiddenUnits = playerUnits.some(u => CONFIG.UNIT_TYPES[u.unit_type]?.hidden);
+      if (hasHiddenUnits) {
+        detectChance *= 0.3; // 70% reduction if hidden
+      }
+
+      covert = Math.random() > detectChance;
+    }
 
     // Generate random amount based on planet economy
     let maxAmount;

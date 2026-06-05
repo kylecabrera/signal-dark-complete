@@ -889,12 +889,12 @@ const CONFIG = {
       description: 'The hidden Emperor. Immobile.',
     },
     jedi_avatar: {
-      label: 'Jedi', designation: 'Jedi',
-      cost: 0, buildTime: 0, strength: 3, hp: 3,
+      label: 'Jedi', designation: 'Jedi Avatar',
+      cost: 0, buildTime: 0, strength: 12, hp: 10,
       canOrbit: true, canSurface: true, hidden: true,
-      jumpDistance: 2, transportCapacity: 0,
+      jumpDistance: 3, transportCapacity: 0,
       rebelOnly: true,
-      description: 'The player\'s Jedi avatar. Death eliminates the player.',
+      description: 'The player\'s powerful Jedi avatar. Can be embedded in ships. Death eliminates the player.',
     },
   },
 
@@ -1103,6 +1103,7 @@ const CONFIG = {
     unit_produce: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
     unit_attack: { rebellion_delta: 5, empire_delta: 4, always_leaks: true },
     rebel_attack: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
+    discover_force_mysteries: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
   },
 
   // ─────────────────────────────────────────────
@@ -1130,6 +1131,7 @@ const CONFIG = {
       fleet_move:  0,
       unit_produce: 0,
       unit_attack: -3,
+      discover_force_mysteries: 0,
     },
     // Bonus stats by starting planet region
     STARTING_BONUSES: {
@@ -1172,9 +1174,92 @@ const CONFIG = {
         name: 'Find Apprentice',
         description: 'Sense a potential Force user nearby and recruit them',
         costPoints: 5,
-        duration: 2,  // rounds active
-        baseChance: 0.15,  // base 15% chance
-        range: 'adjacent',  // search adjacent planets (same as intel)
+        duration: 2,
+        baseChance: 0.15,
+        range: 'adjacent',
+        alignment: 0,
+      },
+      discover_force_mysteries: {
+        name: 'Discover Force Mysteries',
+        description: 'Uncover hidden Force powers available in this sector',
+        costPoints: 0,
+        baseChance: 1.0,
+        unlocks: ['force_shield', 'force_push', 'force_lightning', 'mind_trick', 'healing_touch'],
+        alignment: 0,
+      },
+      // LIGHTSIDE POWERS
+      force_shield: {
+        name: 'Force Shield',
+        description: 'Create a protective barrier. +25% defense for all units this turn',
+        costPoints: 8,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: 40,
+      },
+      healing_touch: {
+        name: 'Healing Touch',
+        description: 'Restore damaged units. Heal 3 HP to any unit at current planet',
+        costPoints: 6,
+        duration: 0,
+        baseChance: 1.0,
+        alignment: 50,
+      },
+      sense_danger: {
+        name: 'Sense Danger',
+        description: 'Foresee threats. Reveal all hidden units within 2 planets',
+        costPoints: 7,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: 30,
+      },
+      inspire_allies: {
+        name: 'Inspire Allies',
+        description: 'Bolster morale. +2 rebellion strength and double unit production next turn',
+        costPoints: 10,
+        duration: 2,
+        baseChance: 0.8,
+        alignment: 35,
+      },
+      // DARKSIDE POWERS
+      force_lightning: {
+        name: 'Force Lightning',
+        description: 'Strike with lightning. Deal 5 damage to any enemy unit at current planet',
+        costPoints: 9,
+        duration: 0,
+        baseChance: 0.9,
+        alignment: -50,
+      },
+      mind_trick: {
+        name: 'Mind Trick',
+        description: 'Cloud minds. Enemy units at this planet lose 30% combat effectiveness for 2 turns',
+        costPoints: 8,
+        duration: 2,
+        baseChance: 0.85,
+        alignment: -40,
+      },
+      force_choke: {
+        name: 'Force Choke',
+        description: 'Crush your enemies. Instantly destroy one enemy unit on this planet',
+        costPoints: 12,
+        duration: 0,
+        baseChance: 0.6,
+        alignment: -60,
+      },
+      dark_vision: {
+        name: 'Dark Vision',
+        description: 'See through darkness. Reveal all hidden enemies across entire sector for 1 turn',
+        costPoints: 10,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: -35,
+      },
+      dominate_will: {
+        name: 'Dominate Will',
+        description: 'Enslave minds. Permanently convert one enemy unit to your side',
+        costPoints: 15,
+        duration: 0,
+        baseChance: 0.4,
+        alignment: -70,
       },
     },
   },

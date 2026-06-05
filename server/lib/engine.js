@@ -500,6 +500,26 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
 
   // ── Force Powers (nested action) ──────────
+  // ── Force: discover mysteries ──────────────
+  } else if (type === 'discover_force_mysteries') {
+    let forceUser = await db.getForceUser(sessionId, playerId);
+    if (!forceUser) {
+      forceUser = await db.getOrCreateForceUser(sessionId, playerId, CONFIG.FORCE.BASE_STRENGTH, 0);
+    }
+
+    if (!forceUser) return { ok:false, error:'Force user not initialized' };
+
+    // Unlock all available force powers for this player
+    const availablePowers = ['force_shield', 'healing_touch', 'sense_danger', 'inspire_allies',
+                             'force_lightning', 'mind_trick', 'force_choke', 'dark_vision', 'dominate_will'];
+
+    result.discoveredPowers = availablePowers;
+    covert = true;
+    label = `Discovered Force mysteries!`;
+    result.forcePowersUnlocked = availablePowers.length;
+
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
+
   } else if (type === 'force_powers') {
     const { powerName } = action;
     if (!powerName) return { ok:false, error:'Power name required' };

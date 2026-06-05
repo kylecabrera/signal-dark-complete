@@ -258,6 +258,8 @@ export function useGame() {
 
   const useForcePower = useCallback((powerName) =>
     sendAction({ type: 'force_powers', powerName }), [sendAction]);
+  const discoverForceMysteries = useCallback(() =>
+    sendAction({ type: 'discover_force_mysteries' }), [sendAction]);
 
   const contribute   = useCallback((factionId, amount, mode='normal', unitType=null) => {
     const action = { type: mode === 'research' ? 'research' : 'contribute', planetId: privateState?.currentPlanet, factionId, amount };
@@ -302,7 +304,7 @@ export function useGame() {
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
     joinGame, markReady, submitTurn, endTurnEarly,
-    sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower,
+    sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
     contribute, foundFaction, foundCell, investigate, denounce,
     moveUnit, produceUnit, attackWith, attackEmpire, attackRebel, toggleUnitHidden,
   };

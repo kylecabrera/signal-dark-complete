@@ -336,7 +336,7 @@ export function Sidebar({ game }) {
   const {
     publicState, privateState, feedEntries, governorThinking,
     selectedPlanet, playerId, submitTurn, endTurnEarly,
-    recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower,
+    recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
     produceUnit,
   } = game;
 
@@ -634,6 +634,26 @@ export function Sidebar({ game }) {
                     <div style={{ fontSize:7, color:'#5a7090', padding:'2px 4px', background:'rgba(160,128,224,0.08)', borderRadius:2 }}>
                       Success chance: {(15 + privateState.forceTier).toFixed(0)}%
                     </div>
+                    <button
+                      onClick={() => discoverForceMysteries()}
+                      disabled={actionsLeft <= 0}
+                      style={{
+                        width:'100%',
+                        padding:'4px 6px',
+                        marginTop:6,
+                        background:'rgba(96,64,160,0.12)',
+                        border:'1px solid rgba(96,64,160,0.3)',
+                        borderRadius:3,
+                        color:'#a080e0',
+                        fontFamily:'var(--mono)',
+                        fontSize:8,
+                        cursor: actionsLeft > 0 ? 'pointer' : 'not-allowed',
+                        opacity: actionsLeft > 0 ? 1 : 0.5,
+                      }}
+                      title='Unlock all available Force powers in this sector'
+                    >
+                      Discover Force Mysteries
+                    </button>
                   </div>
                 )}
 

@@ -168,64 +168,88 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
 
   return (
     <div style={{ overflowY:'auto', flex:1, padding:'0 13px' }}>
-      <div className="sb">
-        <div className="sbt" style={{ color:'#40c880' }}>◉ Traveling with you ({escort.length})</div>
-        {escort.length === 0
-          ? <div className="empty-state">No orbital units in escort</div>
-          : escort.map(u => <UnitRow key={u.id} u={u} onToggleHidden={toggleUnitHidden} />)}
-        {escort.length > 0 && (
-          <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginTop:6, letterSpacing:'0.08em' }}>
-            Orbital units move with you automatically
+      {/* Fleet Creation Guide */}
+      <div className="sb" style={{
+        background: 'rgba(160,128,224,0.05)',
+        borderLeft: '3px solid #a080e0',
+      }}>
+        <div className="sbt" style={{ color:'#a080e0' }}>◇ FLEET CREATION STEPS</div>
+        <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', lineHeight:1.6 }}>
+          <div style={{ marginBottom:4 }}>
+            <span style={{ color:'#a080e0', fontWeight:600 }}>1. Research</span> — Go to Factions tab, contribute to unlock units
           </div>
-        )}
+          <div style={{ marginBottom:4 }}>
+            <span style={{ color:'#a080e0', fontWeight:600 }}>2. Produce</span> — Queue units below (they build each round)
+          </div>
+          <div>
+            <span style={{ color:'#a080e0', fontWeight:600 }}>3. Deploy</span> — Units arrive in orbit then deploy to planets
+          </div>
+        </div>
+      </div>
+      <div className="sb" style={{
+        borderLeft: '3px solid #40c880',
+        background: 'rgba(64,200,128,0.04)',
+      }}>
+        <div className="sbt" style={{ color:'#40c880' }}>◆ ESCORT FLEET ({escort.length})</div>
+        <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginBottom:4, opacity:0.8 }}>
+          Units that travel with you to adjacent planets
+        </div>
+        {escort.length === 0
+          ? <div className="empty-state">Empty — queue units above</div>
+          : escort.map(u => <UnitRow key={u.id} u={u} onToggleHidden={toggleUnitHidden} />)}
       </div>
 
-      <div className="sb">
-        <div className="sbt" style={{ color:'#e8a030' }}>⬡ Deployed ({deployed.length})</div>
+      <div className="sb" style={{
+        borderLeft: '3px solid #e8a030',
+      }}>
+        <div className="sbt" style={{ color:'#e8a030' }}>▲ DEPLOYED FORCES ({deployed.length})</div>
+        <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginBottom:4, opacity:0.8 }}>
+          Units stationed on planets (stay when you leave)
+        </div>
         {deployed.length === 0
-          ? <div className="empty-state">No deployed units</div>
+          ? <div className="empty-state">No forces deployed</div>
           : Object.entries(byPlanet).map(([pid, pUnits]) => {
               const pInfo = (planetState || []).find(p => p.id === pid);
               return (
                 <div key={pid} style={{ marginBottom:8 }}>
                   <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a9ae0',
-                    marginBottom:3, letterSpacing:'0.08em' }}>
-                    {pInfo?.name || pid}
+                    marginBottom:3, letterSpacing:'0.08em', fontWeight:600 }}>
+                    📍 {pInfo?.name || pid}
                   </div>
                   {pUnits.map(u => <UnitRow key={u.id} u={u} onToggleHidden={toggleUnitHidden} />)}
                 </div>
               );
             })}
-        {deployed.length > 0 && (
-          <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginTop:6, letterSpacing:'0.08em' }}>
-            Surface units stay when you move
-          </div>
-        )}
       </div>
 
       {myPlanet && (
-        <div className="sb">
-          <div className="sbt" style={{ color:'#e8d030' }}>⚙ Production at {(planetState || []).find(p => p.id === myPlanet)?.name || myPlanet}</div>
+        <div className="sb" style={{
+          borderLeft: '3px solid #e8d030',
+        }}>
+          <div className="sbt" style={{ color:'#e8d030' }}>⚙ PRODUCTION — {(planetState || []).find(p => p.id === myPlanet)?.name || myPlanet}</div>
 
           {inProgress.length > 0 && (
             <div style={{ marginBottom:8 }}>
-              <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#a080e0', marginBottom:4 }}>
-                IN PROGRESS:
+              <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#a080e0', marginBottom:4, fontWeight:600 }}>
+                BUILDING ({inProgress.length}):
               </div>
               {inProgress.map(q => (
                 <div key={q.id} style={{
                   fontFamily:'var(--mono)', fontSize:8, padding:'4px 6px',
                   background:'rgba(160,128,224,0.08)', borderRadius:3, marginBottom:3
                 }}>
-                  <div>{q.unit_type} ({q.remaining} rounds)</div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}>
+                    <span>{q.unit_type}</span>
+                    <span style={{ color:'#40c880', fontWeight:600 }}>{q.remaining} rnd{q.remaining!==1?'s':''}</span>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
           <div style={{ marginBottom:6, paddingTop:6, borderTop:'1px solid rgba(80,140,220,0.1)' }}>
-            <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginBottom:4, fontWeight:500 }}>
-              QUEUE NEW UNIT ({credits}cr available)
+            <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginBottom:4, fontWeight:600 }}>
+              NEW UNIT QUEUE ({credits}cr available)
             </div>
             {(() => {
               // Get factions with presence at current planet
@@ -258,6 +282,7 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
                 <button
                   key={u.type}
                   onClick={() => produceUnit(myPlanet, u.type)}
+                  title={`Queue ${u.label} for production — arrives in ${u.buildTime || '?'} rounds`}
                   style={{
                     width:'100%',
                     display:'flex',
@@ -272,7 +297,16 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
                     fontFamily:'var(--mono)',
                     fontSize:8,
                     cursor:'pointer',
-                    textAlign:'left'
+                    textAlign:'left',
+                    transition:'all 0.15s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(64,200,128,0.15)';
+                    e.target.style.borderColor = 'rgba(64,200,128,0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(64,200,128,0.08)';
+                    e.target.style.borderColor = 'rgba(64,200,128,0.2)';
                   }}
                 >
                   <span>{u.label}</span>

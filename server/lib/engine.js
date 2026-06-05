@@ -757,9 +757,18 @@ async function processGovernorTurn(sessionId) {
   }
 
   // Raise alert for overt actions this round
-  let alertValue = session.alert_value;
-  const overtCount = moves.filter(m => !m.covert).length;
-  if (overtCount > 0) alertValue = Math.min(alertValue + 1, 4);
+  // Alert level is based on rebel planet control
+  // More planets = higher alert level
+  const rebelPlanets = newPlanets.filter(p =>
+    p.controlled_by === 'rebel' || p.controlled_by?.startsWith('faction:')
+  ).length;
+
+  let alertValue;
+  if (rebelPlanets <= 1) alertValue = 0;      // DORMANT
+  else if (rebelPlanets <= 3) alertValue = 1; // ELEVATED
+  else if (rebelPlanets <= 5) alertValue = 2; // MANHUNT
+  else if (rebelPlanets <= 7) alertValue = 3; // PURGE (Quorum activates)
+  else alertValue = 4;                        // ANNIHILATION
 
   // Update Vektis depth
   newGovState.vektis = newGovState.vektis || {};

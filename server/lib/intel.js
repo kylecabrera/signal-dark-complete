@@ -1,6 +1,7 @@
 const db = require('./db');
 const { BASE_WATCHED_LANES, getNeighbors, reachableIn } = require('./world');
 const CONFIG = require('./config');
+const { getGovernorStatement } = require('./governor_statements');
 
 // ─────────────────────────────────────────────
 // Process all sealed moves into observable intel leaks
@@ -150,9 +151,8 @@ async function applyGovernorActionResults(sessionId, round, govResults) {
   const newLocked   = [...(session.locked_lanes  || [])];
   const feedEntries = [];
 
-  for (const { governor, actions, broadcast } of govResults) {
-    if (broadcast) feedEntries.push({ gov: governor, text: broadcast });
-
+  for (const { governor, actions } of govResults) {
+    // Only show broadcasts for accomplished actions, not every turn
     for (const action of (actions || [])) {
       await applyGovernorAction(
         sessionId, round, governor, action,
@@ -186,6 +186,8 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
         govState.siris.patrolTokens = govState.siris.patrolTokens || {};
         govState.siris.patrolTokens[p.id] = true;
         p.suspicion = Math.min(p.suspicion + 1, 4);
+        const stmt = getGovernorStatement('siris', 'patrol');
+        if (stmt) feed.push({ gov: 'siris', text: stmt });
       }
       break;
     }
@@ -200,6 +202,8 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
         govState.crassus.sweepTargets = govState.crassus.sweepTargets || [];
         govState.crassus.sweepTargets.push(p.id);
         p.suspicion = Math.min(p.suspicion + 1, 4);
+        const stmt = getGovernorStatement('crassus', 'sweep');
+        if (stmt) feed.push({ gov: 'crassus', text: stmt });
       }
       break;
     }
@@ -208,7 +212,11 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
       const pb = planets.find(x => x.name === target2 || x.id === target2);
       if (pa && pb) {
         const already = locked.some(([a,b])=>(a===pa.id&&b===pb.id)||(a===pb.id&&b===pa.id));
-        if (!already) locked.push([pa.id, pb.id]);
+        if (!already) {
+          locked.push([pa.id, pb.id]);
+          const stmt = getGovernorStatement('vektis', 'scan');
+          if (stmt) feed.push({ gov: 'vektis', text: stmt });
+        }
       }
       break;
     }
@@ -216,6 +224,8 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
       const p = planets.find(x => x.name === target || x.id === target);
       if (p) {
         p.loyalty = Math.min(p.loyalty + 5, 100);
+        const stmt = getGovernorStatement('maren', 'propaganda');
+        if (stmt) feed.push({ gov: 'maren', text: stmt });
         // Loyalty hits 100 → architect claims planet
         if (p.loyalty === 100 && !p.controlled_by.startsWith('empire:')) {
           p.controlled_by = `empire:${governor}`;
@@ -230,6 +240,8 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
         govState.maren.informerNetworks = govState.maren.informerNetworks || [];
         if (!govState.maren.informerNetworks.includes(p.id)) {
           govState.maren.informerNetworks.push(p.id);
+          const stmt = getGovernorStatement('maren', 'blackmail');
+          if (stmt) feed.push({ gov: 'maren', text: stmt });
         }
       }
       break;

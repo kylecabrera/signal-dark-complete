@@ -84,13 +84,14 @@ function Landing({ game }) {
   const [mode, setMode]       = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+  const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
 
   async function createGame() {
     if (!name.trim()) return setError('Enter your callsign');
     setLoading(true);
     setError('');
     try {
-      const res  = await fetch('/api/sessions', {
+      const res  = await fetch(`${serverUrl}/api/sessions`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ displayName: name.trim() }),
@@ -110,7 +111,7 @@ function Landing({ game }) {
     setLoading(true);
     setError('');
     try {
-      const res  = await fetch(`/api/sessions/${code.trim().toUpperCase()}/join`, {
+      const res  = await fetch(`${serverUrl}/api/sessions/${code.trim().toUpperCase()}/join`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ displayName: name.trim() }),

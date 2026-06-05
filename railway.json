@@ -2,10 +2,5 @@
   "build": {
     "builder": "nixpacks",
     "buildCommand": "echo 'no build needed'"
-  },
-  "deploy": {
-    "startCommand": "cd server && npm install && npm start",
-    "restartPolicyType": "on_failure",
-    "restartPolicyMaxRetries": 5
   }
 }

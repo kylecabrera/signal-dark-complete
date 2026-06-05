@@ -101,6 +101,13 @@ async function applyRebelAction(sessionId, playerId, action) {
   const playerRow = (await db.getPlayers(sessionId)).find(p => p.id === playerId);
   if (playerRow?.is_eliminated) return { ok:false, error:'You have been eliminated' };
 
+  // Check if player is detained - if so, prevent movement
+  if (rebelState.is_detained) {
+    if (action.type === 'move') {
+      return { ok:false, error:`Detained: cannot move for ${rebelState.detention_turns} more turn${rebelState.detention_turns !== 1 ? 's' : ''}` };
+    }
+  }
+
   const currentPlanet = rebelState.current_planet;
   const currentSector = getPlanetSector(currentPlanet);
 
@@ -642,6 +649,28 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
   }
 
+  // Check for detention based on criminality level
+  if (sector) {
+    const updatedState = await db.getRebelState(sessionId, playerId);
+    const sectorCriminality = updatedState.criminality?.[sector] || 0;
+
+    const detentionChances = {
+      1: 0.20, // Wanted: 20%
+      2: 0.40, // Fugitive: 40%
+      3: 0.60, // Outlaw: 60%
+      4: 0.80  // Terrorist: 80%
+    };
+
+    const detentionChance = detentionChances[sectorCriminality] || 0;
+    if (detentionChance > 0 && Math.random() < detentionChance) {
+      // Detention triggered!
+      const fineAmount = sectorCriminality * 50; // 50, 100, 150, 200 credits
+      result.detentionTriggered = true;
+      result.fineAmount = fineAmount;
+      result.detentionMessage = `Apprehended by local authorities! Fine: ${fineAmount}cr to avoid detention.`;
+    }
+  }
+
   // Update Force user: earn points, apply alignment shift, check tier advancement
   let forceUser = await db.getForceUser(sessionId, playerId);
   if (forceUser) {
@@ -889,12 +918,21 @@ async function processGovernorTurn(sessionId) {
   vektisMemory.roundsSinceConfirm = leaks.some(l=>l.severity==='CERTAIN'||l.severity==='HIGH')
     ? 0 : (vektisMemory.roundsSinceConfirm||0)+1;
 
-  // Reset per-turn rebel actions, grant base credits
+  // Reset per-turn rebel actions, grant base credits, handle detention
   const rebelStates = await db.getAllRebelStates(sessionId);
-  await Promise.all(rebelStates.map(rs =>
-    db.upsertRebelState(sessionId, rs.player_id, rs.current_planet, 0,
-      (rs.credits||0) + 2) // +2 base credits per round
-  ));
+  await Promise.all(rebelStates.map(async (rs) => {
+    // Decrement detention turns and increase detection while detained
+    if (rs.is_detained && rs.detention_turns > 0) {
+      await db.decrementDetentionTurns(sessionId, rs.player_id);
+      // Increase detection by 5 while detained
+      await db.updateRebelStateSuspicion(sessionId, rs.player_id, 5);
+      feedEntries.push({ gov:'system', text:`${rs.player_id} remains under arrest.` });
+    }
+
+    // Reset actions and grant credits
+    return db.upsertRebelState(sessionId, rs.player_id, rs.current_planet, 0,
+      (rs.credits||0) + 2); // +2 base credits per round
+  }));
 
   // Recompute global meters from final planet state
   const { empireLevel, rebellionStrength } = computeGlobalMeters(newPlanets);

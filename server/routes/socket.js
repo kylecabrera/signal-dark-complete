@@ -2,6 +2,7 @@ const db      = require('../lib/db');
 const engine  = require('../lib/engine');
 const units   = require('../lib/units');
 const CONFIG  = require('../lib/config');
+const { getPlanetSector } = require('../lib/world');
 
 const turnTimers = new Map();
 const TURN_TIMEOUT_MS = (parseInt(process.env.TURN_TIMEOUT_SECONDS)||300) * 1000;
@@ -104,6 +105,10 @@ module.exports = function registerSocketHandlers(io) {
           recruitBonus:  result.recruitBonus,
           sabotageBonus: result.sabotageBonus,
           inciteBonus:   result.inciteBonus,
+          // Detention/Crime
+          detentionTriggered: result.detentionTriggered,
+          fineAmount: result.fineAmount,
+          detentionMessage: result.detentionMessage,
         });
 
         // If traitor exposed, all governors get the info (board visual)
@@ -181,6 +186,65 @@ module.exports = function registerSocketHandlers(io) {
       } catch(err) {
         console.error('rebel_action error:', err.message, err.stack);
         socket.emit('action_rejected', { reason:err.message || 'Action failed' });
+      }
+    });
+
+    // ── Handle fine payment or detention ────────
+    socket.on('resolve_fine', async ({ action }) => {
+      try {
+        const { sessionId, playerId } = socket.data;
+        if (!sessionId) return;
+
+        const rebelState = await db.getRebelState(sessionId, playerId);
+        if (!rebelState) return socket.emit('fine_rejected', { reason: 'Rebel state not found' });
+
+        const currentPlanet = rebelState.current_planet;
+        const sector = getPlanetSector(currentPlanet);
+        const sectorCriminality = rebelState.criminality?.[sector] || 0;
+        const fineAmount = sectorCriminality * 50;
+
+        if (action === 'pay') {
+          // Player attempts to pay fine
+          const result = await db.payFine(sessionId, playerId, fineAmount);
+          if (!result) {
+            // Payment failed - insufficient funds, force detention
+            await db.forceDetention(sessionId, playerId, 3);
+            socket.emit('fine_resolved', {
+              success: false,
+              message: `Insufficient credits. Fine: ${fineAmount}cr. Detained for 3 turns.`,
+              detained: true,
+              detentionTurns: 3
+            });
+          } else {
+            // Payment successful
+            socket.emit('fine_resolved', {
+              success: true,
+              message: `Fine paid: ${fineAmount}cr`,
+              creditsRemaining: result.credits
+            });
+          }
+        } else if (action === 'accept') {
+          // Player accepts detention instead of paying
+          await db.forceDetention(sessionId, playerId, 3);
+          socket.emit('fine_resolved', {
+            success: false,
+            message: 'Detained for 3 turns. Cannot move or hide units.',
+            detained: true,
+            detentionTurns: 3
+          });
+        }
+
+        // Update private state
+        const privateState = await engine.buildPrivateState(sessionId, playerId);
+        socket.emit('private_state', privateState);
+
+        // Update public state
+        const session = await db.getSessionById(sessionId);
+        const players = await db.getPlayers(sessionId);
+        io.to(sessionId).emit('state_update', await engine.buildPublicState(session, players));
+      } catch(err) {
+        console.error('resolve_fine error:', err.message);
+        socket.emit('fine_rejected', { reason: err.message || 'Fine resolution failed' });
       }
     });
 

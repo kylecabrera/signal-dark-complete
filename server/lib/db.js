@@ -159,6 +159,26 @@ async function decrementDetentionTurns(sessionId, playerId) {
   return rows[0];
 }
 
+async function payFine(sessionId, playerId, amount) {
+  // Deduct credits and clear detention if player pays fine
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET credits = credits - $3, is_detained = false, detention_turns = 0
+     WHERE session_id=$1 AND player_id=$2 AND credits >= $3 RETURNING *`,
+    [sessionId, playerId, amount]
+  );
+  return rows[0] || null; // null if payment failed (insufficient funds)
+}
+
+async function forceDetention(sessionId, playerId, turns) {
+  // Force detention when player can't or won't pay fine
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET is_detained = true, detention_turns = $3
+     WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+    [sessionId, playerId, turns]
+  );
+  return rows[0];
+}
+
 // ── Sealed moves ─────────────────────────────
 async function insertSealedMove(sessionId, playerId, round, actionType, planetId, covert, label, metadata={}, targetId=null) {
   const { rows } = await pool.query(
@@ -848,7 +868,7 @@ module.exports = {
   createSession, getSessionByCode, getSessionById, updateSession,
   createPlayer, getPlayers, eliminatePlayer, updatePlayerSocket, getPlayerBySocket,
   upsertRebelState, getRebelState, getAllRebelStates, updateRebelStateSuspicion, updateRebelStateHasHiddenUnits,
-  updateCriminality, setDetention, decrementDetentionTurns,
+  updateCriminality, setDetention, decrementDetentionTurns, payFine, forceDetention,
   insertSealedMove, getSealedMovesForRound, getPlayerSealedMoves,
   insertIntelLeak, getRecentLeaks,
   saveGovernorMemory, getGovernorHistory,

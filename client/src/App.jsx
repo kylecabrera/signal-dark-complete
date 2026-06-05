@@ -89,6 +89,7 @@ function Landing({ game }) {
 
   async function createGame() {
     if (!name.trim()) return setError('Enter your callsign');
+    console.log('Creating game, serverUrl:', serverUrl);
     setLoading(true);
     setError('');
     try {

@@ -7,6 +7,8 @@ const db      = require('./lib/db');
 
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 console.log('SERVER STARTING - CLIENT_ORIGIN:', clientOrigin);
+console.log('PORT env var:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 const corsOptions = {
   origin: true, // Allow all origins for now

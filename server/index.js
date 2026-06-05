@@ -69,16 +69,25 @@ function initializeDatabase() {
 }
 
 const PORT = process.env.PORT || 3001;
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Signal Dark v2 listening on 0.0.0.0:${PORT}`);
-  console.log('Server is ready to accept connections');
-  // Skip DB init for now
-  // setImmediate(() => initializeDatabase());
+
+console.log('About to call httpServer.listen');
+const server = httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`✓ Server listening on 0.0.0.0:${PORT}`);
 });
 
-httpServer.on('error', (err) => {
+console.log('httpServer.listen called, waiting for callback');
+
+server.on('error', (err) => {
   console.error('SERVER ERROR:', err);
   process.exit(1);
+});
+
+server.on('listening', () => {
+  console.log('✓ Server emitted listening event');
+});
+
+server.on('close', () => {
+  console.log('✗ Server closed unexpectedly');
 });
 
 process.on('uncaughtException', (err) => {
@@ -89,3 +98,8 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('UNHANDLED REJECTION:', reason);
 });
+
+// Keep the process alive
+setTimeout(() => {
+  console.log('✓ Server still alive after 10 seconds');
+}, 10000);

@@ -29,6 +29,7 @@ io.on('connection', (socket) => {
 });
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.get('/health', (_, res) => res.json({ status:'ok', ts:Date.now() }));
 app.use('/api', sessionRoutes);

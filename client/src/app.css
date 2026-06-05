@@ -194,3 +194,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
   color:#d070ff;letter-spacing:0.1em;z-index:300;
   animation:alert-pulse 0.5s ease-out;}
 @keyframes alert-pulse{from{opacity:0;transform:translateX(-50%) scale(0.95);}to{opacity:1;transform:translateX(-50%) scale(1);}}
+
+/* ── Detention alert ── */
+.detention-alert-overlay{position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center;}
+.detention-alert{background:rgba(20,10,40,0.98);border:2px solid #c060ff;
+  border-radius:4px;padding:24px;font-family:var(--mono);max-width:400px;text-align:center;
+  box-shadow:0 0 20px rgba(192,96,255,0.3);}
+.detention-message{font-size:12px;color:#e0c0ff;letter-spacing:0.15em;margin-bottom:16px;}
+.detention-options{display:flex;gap:12px;margin-top:16px;}
+.btn-pay-fine,.btn-accept-detention{flex:1;padding:8px 16px;font-family:var(--mono);
+  font-size:9px;letter-spacing:0.1em;border:1px solid;border-radius:2px;cursor:pointer;
+  transition:all 0.2s ease;color:#fff;}
+.btn-pay-fine{background:rgba(0,100,0,0.4);border-color:#00ff00;color:#00ff99;}
+.btn-pay-fine:hover{background:rgba(0,100,0,0.6);box-shadow:0 0 10px rgba(0,255,0,0.3);}
+.btn-accept-detention{background:rgba(100,0,0,0.4);border-color:#ff4040;color:#ff9999;}
+.btn-accept-detention:hover{background:rgba(100,0,0,0.6);box-shadow:0 0 10px rgba(255,64,64,0.3);}

@@ -11,7 +11,7 @@ import './app.css';
 
 function GameShell() {
   const game = useGame();
-  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert, jediDeathAlert } = game;
+  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert, jediDeathAlert, detentionAlert, setDetentionAlert } = game;
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -71,6 +71,27 @@ function GameShell() {
       {jediDeathAlert && (
         <div className="jedi-death-alert">
           YOUR JEDI HAS FALLEN — YOU ARE ELIMINATED FROM THIS GAME
+        </div>
+      )}
+      {detentionAlert && (
+        <div className="detention-alert-overlay">
+          <div className="detention-alert">
+            <div className="detention-message">{detentionAlert.message}</div>
+            {detentionAlert.fineAmount !== undefined && (
+              <div className="detention-options">
+                <button onClick={() => {
+                  game.socket.emit('resolve_fine', { action: 'pay' });
+                }} className="btn-pay-fine">
+                  PAY FINE ({detentionAlert.fineAmount}cr)
+                </button>
+                <button onClick={() => {
+                  game.socket.emit('resolve_fine', { action: 'accept' });
+                }} className="btn-accept-detention">
+                  ACCEPT DETENTION
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
       {notification && <div className="notification show">{notification}</div>}

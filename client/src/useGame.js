@@ -25,6 +25,7 @@ export function useGame() {
   const [startingPlanetInfo, setStartingPlanetInfo] = useState(null);
   const [pvpCombatResult, setPvpCombatResult]   = useState(null);
   const [activeCombatReport, setActiveCombatReport] = useState(null);
+  const [detentionAlert, setDetentionAlert] = useState(null);
 
   const notify = useCallback((msg) => {
     setNotification(msg);
@@ -82,7 +83,8 @@ export function useGame() {
     });
 
     socket.on('action_confirmed', ({ label, traitorExposed, investigateResult: ir, denounceResult: dr,
-                                      discoveries, recruitBonus, sabotageBonus, inciteBonus }) => {
+                                      discoveries, recruitBonus, sabotageBonus, inciteBonus,
+                                      detentionTriggered, fineAmount, detentionMessage }) => {
       notify(label?.toUpperCase() || 'ACTION CONFIRMED');
       if (traitorExposed) {
         setTraitorAlert(true);
@@ -90,6 +92,17 @@ export function useGame() {
       }
       if (ir) setInvestigateResult(ir);
       if (dr) notify(`DENUNCIATION: ${dr.outcome?.toUpperCase()} — ${dr.factionName}`);
+
+      // Handle detention trigger
+      if (detentionTriggered) {
+        notify(detentionMessage?.toUpperCase() || 'APPREHENDED');
+        setFeedEntries(prev => [{ gov:'system', text: detentionMessage }, ...prev].slice(0,60));
+        setDetentionAlert({
+          triggered: true,
+          fineAmount,
+          message: detentionMessage
+        });
+      }
 
       // Intel discoveries
       if (discoveries?.length) {
@@ -179,6 +192,24 @@ export function useGame() {
       notify(winner === 'rebels' ? 'REVOLUTION SUCCEEDS' : 'REBELLION CRUSHED');
     });
 
+    socket.on('fine_resolved', ({ success, message, detained, detentionTurns, creditsRemaining }) => {
+      notify(message?.toUpperCase() || 'FINE RESOLVED');
+      setFeedEntries(prev => [{ gov:'system', text: message }, ...prev].slice(0,60));
+      if (!success && detained) {
+        setDetentionAlert({
+          triggered: true,
+          message: `DETAINED FOR ${detentionTurns} TURN${detentionTurns > 1 ? 'S' : ''}`
+        });
+      } else {
+        setDetentionAlert(null);
+      }
+    });
+
+    socket.on('fine_rejected', ({ reason }) => {
+      console.log('fine_rejected:', reason);
+      notify(`FINE REJECTION: ${reason.toUpperCase()}`);
+    });
+
     socket.on('error', ({ message }) => {
       console.log('socket error event:', message);
       notify(`ERROR: ${message.toUpperCase()}`);
@@ -206,6 +237,8 @@ export function useGame() {
       socket.off('player_eliminated');
       socket.off('turn_timer_started');
       socket.off('game_over');
+      socket.off('fine_resolved');
+      socket.off('fine_rejected');
       socket.off('error');
     };
   }, [socket, notify]);
@@ -340,6 +373,8 @@ export function useGame() {
     traitorAlert, jediDeathAlert, setJediDeathAlert, startingPlanetInfo,
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
+    detentionAlert, setDetentionAlert,
+    socket,
     joinGame, markReady, submitTurn, endTurnEarly,
     sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
     contribute, foundFaction, foundCell, investigate, denounce,

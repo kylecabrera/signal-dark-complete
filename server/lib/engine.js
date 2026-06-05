@@ -129,6 +129,9 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, planetId, rebelState.actions_used+1, rebelState.credits||0);
     await db.escortOrbitalUnits(sessionId, playerId, planetId);
     result.newPlanet = planetId;
+    // Decrease suspicion when moving to new planet
+    const suspicionDecrease = Math.floor(Math.random() * 2) + 2; // 2-3 point decrease
+    await db.updateRebelStateSuspicion(sessionId, playerId, -suspicionDecrease);
 
   // ── Money earning actions ───────────────────
   } else if (['earn_money','steal_money'].includes(type)) {
@@ -597,6 +600,14 @@ async function applyRebelAction(sessionId, playerId, action) {
     planetId||currentPlanet, covert, label, metadata, targetId||null
   );
 
+  // Update player suspicion based on covert/overt status
+  if (!covert) {
+    // Overt actions increase suspicion by 3-5
+    const suspicionIncrease = Math.floor(Math.random() * 3) + 3;
+    await db.updateRebelStateSuspicion(sessionId, playerId, suspicionIncrease);
+    result.suspicionAdded = suspicionIncrease;
+  }
+
   // Update Force user: earn points, apply alignment shift, check tier advancement
   let forceUser = await db.getForceUser(sessionId, playerId);
   if (forceUser) {
@@ -926,6 +937,7 @@ async function buildPrivateState(sessionId, playerId) {
     actionsUsed:       rebelState.actions_used,
     actionsRemaining:  CONFIG.ACTIONS_PER_TURN - rebelState.actions_used,
     credits:           rebelState.credits || 0,
+    suspicion:         rebelState.suspicion || 0,
     forceAlignment:    alignment,
     forcePoints,
     forceTier,

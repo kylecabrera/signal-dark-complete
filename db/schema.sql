@@ -52,6 +52,7 @@ CREATE TABLE rebel_state (
   current_planet  TEXT NOT NULL DEFAULT 'p03',
   actions_used    INTEGER NOT NULL DEFAULT 0,
   credits         INTEGER NOT NULL DEFAULT 5,
+  suspicion       INTEGER NOT NULL DEFAULT 0,
   UNIQUE(session_id, player_id)
 );
 

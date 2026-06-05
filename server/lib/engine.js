@@ -936,6 +936,34 @@ async function processGovernorTurn(sessionId) {
 
   // Reset per-turn rebel actions, grant base credits, handle detention
   const rebelStates = await db.getAllRebelStates(sessionId);
+
+  // Spawn police patrols on planets with high-criminality players
+  const { getPlanetSector } = require('./world');
+  const policeSpawnMap = new Map(); // Track spawned police by planet to avoid duplicates
+
+  for (const rebelState of rebelStates) {
+    const playerPlanet = rebelState.current_planet;
+    const playerSector = getPlanetSector(playerPlanet);
+    const sectorCriminality = rebelState.criminality?.[playerSector] || 0;
+
+    // Spawn police if player has Outlaw+ (level 3+) criminality
+    if (sectorCriminality >= 3) {
+      if (!policeSpawnMap.has(playerPlanet)) {
+        const unit = await db.createUnit(
+          sessionId, 'police_patrol', 'empire:local_police',
+          playerPlanet, 'surface',
+          CONFIG.UNIT_TYPES.police_patrol.strength,
+          CONFIG.UNIT_TYPES.police_patrol.hp,
+          false, 1, 0, 'Local Police Response'
+        );
+        newUnits.push(unit);
+        policeSpawnMap.set(playerPlanet, true);
+        const planetName = newPlanets.find(p => p.id === playerPlanet)?.name || playerPlanet;
+        feedEntries.push({ gov:'empire', text:`🚔 POLICE PATROL DEPLOYED to ${planetName}` });
+      }
+    }
+  }
+
   await Promise.all(rebelStates.map(async (rs) => {
     // Decrement detention turns and increase detection while detained
     if (rs.is_detained && rs.detention_turns > 0) {

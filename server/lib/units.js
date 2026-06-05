@@ -90,14 +90,19 @@ function ownerFaction(owner) {
 }
 
 // Generate dramatic, narrative-driven combat descriptions
-function generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, aLosses, dLosses) {
+function generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, aLosses, dLosses, hasPolice = false) {
   const isOrbital = layer === 'orbit';
   const attackerLabel = attackerKey === 'rebel' ? 'Rebel forces'
                        : attackerKey === 'empire' ? 'Imperial fleet'
                        : 'Faction forces';
-  const defenderLabel = defenderKey === 'rebel' ? 'Rebel defenders'
-                       : defenderKey === 'empire' ? 'Imperial garrison'
-                       : 'Faction troops';
+
+  let defenderLabel = defenderKey === 'rebel' ? 'Rebel defenders'
+                    : defenderKey === 'empire' ? (hasPolice ? 'Local police response' : 'Imperial garrison')
+                    : 'Faction troops';
+
+  if (hasPolice && layer === 'surface' && defenderKey === 'empire') {
+    defenderLabel = 'Armed police forces';
+  }
 
   const narratives = {
     // Attacker wins
@@ -203,7 +208,8 @@ async function resolveCombat(sessionId, round, planetId, layer, attackers, defen
   }
 
   const planetName = session.planet_state.find(p => p.id === planetId)?.name || planetId;
-  const summary = generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, attackerLosses, defenderLosses);
+  const hasPolice = defenders.some(u => u.unit_type === 'police_patrol');
+  const summary = generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, attackerLosses, defenderLosses, hasPolice);
 
   await db.insertCombatLog(sessionId, round, planetId, layer,
     attackerKey, defenderKey, attackerLosses, defenderLosses, outcome, summary);

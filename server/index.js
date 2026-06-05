@@ -9,18 +9,9 @@ const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 console.log('SERVER STARTING - CLIENT_ORIGIN:', clientOrigin);
 
 const corsOptions = {
-  origin: function(origin, callback) {
-    console.log('CORS check - origin from request:', origin);
-    console.log('CORS check - allowed origin:', clientOrigin);
-    if (!origin || origin === clientOrigin || origin.includes('localhost')) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Allow all for now to debug
-    }
-  },
+  origin: true, // Allow all origins for now
   methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type'],
 };
 
 const sessionRoutes = require('./routes/sessions');

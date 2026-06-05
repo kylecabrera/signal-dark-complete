@@ -99,6 +99,15 @@ async function updateRebelStateSuspicion(sessionId, playerId, delta) {
   return rows[0];
 }
 
+async function updateRebelStateHasHiddenUnits(sessionId, playerId, hasHidden) {
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET has_hidden_units = $3
+     WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+    [sessionId, playerId, hasHidden]
+  );
+  return rows[0];
+}
+
 // ── Sealed moves ─────────────────────────────
 async function insertSealedMove(sessionId, playerId, round, actionType, planetId, covert, label, metadata={}, targetId=null) {
   const { rows } = await pool.query(
@@ -787,7 +796,7 @@ module.exports = {
   pool,
   createSession, getSessionByCode, getSessionById, updateSession,
   createPlayer, getPlayers, eliminatePlayer, updatePlayerSocket, getPlayerBySocket,
-  upsertRebelState, getRebelState, getAllRebelStates, updateRebelStateSuspicion,
+  upsertRebelState, getRebelState, getAllRebelStates, updateRebelStateSuspicion, updateRebelStateHasHiddenUnits,
   insertSealedMove, getSealedMovesForRound, getPlayerSealedMoves,
   insertIntelLeak, getRecentLeaks,
   saveGovernorMemory, getGovernorHistory,

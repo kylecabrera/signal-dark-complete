@@ -53,6 +53,7 @@ CREATE TABLE rebel_state (
   actions_used    INTEGER NOT NULL DEFAULT 0,
   credits         INTEGER NOT NULL DEFAULT 5,
   suspicion       INTEGER NOT NULL DEFAULT 0,
+  has_hidden_units BOOLEAN NOT NULL DEFAULT FALSE,
   UNIQUE(session_id, player_id)
 );
 

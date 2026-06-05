@@ -233,6 +233,14 @@ module.exports = function registerSocketHandlers(io) {
         }
 
         await db.toggleUnitHidden(unitId);
+
+        // Update has_hidden_units flag for this player
+        const allUnits = await db.getUnits(sessionId);
+        const playerUnits = allUnits.filter(u => u.owner === `rebel:${playerId}`);
+        const CONFIG = require('../lib/config');
+        const hasHidden = playerUnits.some(u => u.is_hidden);
+        await db.updateRebelStateHasHiddenUnits(sessionId, playerId, hasHidden);
+
         const session = await db.getSessionById(sessionId);
         const players = await db.getPlayers(sessionId);
 

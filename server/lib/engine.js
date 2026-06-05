@@ -148,9 +148,7 @@ async function applyRebelAction(sessionId, playerId, action) {
       let detectChance = 0.15; // 15% base chance of being overt
 
       // Reduce detection chance if player has hidden units
-      const playerUnits = units.filter(u => u.owner?.includes(playerId));
-      const hasHiddenUnits = playerUnits.some(u => CONFIG.UNIT_TYPES[u.unit_type]?.hidden);
-      if (hasHiddenUnits) {
+      if (rebelState.has_hidden_units) {
         detectChance *= 0.3; // 70% reduction if hidden
       }
 

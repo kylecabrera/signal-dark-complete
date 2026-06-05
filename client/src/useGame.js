@@ -224,7 +224,7 @@ export function useGame() {
     prevJediAliveRef.current = jediAlive;
   }, [privateState]);
 
-  // Fix black screen on tab focus by forcing a re-render
+  // Fix black screen issues by forcing re-renders on focus changes
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -233,8 +233,17 @@ export function useGame() {
       }
     };
 
+    const handleFocus = () => {
+      // Window regained focus - force re-render
+      setPublicState(s => s ? {...s} : null);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Join a game room - waits for socket to be connected first

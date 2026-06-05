@@ -222,9 +222,18 @@ export function SectorMap({ game }) {
 
   const transform = `translate(${vp.x},${vp.y}) scale(${vp.scale})`;
 
+  // Force re-render on visibility/focus changes
+  const [, setRenderKey] = useState(0);
+  useEffect(() => {
+    const handleVisChange = () => setRenderKey(k => k + 1);
+    window.addEventListener('focus', handleVisChange);
+    return () => window.removeEventListener('focus', handleVisChange);
+  }, []);
+
   return (
     <div className="map-area" style={{ position: 'relative' }}>
       <svg
+        key={Math.floor(vp.x / 100)} // Force re-render on pan
         ref={svgRef}
         className="map-svg"
         xmlns="http://www.w3.org/2000/svg"

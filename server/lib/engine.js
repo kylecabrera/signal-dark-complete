@@ -649,10 +649,6 @@ async function applyImmediateEffects(sessionId, session, type, planetId, rebelSt
   const cfg = CONFIG.ACTIONS[type] || {};
   const multiplier = factionBonus?.multiplier || 1;
 
-  if (type === 'sabotage')  planet.suspicion = Math.min(planet.suspicion+2, 4);
-  if (type === 'incite')    planet.suspicion = Math.min(planet.suspicion+1, 4);
-  if (type === 'hide')      planet.suspicion = Math.max(planet.suspicion-1, 0);
-
   // Per-action local loyalty erosion (from new config)
   const loyaltyDelta = CONFIG.LOYALTY_DELTAS[type] || 0;
   if (loyaltyDelta) {

@@ -354,15 +354,24 @@ export function SectorMap({ game }) {
                     fill="rgba(232,64,64,0.7)" stroke="rgba(255,100,100,0.4)" strokeWidth={1} />
                 )}
 
-                {Array.from({ length: Math.min(planet.suspicion, 4) }, (_, i) => {
-                  const angle = (i / 4) * Math.PI * 2 - Math.PI / 2;
-                  const tx = x + Math.cos(angle) * 21, ty = y + Math.sin(angle) * 21;
-                  const pts = [0,1,2].map(j => {
-                    const a = (j/3)*Math.PI*2 - Math.PI/2;
-                    return `${tx+Math.cos(a)*4},${ty+Math.sin(a)*4}`;
-                  }).join(' ');
-                  return <polygon key={i} points={pts} fill="#e84040" opacity={0.85} className="suspicion-token" />;
-                })}
+                {(() => {
+                  // Show red triangles for empire/faction fleets (up to 4)
+                  const imperialUnits = (publicState?.units || [])
+                    .filter(u => u.planet_id === planet.id &&
+                             (u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:')) &&
+                             !u.is_hidden)
+                    .slice(0, 4);
+                  return imperialUnits.map((u, i) => {
+                    const angle = (i / Math.max(imperialUnits.length, 1)) * Math.PI * 2 - Math.PI / 2;
+                    const tx = x + Math.cos(angle) * 21, ty = y + Math.sin(angle) * 21;
+                    const pts = [0,1,2].map(j => {
+                      const a = (j/3)*Math.PI*2 - Math.PI/2;
+                      return `${tx+Math.cos(a)*4},${ty+Math.sin(a)*4}`;
+                    }).join(' ');
+                    return <polygon key={`fleet-${u.id}`} points={pts} fill="#e84040" opacity={0.85}
+                      className="imperial-fleet-marker" title={u.designation || u.unit_type} />;
+                  });
+                })()}
 
                 {orbitUnits.slice(0, 4).map((u, i) => {
                   const angle = (i / Math.max(orbitUnits.length, 1)) * Math.PI * 2 - Math.PI / 2;

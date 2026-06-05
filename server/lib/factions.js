@@ -35,7 +35,33 @@ async function initTraitorFaction(sessionId) {
   // Give the traitor faction some cells to look established
   await db.upsertFactionCell(faction.id, sessionId, home, 2);
   await db.upsertFactionCell(faction.id, sessionId, 'p03', 1);
+
+  // Assign random buildable units to traitor faction
+  const allowedUnits = assignRandomUnitsToFaction(traitor.ideology);
+  await db.updateFactionAllowedUnits(faction.id, allowedUnits);
+
   return faction;
+}
+
+// ─────────────────────────────────────────────
+// Assign random buildable units to a faction
+// ─────────────────────────────────────────────
+function assignRandomUnitsToFaction(ideology) {
+  const allowedClasses = CONFIG.FACTIONS.IDEOLOGIES[ideology]?.allowed_ship_classes || [];
+
+  // Get all units that match allowed classes
+  const buildableUnits = Object.keys(CONFIG.UNIT_TYPES).filter(unitType => {
+    const unitDef = CONFIG.UNIT_TYPES[unitType];
+    if (!unitDef || unitDef.imperialOnly || unitDef.requiredPlanetIds) return false;
+
+    const effectiveClass = CONFIG.UNIT_BASE_CLASSES?.[unitType] || unitType;
+    return allowedClasses.includes(effectiveClass);
+  });
+
+  // Randomly select 3-10 units
+  const count = Math.floor(Math.random() * 8) + 3; // 3-10
+  const shuffled = buildableUnits.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
 }
 
 // ─────────────────────────────────────────────
@@ -53,8 +79,9 @@ async function seedInitialFactions(sessionId) {
     // Establish founding cell at home planet with strength 2
     await db.upsertFactionCell(faction.id, sessionId, tmpl.homePlanet, 2);
 
-    // Initialize unit research for all units (bulk insert)
-    await db.ensureFactionResearchInitialized(faction.id, sessionId);
+    // Assign random buildable units
+    const allowedUnits = assignRandomUnitsToFaction(tmpl.ideology);
+    await db.updateFactionAllowedUnits(faction.id, allowedUnits);
   }
 }
 
@@ -89,8 +116,9 @@ async function foundFaction(sessionId, playerId, name, ideology, homePlanet) {
   // Establish founding cell
   await db.upsertFactionCell(faction.id, sessionId, homePlanet, 1);
 
-  // Initialize unit research for all units (bulk insert)
-  await db.ensureFactionResearchInitialized(faction.id, sessionId);
+  // Assign random buildable units
+  const allowedUnits = assignRandomUnitsToFaction(ideology);
+  await db.updateFactionAllowedUnits(faction.id, allowedUnits);
 
   // Deduct credits
   await db.upsertRebelState(sessionId, playerId, rebelState.current_planet,
@@ -101,106 +129,6 @@ async function foundFaction(sessionId, playerId, name, ideology, homePlanet) {
   return { ok:true, faction };
 }
 
-// ─────────────────────────────────────────────
-// Calculate unit research cost
-// ─────────────────────────────────────────────
-function calculateUnitResearchCost(unitType, homePlanetId) {
-  const unitDef = CONFIG.UNIT_TYPES[unitType];
-  if (!unitDef) return null;
-
-  const baseCost = unitDef.cost || 5;
-  const baseMultiplier = CONFIG.FACTIONS.UNIT_RESEARCH_BASE_MULTIPLIER;
-
-  // Get planet modifiers
-  const planet = PLANETS.find(p => p.id === homePlanetId);
-  const planetType = planet?.type || 'Outer Rim Territories';
-  const planetModifier = CONFIG.FACTIONS.UNIT_RESEARCH_PLANET_MODIFIERS[planetType] || 1.0;
-
-  // Get species modifiers (based on planet population description)
-  const populationDesc = planet?.pop ? `${planet.pop}` : '';
-  const speciesModifier = CONFIG.FACTIONS.UNIT_RESEARCH_SPECIES_MODIFIERS[populationDesc] ||
-                         CONFIG.FACTIONS.UNIT_RESEARCH_SPECIES_MODIFIERS['default'];
-
-  const totalCost = Math.ceil(baseCost * baseMultiplier * planetModifier * speciesModifier);
-  return totalCost;
-}
-
-// ─────────────────────────────────────────────
-// Player contributes to unit research for a faction
-// ─────────────────────────────────────────────
-async function contributeToUnitResearch(sessionId, playerId, factionId, unitType, amount, round) {
-  const rebelState = await db.getRebelState(sessionId, playerId);
-  if (!rebelState) return { ok:false, error:'Rebel state not found' };
-
-  if ((rebelState.credits||0) < amount) {
-    return { ok:false, error:`Need ${amount} credits` };
-  }
-  if (amount < 1) return { ok:false, error:'Minimum contribution is 1 credit' };
-
-  const faction = await db.getFactionById(factionId, true);
-  if (!faction || faction.session_id !== sessionId) {
-    return { ok:false, error:'Faction not found' };
-  }
-  if (faction.is_denounced) return { ok:false, error:'Faction has been denounced' };
-
-  // Check if unit type is valid
-  if (!CONFIG.UNIT_TYPES[unitType]) {
-    return { ok:false, error:'Invalid unit type' };
-  }
-
-  // Check if faction ideology allows this unit type
-  const ideo = CONFIG.FACTIONS.IDEOLOGIES[faction.ideology];
-  const allowedClasses = ideo?.allowed_ship_classes || [];
-  const unitDef = CONFIG.UNIT_TYPES[unitType];
-  const UNIT_BASE_CLASSES = CONFIG.UNIT_BASE_CLASSES || {};
-  const effectiveClass = UNIT_BASE_CLASSES[unitType] || unitType;
-
-  if (!allowedClasses.includes(effectiveClass)) {
-    // Build list of unit types this faction CAN produce
-    const producibleUnits = Object.entries(CONFIG.UNIT_TYPES)
-      .filter(([type, def]) => {
-        if (def.imperialOnly || def.requiredPlanetIds) return false;
-        const uClass = UNIT_BASE_CLASSES[type] || type;
-        return allowedClasses.includes(uClass);
-      })
-      .map(([_, def]) => def.label)
-      .sort();
-
-    const canProduce = producibleUnits.length > 0
-      ? producibleUnits.join(', ')
-      : '(none)';
-
-    return { ok:false, error:`${faction.name} can only research: ${canProduce}` };
-  }
-
-  // Ensure research entry exists
-  await db.getOrCreateFactionUnitResearch(factionId, sessionId, unitType);
-
-  // Add research points
-  const researchData = await db.addUnitResearchPoints(factionId, unitType, amount);
-
-  // Deduct credits
-  await db.upsertRebelState(sessionId, playerId, rebelState.current_planet,
-    rebelState.actions_used, (rebelState.credits||0) - amount);
-
-  // Add contribution to log
-  await db.addContribution(factionId, sessionId, playerId, amount, round, 'research');
-
-  // Auto-discover the faction
-  await db.recordFactionDiscovery(sessionId, playerId, factionId, round);
-
-  // Check if research threshold reached
-  const researchCost = calculateUnitResearchCost(unitType, faction.home_planet);
-  const unlocked = researchData.research_points >= researchCost;
-
-  if (unlocked && !researchData.unlocked) {
-    await db.unlockFactionUnitResearch(factionId, unitType, round);
-    return { ok:true, unlocked: true, unlockedUnit: unitType, progressPercent: 100 };
-  }
-
-  const progressPercent = researchCost ? Math.min(99, Math.round((researchData.research_points / researchCost) * 100)) : 0;
-  return { ok:true, unlocked: false, progressPercent, pointsRemaining: Math.max(0, researchCost - researchData.research_points) };
-}
 
 // ─────────────────────────────────────────────
 // Player contributes to a faction
@@ -399,34 +327,6 @@ async function buildClientFactionState(sessionId, playerId) {
     const myTotal = parseInt(myContrib?.total||0);
     const myPct = total > 0 ? Math.round((myTotal/total)*100) : 0;
 
-    // Get unit research data
-    let researchMap = {};
-    try {
-      // Ensure research records are initialized for this faction
-      try {
-        await db.ensureFactionResearchInitialized(f.id, sessionId);
-      } catch (err) {
-        // Table may not exist yet, that's ok
-      }
-
-      const researchData = await db.getFactionUnitResearch(f.id);
-      for (const r of researchData) {
-        const cost = calculateUnitResearchCost(r.unit_type, f.home_planet);
-        researchMap[r.unit_type] = {
-          unit_type: r.unit_type,
-          research_points: r.research_points,
-          unlocked: r.unlocked,
-          cost: cost,
-          progressPercent: cost ? Math.min(100, Math.round((r.research_points / cost) * 100)) : 0,
-        };
-      }
-    } catch (err) {
-      // Table may not exist yet
-      if (err.message && err.message.includes('faction_unit_research')) {
-        console.warn('faction_unit_research table not yet created — run migration in Supabase');
-      }
-    }
-
     result.push({
       id: f.id,
       name: f.name,
@@ -446,9 +346,7 @@ async function buildClientFactionState(sessionId, playerId) {
         planet_id: c.planet_id,
         strength: c.strength,
       })),
-      allowed_ship_classes: CONFIG.FACTIONS.IDEOLOGIES[f.ideology]?.allowed_ship_classes || [],
-      unlocked_ship_classes: f.unlocked_ship_classes || [],
-      unit_research: researchMap,
+      allowed_unit_types: f.allowed_unit_types || [],
     });
   }
 
@@ -596,7 +494,7 @@ async function buildAllianceState(sessionId, playerId) {
 
 module.exports = {
   initTraitorFaction, seedInitialFactions, foundFaction, contributeToFaction,
-  investigateFaction, denounceFaction, calculateUnitResearchCost, contributeToUnitResearch,
+  investigateFaction, denounceFaction,
   getFactionBonuses, buildClientFactionState, buildGovernorFactionBrief,
   createNewAlliance, joinAlliance, buildAllianceState,
 };

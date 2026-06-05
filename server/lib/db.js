@@ -241,6 +241,75 @@ async function createUnitsFromConfig(sessionId, unitList) {
   }
 }
 
+// ── Fleets ────────────────────────────────────
+async function createFleet(sessionId, owner, name, planetId, layer, autoGrouped=false, createdRound=null) {
+  const { rows } = await pool.query(
+    `INSERT INTO fleets (session_id, owner, name, planet_id, layer, auto_grouped, created_round)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [sessionId, owner, name, planetId, layer, autoGrouped, createdRound]
+  );
+  return rows[0];
+}
+
+async function getFleet(fleetId) {
+  const { rows } = await pool.query(
+    'SELECT * FROM fleets WHERE id=$1',
+    [fleetId]
+  );
+  return rows[0] || null;
+}
+
+async function getFleets(sessionId, owner=null) {
+  let query = 'SELECT * FROM fleets WHERE session_id=$1';
+  const params = [sessionId];
+  if (owner) {
+    query += ' AND owner=$2';
+    params.push(owner);
+  }
+  const { rows } = await pool.query(query, params);
+  return rows;
+}
+
+async function getFleetsByLocation(sessionId, planetId, layer) {
+  const { rows } = await pool.query(
+    'SELECT * FROM fleets WHERE session_id=$1 AND planet_id=$2 AND layer=$3',
+    [sessionId, planetId, layer]
+  );
+  return rows;
+}
+
+async function updateFleet(fleetId, updates) {
+  const fields = Object.keys(updates).map((k, i) => `${k}=$${i+2}`).join(', ');
+  const values = [fleetId, ...Object.values(updates)];
+  const { rows } = await pool.query(
+    `UPDATE fleets SET ${fields}, updated_at=NOW() WHERE id=$1 RETURNING *`,
+    values
+  );
+  return rows[0];
+}
+
+async function deleteFleet(fleetId) {
+  await pool.query('DELETE FROM fleets WHERE id=$1', [fleetId]);
+}
+
+async function getUnitsByFleet(fleetId) {
+  const { rows } = await pool.query(
+    'SELECT * FROM units WHERE fleet_id=$1',
+    [fleetId]
+  );
+  return rows;
+}
+
+async function assignUnitsToFleet(unitIds, fleetId) {
+  if (unitIds.length === 0) return;
+  const placeholders = unitIds.map((_, i) => `$${i+1}`).join(',');
+  await pool.query(
+    `UPDATE units SET fleet_id=$${unitIds.length + 1}, updated_at=NOW()
+     WHERE id IN (${placeholders})`,
+    [...unitIds, fleetId]
+  );
+}
+
 // ── Production queue ──────────────────────────
 async function addToProductionQueue(sessionId, planetId, unitType, owner, roundsRemaining) {
   const { rows } = await pool.query(
@@ -291,8 +360,8 @@ async function createFaction(sessionId, name, ideology, homePlanet, isTraitor, c
   const resourcePool = isTraitor ? 8 : 0;
   const reputation   = isTraitor ? 62 : 50;
   const { rows } = await pool.query(
-    `INSERT INTO factions (session_id,name,ideology,home_planet,is_traitor,resource_pool,reputation,created_by,unlocked_ship_classes)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'[]') RETURNING *`,
+    `INSERT INTO factions (session_id,name,ideology,home_planet,is_traitor,resource_pool,reputation,created_by,unlocked_ship_classes,allowed_unit_types)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'[]','[]') RETURNING *`,
     [sessionId, name, ideology, homePlanet, isTraitor, resourcePool, reputation, createdBy||null]
   );
   return rows[0];
@@ -319,6 +388,12 @@ async function unlockFactionShipClass(factionId, shipClass) {
   await pool.query(
     `UPDATE factions SET unlocked_ship_classes = unlocked_ship_classes || $2::jsonb WHERE id=$1`,
     [factionId, JSON.stringify([shipClass])]
+  );
+}
+async function updateFactionAllowedUnits(factionId, unitTypes) {
+  await pool.query(
+    `UPDATE factions SET allowed_unit_types = $2::jsonb WHERE id=$1`,
+    [factionId, JSON.stringify(unitTypes)]
   );
 }
 
@@ -433,8 +508,8 @@ async function getDiscoveredFactions(sessionId, playerId) {
 // ── Force Users ──────────────────────────────
 async function getOrCreateForceUser(sessionId, playerId, forceStrength, alignment) {
   const { rows } = await pool.query(
-    `INSERT INTO force_users (session_id, player_id, force_points, alignment)
-     VALUES ($1, $2, 0, $3)
+    `INSERT INTO force_users (session_id, player_id, force_points, alignment, force_tier)
+     VALUES ($1, $2, 0, $3, 1)
      ON CONFLICT (session_id, player_id) DO NOTHING
      RETURNING *`,
     [sessionId, playerId, alignment]
@@ -470,6 +545,15 @@ async function updateForceTier(forceUserId, tier) {
   );
   return rows[0];
 }
+async function updateForceAlignment(forceUserId, alignment) {
+  const clamped = Math.max(-100, Math.min(100, alignment));
+  const { rows } = await pool.query(
+    `UPDATE force_users SET alignment = $1, updated_at=NOW()
+     WHERE id=$2 RETURNING *`,
+    [clamped, forceUserId]
+  );
+  return rows[0];
+}
 async function recordForcePowerUse(sessionId, forceUserId, powerName, round, duration) {
   const { rows } = await pool.query(
     `INSERT INTO force_power_uses (session_id, force_user_id, power_name, round_used, duration)
@@ -486,13 +570,53 @@ async function getActiveForcePowers(sessionId, forceUserId, round) {
   );
   return rows;
 }
-async function createForceApprentice(masterId, apprenticeId) {
+async function createForceApprentice(sessionId, masterId, masterPlayerId) {
+  const { rows } = await pool.query(
+    `INSERT INTO force_users (session_id, player_id, force_tier, force_points, alignment, master_id)
+     VALUES ($1, NULL, 1, 0, 0, $2) RETURNING *`,
+    [sessionId, masterId]
+  );
+  return rows[0];
+}
+async function linkApprenticeToMaster(apprenticeId, masterId) {
   const { rows } = await pool.query(
     `UPDATE force_users SET master_id=$1, updated_at=NOW()
      WHERE id=$2 RETURNING *`,
     [masterId, apprenticeId]
   );
   return rows[0];
+}
+
+// ── Discovered Fleets ────────────────────────
+async function recordFleetDiscovery(sessionId, playerId, fleetOwner, planetId, round, unitCount, strongestUnit) {
+  const { rows } = await pool.query(
+    `INSERT INTO discovered_fleets (session_id, player_id, fleet_owner, planet_id, round_discovered, unit_count, strongest_unit)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (session_id, player_id, fleet_owner, planet_id) DO UPDATE
+     SET round_discovered = $5, unit_count = $6, strongest_unit = $7
+     RETURNING *`,
+    [sessionId, playerId, fleetOwner, planetId, round, unitCount, strongestUnit]
+  );
+  return rows[0];
+}
+
+async function getDiscoveredFleets(sessionId, playerId) {
+  const { rows } = await pool.query(
+    `SELECT * FROM discovered_fleets
+     WHERE session_id=$1 AND player_id=$2
+     ORDER BY round_discovered DESC`,
+    [sessionId, playerId]
+  );
+  return rows;
+}
+
+async function getDiscoveredFleetsByPlanet(sessionId, playerId, planetId) {
+  const { rows } = await pool.query(
+    `SELECT * FROM discovered_fleets
+     WHERE session_id=$1 AND player_id=$2 AND planet_id=$3`,
+    [sessionId, playerId, planetId]
+  );
+  return rows;
 }
 
 // ── Alliances ────────────────────────────────
@@ -671,12 +795,13 @@ module.exports = {
   createUnit, escortOrbitalUnits, getUnits, getUnitsAtPlanet, updateUnit, deleteUnit, toggleUnitHidden, loadUnitIntoTransport, unloadUnitFromTransport, recordCombatEvent, getCombatFeed, createUnitsFromConfig,
   addToProductionQueue, getProductionQueue, tickProductionQueue,
   insertCombatLog, getRecentCombat,
-  createFaction, getFactions, getFactionById, updateFaction, unlockFactionShipClass,
+  createFaction, getFactions, getFactionById, updateFaction, unlockFactionShipClass, updateFactionAllowedUnits,
   addContribution, getContributions, getPlayerContributions, getFactionContributors,
   upsertFactionCell, getFactionCells, getFactionCellsAtPlanet,
   recordInvestigation, getPlayerInvestigationTotal,
   recordFactionDiscovery, getDiscoveredFactions,
-  getOrCreateForceUser, getForceUser, addForcePoints, updateForceTier, recordForcePowerUse, getActiveForcePowers, createForceApprentice,
+  getOrCreateForceUser, getForceUser, addForcePoints, updateForceTier, updateForceAlignment, recordForcePowerUse, getActiveForcePowers, createForceApprentice, linkApprenticeToMaster,
+  recordFleetDiscovery, getDiscoveredFleets, getDiscoveredFleetsByPlanet,
+  createFleet, getFleet, getFleets, getFleetsByLocation, updateFleet, deleteFleet, getUnitsByFleet, assignUnitsToFleet,
   createAlliance, getAlliances, getAllianceById, addFactionToAlliance, getAllianceMembers, getFactionAlliance,
-  getOrCreateFactionUnitResearch, addUnitResearchPoints, unlockFactionUnitResearch, getFactionUnitResearch, getFactionUnitResearchByType, ensureFactionResearchInitialized,
 };

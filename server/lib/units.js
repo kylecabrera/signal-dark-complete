@@ -7,6 +7,7 @@ const CONFIG = require('./config');
 async function resolveAllCombat(sessionId, round) {
   const units = await db.getUnits(sessionId);
   const combatLog = [];
+  const resolvedCombats = new Set();
 
   // Find contested planets (opposing units in same planet+layer)
   const byLocation = {};
@@ -18,9 +19,8 @@ async function resolveAllCombat(sessionId, round) {
 
   for (const [key, locationUnits] of Object.entries(byLocation)) {
     const [planetId, layer] = key.split(':');
-    const owners = [...new Set(locationUnits.map(u => ownerFaction(u.owner)))];
-    if (owners.length < 2) continue; // no conflict
 
+    // Group units by faction
     const sides = {};
     for (const u of locationUnits) {
       const faction = ownerFaction(u.owner);
@@ -29,26 +29,54 @@ async function resolveAllCombat(sessionId, round) {
     }
 
     const factions = Object.keys(sides);
-    if (factions.length < 2) continue;
+    if (factions.length < 2) continue; // no conflict
 
-    // Resolve pairwise (architect vs rebels, or rebels vs traitor faction units etc.)
-    const [sideA, sideB] = factions;
-    const result = await resolveCombat(
-      sessionId, round, planetId, layer,
-      sides[sideA], sides[sideB], sideA, sideB
-    );
+    // Combat rules:
+    // 1. Empire vs Rebel - always combat
+    // 2. Faction vs Rebel - always combat
+    // 3. Rebel vs Rebel - manual only (not auto)
+    // 4. Rebel vs Multiple Enemies - fight strongest enemy
 
-    // Extract involved player IDs from both sides
-    const involvedPlayerIds = [];
-    for (const u of locationUnits) {
-      if (u.owner.startsWith('rebel:')) {
-        const playerId = u.owner.slice(6);
-        if (!involvedPlayerIds.includes(playerId)) involvedPlayerIds.push(playerId);
+    const hasRebel = factions.includes('rebel');
+    const hasEmpire = factions.includes('empire');
+    const factionFactions = factions.filter(f => f.startsWith('faction:'));
+
+    if (hasRebel && (hasEmpire || factionFactions.length > 0)) {
+      // Rebel encounters empire or faction - combat
+      let enemySide = null;
+      let enemyKey = null;
+
+      if (hasEmpire) {
+        enemySide = sides['empire'];
+        enemyKey = 'empire';
+      } else {
+        // Fight the first faction (could expand to strongest)
+        enemyKey = factionFactions[0];
+        enemySide = sides[enemyKey];
+      }
+
+      const combatKey = `${planetId}:${layer}:rebel:${enemyKey}`;
+      if (!resolvedCombats.has(combatKey)) {
+        resolvedCombats.add(combatKey);
+
+        const result = await resolveCombat(
+          sessionId, round, planetId, layer,
+          sides['rebel'], enemySide, 'rebel', enemyKey
+        );
+
+        // Extract involved player IDs
+        const involvedPlayerIds = [];
+        for (const u of locationUnits) {
+          if (u.owner.startsWith('rebel:')) {
+            const playerId = u.owner.slice(6);
+            if (!involvedPlayerIds.includes(playerId)) involvedPlayerIds.push(playerId);
+          }
+        }
+
+        result.involvedPlayerIds = involvedPlayerIds;
+        combatLog.push(result);
       }
     }
-
-    result.involvedPlayerIds = involvedPlayerIds;
-    combatLog.push(result);
   }
 
   return combatLog;
@@ -59,6 +87,38 @@ function ownerFaction(owner) {
   if (owner.startsWith('rebel'))     return 'rebel';
   if (owner.startsWith('faction'))   return owner; // faction:id
   return 'rebel';
+}
+
+// Generate dramatic, narrative-driven combat descriptions
+function generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, aLosses, dLosses) {
+  const isOrbital = layer === 'orbit';
+  const attackerLabel = attackerKey === 'rebel' ? 'Rebel forces'
+                       : attackerKey === 'empire' ? 'Imperial fleet'
+                       : 'Faction forces';
+  const defenderLabel = defenderKey === 'rebel' ? 'Rebel defenders'
+                       : defenderKey === 'empire' ? 'Imperial garrison'
+                       : 'Faction troops';
+
+  const narratives = {
+    // Attacker wins
+    attacker_wins_orbit_rebel: `ORBITAL VICTORY: Rebel starfighters overwhelm Imperial patrol craft above ${planetName}. ${dLosses} Imperial ships destroyed. Rebel losses: ${aLosses}.`,
+    attacker_wins_orbit_empire: `ORBITAL BLOCKADE: Imperial fleet establishes control over ${planetName}. ${dLosses} rebel vessels vaporized. Imperial losses: ${aLosses}.`,
+    attacker_wins_surface_rebel: `GROUND ASSAULT: Rebel forces storm ${planetName} surface positions. ${dLosses} Imperial troops neutralized. Rebel casualties: ${aLosses}.`,
+    attacker_wins_surface_empire: `PLANETARY PACIFICATION: Imperial ground forces secure ${planetName}. ${dLosses} rebels eliminated. Imperial casualties: ${aLosses}.`,
+
+    // Defender wins
+    defender_wins_orbit_rebel: `REBEL DEFENSE: Rebel pilots repel Imperial attack above ${planetName}. ${aLosses} Imperial ships shot down. ${dLosses} rebels lost.`,
+    defender_wins_orbit_empire: `IMPERIAL DEFENSE: Imperial fighters intercept rebel attack. ${aLosses} rebel craft destroyed. Imperial losses: ${dLosses}.`,
+    defender_wins_surface_rebel: `REBEL HOLDOUT: Rebel forces repel Imperial invasion of ${planetName}. ${aLosses} Imperial troops killed. Rebel defenders: ${dLosses} lost.`,
+    defender_wins_surface_empire: `DEFENSIVE VICTORY: Imperial garrison holds ${planetName} against rebel assault. ${aLosses} rebels cut down. Garrison losses: ${dLosses}.`,
+
+    // Draw
+    draw_orbit: `STALEMATE AT ${planetName.toUpperCase()}: Both fleets withdraw after brutal orbital engagement. Both sides report heavy losses.`,
+    draw_surface: `DEADLOCK ON ${planetName.toUpperCase()}: Ground forces locked in bitter stalemate. Combat ends inconclusively.`,
+  };
+
+  const key = `${outcome}_${layer}_${attackerKey === 'rebel' ? 'rebel' : 'empire'}`;
+  return narratives[key] || `Combat at ${planetName}: ${outcome === 'draw' ? 'forces withdraw in stalemate' : attackerKey + ' ' + outcome}`;
 }
 
 async function resolveCombat(sessionId, round, planetId, layer, attackers, defenders, attackerKey, defenderKey) {
@@ -142,7 +202,8 @@ async function resolveCombat(sessionId, round, planetId, layer, attackers, defen
     outcome = 'defender_wins';
   }
 
-  const summary = `${layer} combat at ${planetId}: ${attackerKey} ${outcome === 'attacker_wins' ? 'captures' : outcome === 'defender_wins' ? 'repelled by' : 'draws with'} ${defenderKey}. A:${attackerLosses} D:${defenderLosses} units lost.`;
+  const planetName = session.planet_state.find(p => p.id === planetId)?.name || planetId;
+  const summary = generateCombatNarrative(planetId, planetName, layer, attackerKey, defenderKey, outcome, attackerLosses, defenderLosses);
 
   await db.insertCombatLog(sessionId, round, planetId, layer,
     attackerKey, defenderKey, attackerLosses, defenderLosses, outcome, summary);
@@ -418,37 +479,25 @@ async function queueRebelUnitProduction(sessionId, playerId, planetId, unitType)
     if (cells.length === 0)
       return { ok:false, error:'Rebels cannot produce here — no control or faction presence' };
 
-    // Validate unit type against faction classes
+    // Check if unit is in any faction's allowed units
     const factions = await db.getFactions(sessionId);
-    const allowed  = new Set();
-    const factionIds = [];
-    for (const f of factions.filter(f => cells.some(c => c.faction_id === f.id))) {
-      factionIds.push(f.id);
-      const ideo = CONFIG.FACTIONS.IDEOLOGIES[f.ideology];
-      (ideo?.allowed_ship_classes || []).forEach(c => allowed.add(c));
-      (f.unlocked_ship_classes   || []).forEach(c => allowed.add(c));
-    }
-    // Resolve named units to their base class for faction validation
-    const effectiveClass = CONFIG.UNIT_BASE_CLASSES?.[unitType] || unitType;
-    if (!allowed.has(effectiveClass))
-      return { ok:false, error:`Faction network at this planet cannot produce ${typeCfg.label}` };
+    const factionsHere = factions.filter(f => cells.some(c => c.faction_id === f.id));
 
-    // Check if unit has been researched by any of the factions here
-    try {
-      const hasResearch = await Promise.all(
-        factionIds.map(async (fid) => {
-          const research = await db.getFactionUnitResearchByType(fid, unitType);
-          return research?.unlocked === true;
-        })
-      );
-      if (!hasResearch.some(r => r)) {
-        return { ok:false, error:`${typeCfg.label} must be researched first` };
+    const canProduce = factionsHere.some(f => {
+      const allowed = f.allowed_unit_types || [];
+      return allowed.includes(unitType);
+    });
+
+    if (!canProduce) {
+      const producibleUnits = new Set();
+      for (const f of factionsHere) {
+        (f.allowed_unit_types || []).forEach(u => producibleUnits.add(u));
       }
-    } catch (err) {
-      // Table may not exist yet; allow production
-      if (err.message && !err.message.includes('faction_unit_research')) {
-        throw err;
-      }
+      const unitNames = [...producibleUnits]
+        .map(u => CONFIG.UNIT_TYPES[u]?.label || u)
+        .sort()
+        .join(', ') || '(none)';
+      return { ok:false, error:`Faction network here can only produce: ${unitNames}` };
     }
   }
 
@@ -492,8 +541,114 @@ async function buildPublicUnitState(sessionId, requestingPlayerId=null) {
   }));
 }
 
+async function applyFleetMove(sessionId, playerId, fleetId, targetPlanetId, targetLayer) {
+  const fleet = await db.getFleet(fleetId);
+  if (!fleet) return { ok:false, error:'Fleet not found' };
+
+  const fleetOwner = fleet.owner;
+  if (!fleetOwner.includes(playerId)) return { ok:false, error:'Not your fleet' };
+
+  // Get all units in the fleet
+  const fleetUnits = await db.getUnitsByFleet(fleetId);
+  if (fleetUnits.length === 0) return { ok:false, error:'Fleet has no units' };
+
+  // Verify all units are at the same location (sanity check)
+  const currentPlanetId = fleet.planet_id;
+  const currentLayer = fleet.layer;
+  if (fleetUnits.some(u => u.planet_id !== currentPlanetId || u.layer !== currentLayer)) {
+    return { ok:false, error:'Fleet units not coherent - cannot move' };
+  }
+
+  // Calculate effective jump range (use minimum jump_distance in fleet)
+  const jumpDistances = fleetUnits.map(u => u.jump_distance ?? CONFIG.UNIT_TYPES[u.unit_type]?.jumpDistance ?? 1);
+  const minJumpDist = Math.min(...jumpDistances);
+  if (minJumpDist === 0) return { ok:false, error:'Fleet cannot jump between planets' };
+
+  const { reachableIn } = require('./world');
+  if (!reachableIn(currentPlanetId, minJumpDist).includes(targetPlanetId))
+    return { ok:false, error:'Target out of fleet jump range' };
+
+  // Move all units atomically
+  const unitIds = fleetUnits.map(u => u.id);
+  const placeholders = unitIds.map((_, i) => `$${i+1}`).join(',');
+  await db.pool.query(
+    `UPDATE units SET planet_id=$${unitIds.length+1}, layer=$${unitIds.length+2}, updated_at=NOW()
+     WHERE id IN (${placeholders})`,
+    [...unitIds, targetPlanetId, targetLayer]
+  );
+
+  // Update fleet location
+  await db.updateFleet(fleetId, { planet_id: targetPlanetId, layer: targetLayer });
+
+  // Return updated fleet state
+  const updatedFleet = await db.getFleet(fleetId);
+  return { ok:true, fleet: updatedFleet, unitCount: fleetUnits.length };
+}
+
+async function autoGroupFleets(sessionId, db) {
+  // Group ungrouped units by (owner, planet_id, layer) into fleets
+  const ungroupedUnits = await db.pool.query(
+    `SELECT u.* FROM units u
+     WHERE u.session_id = $1 AND u.fleet_id IS NULL
+     ORDER BY u.owner, u.planet_id, u.layer, u.created_at`,
+    [sessionId]
+  );
+
+  if (ungroupedUnits.rows.length === 0) return [];
+
+  let currentOwner = null;
+  let currentPlanetId = null;
+  let currentLayer = null;
+  let fleetUnits = [];
+  const createdFleets = [];
+
+  for (const unit of ungroupedUnits.rows) {
+    // Check if we've moved to a different (owner, planet, layer) group
+    if (unit.owner !== currentOwner || unit.planet_id !== currentPlanetId || unit.layer !== currentLayer) {
+      // Save previous fleet if any
+      if (fleetUnits.length > 0) {
+        const fleet = await db.createFleet(
+          sessionId,
+          currentOwner,
+          `${currentOwner} ${currentLayer} fleet at ${currentPlanetId}`,
+          currentPlanetId,
+          currentLayer,
+          true, // auto_grouped = true
+          null  // createdRound = null (mid-game auto-group)
+        );
+        await db.assignUnitsToFleet(fleetUnits.map(u => u.id), fleet.id);
+        createdFleets.push(fleet);
+      }
+      // Start new group
+      currentOwner = unit.owner;
+      currentPlanetId = unit.planet_id;
+      currentLayer = unit.layer;
+      fleetUnits = [unit];
+    } else {
+      fleetUnits.push(unit);
+    }
+  }
+
+  // Don't forget the last group
+  if (fleetUnits.length > 0) {
+    const fleet = await db.createFleet(
+      sessionId,
+      currentOwner,
+      `${currentOwner} ${currentLayer} fleet at ${currentPlanetId}`,
+      currentPlanetId,
+      currentLayer,
+      true,
+      null
+    );
+    await db.assignUnitsToFleet(fleetUnits.map(u => u.id), fleet.id);
+    createdFleets.push(fleet);
+  }
+
+  return createdFleets;
+}
+
 module.exports = {
-  resolveAllCombat, resolveRebelVsRebelCombat, runProductionPhase,
-  applyRebelUnitMove, queueRebelUnitProduction,
-  buildPublicUnitState, getAssignedGovernor,
+  resolveAllCombat, resolveCombat, resolveRebelVsRebelCombat, runProductionPhase,
+  applyRebelUnitMove, applyFleetMove, queueRebelUnitProduction,
+  buildPublicUnitState, getAssignedGovernor, autoGroupFleets,
 };

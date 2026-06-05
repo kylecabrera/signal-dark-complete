@@ -254,6 +254,9 @@ export function useGame() {
   const incite     = useCallback((planetId) => sendAction({ type: 'incite', planetId }), [sendAction]);
   const hide       = useCallback((planetId) => sendAction({ type: 'hide', planetId }), [sendAction]);
 
+  const useForcePower = useCallback((powerName) =>
+    sendAction({ type: 'force_powers', powerName }), [sendAction]);
+
   const contribute   = useCallback((factionId, amount, mode='normal', unitType=null) => {
     const action = { type: mode === 'research' ? 'research' : 'contribute', planetId: privateState?.currentPlanet, factionId, amount };
     if (mode === 'research' && unitType) {
@@ -272,8 +275,10 @@ export function useGame() {
     sendAction({ type: 'unit_move', planetId: privateState?.currentPlanet, unitId, targetId, layer }), [sendAction, privateState]);
   const produceUnit = useCallback((planetId, unitType) =>
     sendAction({ type: 'unit_produce', planetId, unitType }), [sendAction]);
-  const attackWith  = useCallback((planetId, targetId) =>
-    sendAction({ type: 'unit_attack', planetId, targetId }), [sendAction]);
+  const attackWith  = useCallback((planetId, targetId, layer) =>
+    sendAction({ type: 'unit_attack', planetId, targetId, layer }), [sendAction]);
+  const attackEmpire = useCallback((planetId, layer) =>
+    sendAction({ type: 'unit_attack', planetId, layer }), [sendAction]);
   const attackRebel = useCallback((targetPlayerId, layer) =>
     sendAction({ type: 'rebel_attack', targetPlayerId, layer }), [sendAction]);
   const toggleUnitHidden = useCallback((unitId) => {
@@ -293,8 +298,8 @@ export function useGame() {
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
     joinGame, markReady, submitTurn, endTurnEarly,
-    sendAction, move, recruit, intel, sabotage, incite, hide,
+    sendAction, move, recruit, intel, sabotage, incite, hide, useForcePower,
     contribute, foundFaction, investigate, denounce,
-    moveUnit, produceUnit, attackWith, attackRebel, toggleUnitHidden,
+    moveUnit, produceUnit, attackWith, attackEmpire, attackRebel, toggleUnitHidden,
   };
 }

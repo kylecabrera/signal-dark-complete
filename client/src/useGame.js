@@ -84,7 +84,7 @@ export function useGame() {
 
     socket.on('action_confirmed', ({ label, traitorExposed, investigateResult: ir, denounceResult: dr,
                                       discoveries, recruitBonus, sabotageBonus, inciteBonus,
-                                      detentionTriggered, fineAmount, detentionMessage }) => {
+                                      detentionTriggered, fineAmount, detentionMessage, cascadeEffects }) => {
       notify(label?.toUpperCase() || 'ACTION CONFIRMED');
       if (traitorExposed) {
         setTraitorAlert(true);
@@ -92,6 +92,14 @@ export function useGame() {
       }
       if (ir) setInvestigateResult(ir);
       if (dr) notify(`DENUNCIATION: ${dr.outcome?.toUpperCase()} — ${dr.factionName}`);
+
+      // Handle cascade effects
+      if (cascadeEffects?.length) {
+        cascadeEffects.forEach(effect => {
+          notify(`CASCADE: Criminal activity spreads to ${effect.sector}`);
+          setFeedEntries(prev => [{ gov:'system', text: `CASCADE EFFECT: Criminal activity spreading to ${effect.sector}` }, ...prev].slice(0,60));
+        });
+      }
 
       // Handle detention trigger
       if (detentionTriggered) {

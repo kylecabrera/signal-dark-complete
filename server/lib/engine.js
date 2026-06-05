@@ -649,7 +649,7 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
   }
 
-  // Check for detention based on criminality level
+  // Check for detention based on criminality level and cascade effects
   if (sector) {
     const updatedState = await db.getRebelState(sessionId, playerId);
     const sectorCriminality = updatedState.criminality?.[sector] || 0;
@@ -668,6 +668,22 @@ async function applyRebelAction(sessionId, playerId, action) {
       result.detentionTriggered = true;
       result.fineAmount = fineAmount;
       result.detentionMessage = `Apprehended by local authorities! Fine: ${fineAmount}cr to avoid detention.`;
+    }
+
+    // Cascade effects: if player reached Terrorist level, decrease criminality in adjacent sectors
+    if (sectorCriminality === 4) {
+      const { getAdjacentSectors } = require('./world');
+      const adjacentSectors = getAdjacentSectors(sector);
+      result.cascadeEffects = [];
+
+      for (const adjSector of adjacentSectors) {
+        await db.updateCriminality(sessionId, playerId, adjSector, -1);
+        result.cascadeEffects.push({
+          sector: adjSector,
+          change: -1,
+          message: `Cascade: Increased criminal activity spreading to ${adjSector}`
+        });
+      }
     }
   }
 

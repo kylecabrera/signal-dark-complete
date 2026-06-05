@@ -310,8 +310,8 @@ module.exports = function registerSocketHandlers(io) {
 
       startTurnTimer(io, sessionId);
     } catch(err) {
-      console.error('Governor turn error:', err);
-      io.to(sessionId).emit('error', { message:'Governor turn processing failed' });
+      console.error('Governor turn error:', err.message, err.stack);
+      io.to(sessionId).emit('error', { message:`Governor turn processing failed: ${err.message}` });
     }
   }
 

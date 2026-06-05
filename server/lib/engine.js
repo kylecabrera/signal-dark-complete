@@ -726,6 +726,52 @@ async function processGovernorTurn(sessionId) {
   let { newPlanets, newGovState, newWatched, newLocked, feedEntries } =
     await applyGovernorActionResults(sessionId, session.round, govResults);
 
+  // Calculate current alert level based on rebel planets (before we update it)
+  const rebelPlanets = newPlanets.filter(p =>
+    p.controlled_by === 'rebel' || p.controlled_by?.startsWith('faction:')
+  ).length;
+
+  // Apply alert-level escalation mechanics
+  const alertLevel = rebelPlanets <= 1 ? 0 : rebelPlanets <= 3 ? 1 : rebelPlanets <= 5 ? 2 : rebelPlanets <= 7 ? 3 : 4;
+
+  // Escalate lane lockdown with alert level
+  if (alertLevel >= 1) {
+    // ELEVATED: Lock 1 additional random lane
+    const allLanes = require('./world').LANES;
+    const unlockedLanes = allLanes.filter(lane =>
+      !newLocked.some(l => (l[0] === lane[0] && l[1] === lane[1]) || (l[0] === lane[1] && l[1] === lane[0]))
+    );
+    if (unlockedLanes.length > 0) {
+      const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
+      newLocked.push(randomLane);
+      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+    }
+  }
+  if (alertLevel >= 2) {
+    // MANHUNT: Lock another lane
+    const allLanes = require('./world').LANES;
+    const unlockedLanes = allLanes.filter(lane =>
+      !newLocked.some(l => (l[0] === lane[0] && l[1] === lane[1]) || (l[0] === lane[1] && l[1] === lane[0]))
+    );
+    if (unlockedLanes.length > 0) {
+      const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
+      newLocked.push(randomLane);
+      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+    }
+  }
+  if (alertLevel >= 3) {
+    // PURGE: Lock another lane + emergency spawn units
+    const allLanes = require('./world').LANES;
+    const unlockedLanes = allLanes.filter(lane =>
+      !newLocked.some(l => (l[0] === lane[0] && l[1] === lane[1]) || (l[0] === lane[1] && l[1] === lane[0]))
+    );
+    if (unlockedLanes.length > 0) {
+      const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
+      newLocked.push(randomLane);
+      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+    }
+  }
+
   // Resolve any combat triggered by unit movements
   const combatLog = await resolveAllCombat(sessionId, session.round);
   if (combatLog.length > 0) {
@@ -751,24 +797,52 @@ async function processGovernorTurn(sessionId) {
   newPlanets = session.planet_state;
 
   // Production phase
-  const { newUnits, govProduction } = await runProductionPhase(sessionId);
+  let { newUnits, govProduction } = await runProductionPhase(sessionId);
   if (newUnits.length > 0) {
     feedEntries.push({ gov:'system', text:`Production complete: ${newUnits.length} unit(s) delivered.` });
   }
 
-  // Raise alert for overt actions this round
-  // Alert level is based on rebel planet control
-  // More planets = higher alert level
-  const rebelPlanets = newPlanets.filter(p =>
+  // Emergency unit spawning for high alert levels
+  const finalRebelPlanets = newPlanets.filter(p =>
     p.controlled_by === 'rebel' || p.controlled_by?.startsWith('faction:')
   ).length;
 
   let alertValue;
-  if (rebelPlanets <= 1) alertValue = 0;      // DORMANT
-  else if (rebelPlanets <= 3) alertValue = 1; // ELEVATED
-  else if (rebelPlanets <= 5) alertValue = 2; // MANHUNT
-  else if (rebelPlanets <= 7) alertValue = 3; // PURGE (Quorum activates)
-  else alertValue = 4;                        // ANNIHILATION
+  if (finalRebelPlanets <= 1) alertValue = 0;      // DORMANT
+  else if (finalRebelPlanets <= 3) alertValue = 1; // ELEVATED
+  else if (finalRebelPlanets <= 5) alertValue = 2; // MANHUNT
+  else if (finalRebelPlanets <= 7) alertValue = 3; // PURGE (Quorum activates)
+  else alertValue = 4;                            // ANNIHILATION
+
+  // Spawn emergency units at high alert levels
+  if (alertValue >= 3) {
+    // PURGE: Spawn 1-2 fighter squadrons on adjacent planets to rebel activity
+    const rebelActivePlanets = newPlanets.filter(p =>
+      p.controlled_by === 'rebel' || p.controlled_by?.startsWith('faction:')
+    );
+
+    if (rebelActivePlanets.length > 0) {
+      const targetPlanet = rebelActivePlanets[Math.floor(Math.random() * rebelActivePlanets.length)];
+      const { LANES } = require('./world');
+      const adjacentPlanets = LANES
+        .filter(lane => lane[0] === targetPlanet.id || lane[1] === targetPlanet.id)
+        .map(lane => lane[0] === targetPlanet.id ? lane[1] : lane[0]);
+
+      for (let i = 0; i < (alertValue >= 4 ? 2 : 1); i++) {
+        if (adjacentPlanets.length === 0) break;
+        const spawnPlanet = adjacentPlanets[Math.floor(Math.random() * adjacentPlanets.length)];
+        const unit = await db.createUnit(
+          sessionId, 'starfighter', 'empire:crassus',
+          spawnPlanet, 'orbit',
+          CONFIG.UNIT_TYPES.starfighter.strength,
+          CONFIG.UNIT_TYPES.starfighter.hp,
+          false, 1, 0, 'Emergency Fighter Squadron'
+        );
+        newUnits.push(unit);
+        feedEntries.push({ gov:'empire', text:`EMPIRE: Emergency fighter squadron spawned at ${spawnPlanet}` });
+      }
+    }
+  }
 
   // Update Vektis depth
   newGovState.vektis = newGovState.vektis || {};

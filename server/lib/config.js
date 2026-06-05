@@ -9,7 +9,7 @@ const CONFIG = {
   // ─────────────────────────────────────────────
   ACTIONS_PER_TURN: 4,
   TURN_TIMEOUT_SECONDS: 300,
-  MAX_PLAYERS: 4,
+  MAX_PLAYERS: 12,
   STARTING_CREDITS: 5,
 
   // ─────────────────────────────────────────────

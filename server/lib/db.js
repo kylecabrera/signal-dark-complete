@@ -28,20 +28,10 @@ async function getSessionById(id) {
   return rows[0]||null;
 }
 async function updateSession(id, fields) {
-  // Map empire_level to suppression_level for database compatibility
-  const mappedFields = { ...fields };
-  if (mappedFields.empire_level !== undefined) {
-    mappedFields.suppression_level = mappedFields.empire_level;
-    delete mappedFields.empire_level;
-  }
-  const keys=Object.keys(mappedFields);
-  const vals=Object.values(mappedFields).map(v=>typeof v==='object'?JSON.stringify(v):v);
+  const keys=Object.keys(fields);
+  const vals=Object.values(fields).map(v=>typeof v==='object'?JSON.stringify(v):v);
   const set=keys.map((k,i)=>`${k}=$${i+2}`).join(',');
   const { rows } = await pool.query(`UPDATE game_sessions SET ${set} WHERE id=$1 RETURNING *`,[id,...vals]);
-  // Map suppression_level back to empire_level for consistency
-  if (rows[0]) {
-    rows[0].empire_level = rows[0].suppression_level;
-  }
   return rows[0];
 }
 

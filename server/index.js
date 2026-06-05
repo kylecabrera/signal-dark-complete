@@ -67,3 +67,17 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   // Initialize DB async, don't block server startup
   setImmediate(() => initializeDatabase());
 });
+
+httpServer.on('error', (err) => {
+  console.error('SERVER ERROR:', err);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});

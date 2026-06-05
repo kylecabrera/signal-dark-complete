@@ -83,11 +83,13 @@ const MIN_ZOOM = 0.15;
 const MAX_ZOOM = 4;
 
 export function SectorMap({ game }) {
+  if (!game) return null;
+
   const svgRef      = useRef(null);
   const [dims, setDims] = useState({ w: 800, h: 600 });
   const vpInitRef   = useRef(false);   // fire auto-fit only once
 
-  // Pan + zoom state — starts null, set to auto-fit on first measure
+  // Pan + zoom state — starts with default, set to auto-fit on first measure
   const [vp, setVp] = useState({ x: 0, y: 0, scale: 1 });
   const dragRef    = useRef(null);
   const movedRef   = useRef(false);
@@ -95,7 +97,7 @@ export function SectorMap({ game }) {
 
   const { publicState, privateState, myColor, myName,
           selectedPlanet, setSelectedPlanet,
-          selectedUnit, setSelectedUnit, move, moveUnit } = game;
+          selectedUnit, setSelectedUnit, move, moveUnit } = game || {};
 
   // Measure SVG and set auto-fit viewport once
   useEffect(() => {
@@ -233,7 +235,7 @@ export function SectorMap({ game }) {
   return (
     <div className="map-area" style={{ position: 'relative' }}>
       <svg
-        key={Math.floor(vp.x / 100)} // Force re-render on pan
+        key={vp ? Math.floor(vp.x / 100) : 0} // Force re-render on pan
         ref={svgRef}
         className="map-svg"
         xmlns="http://www.w3.org/2000/svg"

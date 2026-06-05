@@ -377,6 +377,8 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
 }
 
 export function Sidebar({ game }) {
+  if (!game) return null;
+
   const {
     publicState, privateState, feedEntries, governorThinking,
     selectedPlanet, playerId, submitTurn, endTurnEarly,

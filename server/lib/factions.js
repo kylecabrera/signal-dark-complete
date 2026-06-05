@@ -509,10 +509,10 @@ async function foundFactionCell(sessionId, playerId, factionId, planetId, round)
     return { ok:false, error:'Faction not found' };
   }
 
-  // Check if cell already exists at this planet
+  // Check if ANY cell already exists at this planet (only 1 cell per planet allowed)
   const existingCells = await db.getFactionCellsAtPlanet(sessionId, planetId);
-  if (existingCells.some(c => c.faction_id === factionId)) {
-    return { ok:false, error:'Cell already established here' };
+  if (existingCells.length > 0) {
+    return { ok:false, error:'A cell already exists on this planet. Only one cell per planet allowed.' };
   }
 
   // Establish cell with strength 1

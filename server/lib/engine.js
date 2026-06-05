@@ -3,7 +3,7 @@ const { processMovesIntoLeaks, updateSirisModel, applyGovernorActionResults } = 
 const { runAllGovernors } = require('./governors');
 const { resolveAllCombat, runProductionPhase, buildPublicUnitState } = require('./units');
 const { contributeToFaction, foundFaction, foundFactionCell, investigateFaction, denounceFaction, getFactionBonuses, buildClientFactionState, buildAllianceState } = require('./factions');
-const { ALERT_LEVELS, isAdjacent, LANES } = require('./world');
+const { ALERT_LEVELS, isAdjacent, LANES, getPlanetSector, getAdjacentSectors, CRIMINALITY_LEVELS } = require('./world');
 const CONFIG = require('./config');
 
 // ─────────────────────────────────────────────
@@ -101,12 +101,24 @@ async function applyRebelAction(sessionId, playerId, action) {
   const playerRow = (await db.getPlayers(sessionId)).find(p => p.id === playerId);
   if (playerRow?.is_eliminated) return { ok:false, error:'You have been eliminated' };
 
-  const actionsLeft = CONFIG.ACTIONS_PER_TURN - rebelState.actions_used;
+  const currentPlanet = rebelState.current_planet;
+  const currentSector = getPlanetSector(currentPlanet);
+
+  // Get cell bonus actions (1 per cell in current sector)
+  let cellBonusActions = 0;
+  if (currentSector) {
+    const cells = await db.getFactionCells(sessionId);
+    cellBonusActions = cells.filter(c => {
+      const cellSector = getPlanetSector(c.planet_id);
+      return cellSector === currentSector;
+    }).length;
+  }
+
+  const actionsLeft = CONFIG.ACTIONS_PER_TURN - rebelState.actions_used + cellBonusActions;
   if (actionsLeft <= 0) return { ok:false, error:'No actions remaining' };
 
   const { type, planetId, targetId, unitId, factionId, factionName,
           ideology, amount, unitType } = action;
-  const currentPlanet = rebelState.current_planet;
   let covert = true;
   let label  = '';
   let metadata = {};
@@ -383,6 +395,13 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       (rebelState.credits||0) - CONFIG.FACTIONS.CELL_COST);
 
+    // Decrease criminality when cell is founded
+    const cellSector = getPlanetSector(planetId);
+    if (cellSector) {
+      await db.updateCriminality(sessionId, playerId, cellSector, -1);
+      result.criminalityDecreased = 1;
+    }
+
   // ── Faction: investigate ──────────────────
   } else if (type === 'investigate') {
     if (!factionId) return { ok:false, error:'Need factionId' };
@@ -605,6 +624,22 @@ async function applyRebelAction(sessionId, playerId, action) {
     const suspicionIncrease = Math.floor(Math.random() * 3) + 3;
     await db.updateRebelStateSuspicion(sessionId, playerId, suspicionIncrease);
     result.suspicionAdded = suspicionIncrease;
+  }
+
+  // Update criminality for crimes
+  const sector = getPlanetSector(planetId || currentPlanet);
+  if (sector) {
+    if (type === 'sabotage') {
+      await db.updateCriminality(sessionId, playerId, sector, 1);
+      result.criminalityAdded = 1;
+    } else if (type === 'incite') {
+      await db.updateCriminality(sessionId, playerId, sector, 1);
+      result.criminalityAdded = 1;
+    } else if (type === 'steal_money' && Math.random() < 0.40) {
+      // 40% chance theft increases criminality
+      await db.updateCriminality(sessionId, playerId, sector, 1);
+      result.criminalityAdded = 1;
+    }
   }
 
   // Update Force user: earn points, apply alignment shift, check tier advancement
@@ -1012,11 +1047,23 @@ async function buildPrivateState(sessionId, playerId) {
                      : alignment < -CONFIG.FORCE.ALIGNMENT_THRESHOLD ? 'dark'
                      : 'grey';
 
+  // Calculate cell bonus actions
+  let cellBonusActions = 0;
+  const currentSector = getPlanetSector(rebelState.current_planet);
+  if (currentSector) {
+    const cells = await db.getFactionCells(sessionId);
+    cellBonusActions = cells.filter(c => {
+      const cellSector = getPlanetSector(c.planet_id);
+      return cellSector === currentSector;
+    }).length;
+  }
+
   return {
     currentPlanet:     rebelState.current_planet,
     startingPlanet:    rebelState.starting_planet,
     actionsUsed:       rebelState.actions_used,
-    actionsRemaining:  CONFIG.ACTIONS_PER_TURN - rebelState.actions_used,
+    actionsRemaining:  CONFIG.ACTIONS_PER_TURN - rebelState.actions_used + cellBonusActions,
+    cellBonusActions,
     credits:           rebelState.credits || 0,
     suspicion:         rebelState.suspicion || 0,
     forceAlignment:    alignment,

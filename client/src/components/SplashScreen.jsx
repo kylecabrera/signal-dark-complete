@@ -11,7 +11,7 @@ export function SplashScreen({ onDismiss }) {
         <div style={{ fontSize: '13px', lineHeight: 2, color: '#a8c5dd' }}>
           <div>You are Jedi survivors building a rebellion to overthrow the Empire.</div>
           <div style={{ marginTop: 8 }}>🎯 <strong>Win:</strong> Reach 100 rebellion strength</div>
-          <div>🎯 <strong>Lose:</strong> Reach 100 suppression level</div>
+          <div>🎯 <strong>Lose:</strong> Reach 100 imperial strength, or your jedi is eliminated.</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
             Four AI Governors (Siris-tactical, Crassus-military, Maren-enforcer, Vektis-adaptive) command Imperial forces. Lower planet loyalty from 100% to 0% to claim them. Covert actions raise suspicion slower.
           </div>

@@ -33,7 +33,12 @@ io.on('connection', (socket) => {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
-app.get('/health', (_, res) => res.json({ status:'ok', ts:Date.now() }));
+
+// Simple health check - responds immediately
+app.get('/health', (_, res) => {
+  console.log('Health check called');
+  res.json({ status:'ok', ts:Date.now() });
+});
 app.use('/api', sessionRoutes);
 registerSocketHandlers(io);
 

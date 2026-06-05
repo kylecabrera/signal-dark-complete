@@ -21,13 +21,21 @@ const registerSocketHandlers = require('./routes/socket');
 
 const app        = express();
 const httpServer = http.createServer(app);
+
+console.log('Creating Socket.io server with corsOptions:', corsOptions);
 const io         = new Server(httpServer, {
   cors: corsOptions,
   transports: ['websocket', 'polling'],
 });
 
+console.log('✓ Socket.io server created');
+
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
+});
+
+io.on('error', (err) => {
+  console.error('Socket.io error:', err);
 });
 
 app.use(cors(corsOptions));

@@ -253,6 +253,8 @@ export function useGame() {
   const sabotage   = useCallback((planetId) => sendAction({ type: 'sabotage', planetId }), [sendAction]);
   const incite     = useCallback((planetId) => sendAction({ type: 'incite', planetId }), [sendAction]);
   const hide       = useCallback((planetId) => sendAction({ type: 'hide', planetId }), [sendAction]);
+  const earnMoney  = useCallback((planetId) => sendAction({ type: 'earn_money', planetId }), [sendAction]);
+  const stealMoney = useCallback((planetId) => sendAction({ type: 'steal_money', planetId }), [sendAction]);
 
   const useForcePower = useCallback((powerName) =>
     sendAction({ type: 'force_powers', powerName }), [sendAction]);
@@ -298,7 +300,7 @@ export function useGame() {
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
     joinGame, markReady, submitTurn, endTurnEarly,
-    sendAction, move, recruit, intel, sabotage, incite, hide, useForcePower,
+    sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower,
     contribute, foundFaction, investigate, denounce,
     moveUnit, produceUnit, attackWith, attackEmpire, attackRebel, toggleUnitHidden,
   };

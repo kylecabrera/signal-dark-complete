@@ -143,6 +143,8 @@ const ACTION_DESCRIPTIONS = {
   sabotage: 'Loyalty -8 · +2cr · 18% chance: block empire production 2 rounds [OVERT]',
   incite:   'Loyalty -10 · +2cr · 18% chance: damage/kill imperial unit [OVERT]',
   hide:     'Suspicion -1 · Lay low and avoid detection',
+  earn_money: 'Generate income through honest work and trade',
+  steal_money: 'Steal credits through criminal activity [OVERT]',
 };
 
 function FleetTab({ game, privateState, planetState, productionQueue }) {
@@ -334,7 +336,7 @@ export function Sidebar({ game }) {
   const {
     publicState, privateState, feedEntries, governorThinking,
     selectedPlanet, playerId, submitTurn, endTurnEarly,
-    recruit, intel, sabotage, incite, hide, useForcePower,
+    recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower,
     produceUnit,
   } = game;
 
@@ -581,6 +583,24 @@ export function Sidebar({ game }) {
                   </button>
                   <div style={{ fontSize:'9px', color:'rgba(140,160,200,0.45)', padding:'1px 9px 4px', lineHeight:1.3 }}>
                     {ACTION_DESCRIPTIONS.hide}
+                  </div>
+                </div>
+
+                {/* Money actions */}
+                <div style={{ marginBottom:2 }}>
+                  <button className="abtn covert" disabled={actionsLeft<=0} onClick={() => earnMoney(planet.id)}>
+                    <span>Earn money (honest work)</span><span className="btag tc">COVERT</span>
+                  </button>
+                  <div style={{ fontSize:'9px', color:'rgba(140,160,200,0.45)', padding:'1px 9px 4px', lineHeight:1.3 }}>
+                    {ACTION_DESCRIPTIONS.earn_money}
+                  </div>
+                </div>
+                <div style={{ marginBottom:2 }}>
+                  <button className="abtn overt" disabled={actionsLeft<=0} onClick={() => stealMoney(planet.id)}>
+                    <span>Steal money (criminal activity)</span><span className="btag to">OVERT</span>
+                  </button>
+                  <div style={{ fontSize:'9px', color:'rgba(140,160,200,0.45)', padding:'1px 9px 4px', lineHeight:1.3 }}>
+                    {ACTION_DESCRIPTIONS.steal_money}
                   </div>
                 </div>
 

@@ -224,6 +224,19 @@ export function useGame() {
     prevJediAliveRef.current = jediAlive;
   }, [privateState]);
 
+  // Fix black screen on tab focus by forcing a re-render
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Tab came back into focus, force update
+        setPublicState(s => s ? {...s} : null);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Join a game room - waits for socket to be connected first
   const joinGame = useCallback((sid, pid, spInfo) => {
     if (spInfo) setStartingPlanetInfo(spInfo);

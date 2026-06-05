@@ -63,6 +63,7 @@ function initializeDatabase() {
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Signal Dark v2 on port ${PORT}`);
-  initializeDatabase();
+  console.log(`Signal Dark v2 listening on 0.0.0.0:${PORT}`);
+  // Initialize DB async, don't block server startup
+  setImmediate(() => initializeDatabase());
 });

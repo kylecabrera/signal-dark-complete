@@ -85,6 +85,7 @@ function Landing({ game }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
   const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+  console.log('Landing: serverUrl =', serverUrl);
 
   async function createGame() {
     if (!name.trim()) return setError('Enter your callsign');

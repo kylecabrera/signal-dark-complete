@@ -127,6 +127,31 @@ export function FactionPanel({ game }) {
                 </div>
               )}
 
+              {/* Unit production info */}
+              {f.unit_research && Object.keys(f.unit_research).length > 0 && (
+                <div style={{ marginBottom:6, paddingBottom:6, borderBottom:'1px solid rgba(80,140,220,0.1)' }}>
+                  <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#40c880', marginBottom:3, fontWeight:600 }}>
+                    UNIT RESEARCH:
+                  </div>
+                  <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', lineHeight:1.5 }}>
+                    {Object.entries(f.unit_research).map(([unitType, data]) => (
+                      <div key={unitType} style={{
+                        color: data.unlocked ? '#40c880' : '#5a7090',
+                        opacity: data.unlocked ? 1 : 0.6,
+                        marginBottom: 2
+                      }}>
+                        {data.unlocked ? '✓' : '◐'} {unitType} {!data.unlocked && `(${data.progress || 0}/${data.total_cost || '?'})`}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Control/Production requirement */}
+              <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginBottom:6, opacity:0.75 }}>
+                To produce units: Rebel control OR faction cell on planet
+              </div>
+
               {!f.is_denounced && (
                 <div style={{ display:'flex', gap:4 }}>
                   {/* Contribute */}

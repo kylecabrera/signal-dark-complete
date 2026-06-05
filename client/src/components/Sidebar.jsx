@@ -278,11 +278,20 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
                 return <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090' }}>No researched units available</div>;
               }
 
-              return availableUnits.map(u => (
+              return availableUnits.map(u => {
+                // Find which factions can produce this unit
+                const producingFactions = factionIds.filter(fid => {
+                  const factionData = privateState?.factions?.find(f => f.id === fid);
+                  return factionData?.unit_research?.[u.type]?.unlocked;
+                }).map(fid => privateState?.factions?.find(f => f.id === fid)?.name || fid);
+
+                const tooltipText = `${u.label} (${u.buildTime} rounds)\nProduced by: ${producingFactions.join(', ')}\nCost: ${u.cost}cr`;
+
+                return (
                 <button
                   key={u.type}
                   onClick={() => produceUnit(myPlanet, u.type)}
-                  title={`Queue ${u.label} for production — arrives in ${u.buildTime || '?'} rounds`}
+                  title={tooltipText}
                   style={{
                     width:'100%',
                     display:'flex',
@@ -312,7 +321,8 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
                   <span>{u.label}</span>
                   <span style={{ color:'#5a7090', fontWeight:600 }}>{u.cost}cr</span>
                 </button>
-              ));
+                );
+              });
             })()}
           </div>
         </div>

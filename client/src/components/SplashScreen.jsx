@@ -10,10 +10,10 @@ export function SplashScreen({ onDismiss }) {
       content: (
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '14px', lineHeight: 1.8, marginBottom: 16, color: '#a8c5dd' }}>
-            You are rebel commanders leading the uprising against the Imperial regime.
+            You are Jedi who survived the purge. You are being hunted. You must build a rebellion to overthrow the Empire and restore freedom to the galaxy.
           </div>
           <div style={{ fontSize: '13px', color: '#7a9aad' }}>
-            Four AI Governors (Siris, Crassus, Maren, Vektis) control the Empire's forces.
+            Four AI Governors (Siris, Crassus, Maren, Vektis) control the Empire's forces. The Emperor sits somewhere in the galaxy.
           </div>
         </div>
       ),
@@ -25,7 +25,8 @@ export function SplashScreen({ onDismiss }) {
           <div>🎯 <strong>Win by Rebellion:</strong> Reach 100 rebellion strength</div>
           <div>🎯 <strong>Lose by Suppression:</strong> Reach 100 suppression level</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Planets start under Imperial control (loyalty 100%). Lower loyalty to 0 to claim them. Raise it back to 100 to flip them back to Empire.
+            You must balance growing your rebellion while avoiding drawing too much attention. Each turn, the governors will react to your actions and try to suppress you, find you and kill you.
+            Planets start under Imperial control (loyalty level is indicative of this). Lower loyalty to 0 to claim them as part of a faction in the rebellion.
           </div>
         </div>
       ),
@@ -34,11 +35,11 @@ export function SplashScreen({ onDismiss }) {
       title: 'ACTIONS & RESOURCES',
       content: (
         <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>5 Actions per turn</strong> — Move, recruit, intel, sabotage, or incite</div>
+          <div><strong>Many available Actions per turn</strong> — Move, recruit, intel, sabotage, or incite - more tbd</div>
           <div><strong>Credits</strong> — Spend on units and founding factions</div>
-          <div><strong>Jedi Avatar</strong> — Your personal Force user. If defeated, you can't move.</div>
+          <div><strong>Jedi Avatar</strong> — Your personal Force user. If killed in combat, you lose the game.</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Each action costs loyalty on the planet (helps you control it). Some actions are covert, others are overt.
+            Some actions remove loyalty on the planet (helps you control it). Some actions are covert, others are overt. Some make money. Some find information.
           </div>
         </div>
       ),
@@ -51,7 +52,7 @@ export function SplashScreen({ onDismiss }) {
           <div><strong>Contribute Credits:</strong> Build influence and unlock ship classes</div>
           <div><strong>Form Alliances:</strong> Unite factions under a shared banner</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Factions control planets when they flip to rebel. Alliances let multiple factions work together strategically.
+            Factions control planets when they flip to rebel. Every faction has a limited number of different units they can build. Alliances let multiple factions work together strategically, develop each other's units and pool resources.
           </div>
         </div>
       ),
@@ -77,7 +78,7 @@ export function SplashScreen({ onDismiss }) {
           <div><strong>Combat:</strong> Automatic when units occupy the same planet/layer</div>
           <div><strong>Intel:</strong> Reveals hidden enemy units and faction cells</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Planets have surface and orbit layers. Some units can only exist in one layer.
+            Planets have surface and orbit layers. Some units can only exist in one layer. Combat is bad and I'm working on it.
           </div>
         </div>
       ),

@@ -316,7 +316,8 @@ async function applyRebelAction(sessionId, playerId, action) {
     if (type === 'recruit' && Math.random() < 0.20) {
       await db.createUnit(sessionId, 'militia', `rebel:${playerId}`, currentPlanet, 'surface',
         CONFIG.UNIT_TYPES.militia.strength, CONFIG.UNIT_TYPES.militia.hp, true, 0, 0, 'Rebel Sympathizer');
-      result.recruitBonus = { unit: 'militia', planetId: currentPlanet };
+      const planetName = session.planet_state.find(p => p.id === currentPlanet)?.name || currentPlanet;
+      result.recruitBonus = { unit: 'militia', planetId: currentPlanet, planetName };
     }
 
     // Sabotage: 18% chance to block empire production on planet for 2 rounds
@@ -733,6 +734,7 @@ async function processGovernorTurn(sessionId) {
 
   // Apply alert-level escalation mechanics
   const alertLevel = rebelPlanets <= 1 ? 0 : rebelPlanets <= 3 ? 1 : rebelPlanets <= 5 ? 2 : rebelPlanets <= 7 ? 3 : 4;
+  const ALERT_NAMES = ['DORMANT', 'ELEVATED', 'MANHUNT', 'PURGE', 'ANNIHILATION'];
 
   // Escalate lane lockdown with alert level
   if (alertLevel >= 1) {
@@ -744,7 +746,7 @@ async function processGovernorTurn(sessionId) {
     if (unlockedLanes.length > 0) {
       const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
       newLocked.push(randomLane);
-      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+      feedEntries.push({ gov:'empire', text:`[${ALERT_NAMES[alertLevel]}] Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
     }
   }
   if (alertLevel >= 2) {
@@ -756,7 +758,7 @@ async function processGovernorTurn(sessionId) {
     if (unlockedLanes.length > 0) {
       const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
       newLocked.push(randomLane);
-      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+      feedEntries.push({ gov:'empire', text:`[${ALERT_NAMES[alertLevel]}] INCREASED SURVEILLANCE: Hyperlane ${randomLane[0]}-${randomLane[1]} under lockdown` });
     }
   }
   if (alertLevel >= 3) {
@@ -768,7 +770,7 @@ async function processGovernorTurn(sessionId) {
     if (unlockedLanes.length > 0) {
       const randomLane = unlockedLanes[Math.floor(Math.random() * unlockedLanes.length)];
       newLocked.push(randomLane);
-      feedEntries.push({ gov:'empire', text:`EMPIRE: Hyperlane ${randomLane[0]}-${randomLane[1]} locked down` });
+      feedEntries.push({ gov:'empire', text:`[${ALERT_NAMES[alertLevel]}] ⚠️ CRITICAL: Hyperlane ${randomLane[0]}-${randomLane[1]} SEALED` });
     }
   }
 
@@ -831,6 +833,7 @@ async function processGovernorTurn(sessionId) {
       for (let i = 0; i < (alertValue >= 4 ? 2 : 1); i++) {
         if (adjacentPlanets.length === 0) break;
         const spawnPlanet = adjacentPlanets[Math.floor(Math.random() * adjacentPlanets.length)];
+        const spawnPlanetName = newPlanets.find(p => p.id === spawnPlanet)?.name || spawnPlanet;
         const unit = await db.createUnit(
           sessionId, 'starfighter', 'empire:crassus',
           spawnPlanet, 'orbit',
@@ -839,7 +842,8 @@ async function processGovernorTurn(sessionId) {
           false, 1, 0, 'Emergency Fighter Squadron'
         );
         newUnits.push(unit);
-        feedEntries.push({ gov:'empire', text:`EMPIRE: Emergency fighter squadron spawned at ${spawnPlanet}` });
+        const intensity = alertValue >= 4 ? '🚨 IMMEDIATE THREAT' : '⚠️ EMERGENCY RESPONSE';
+        feedEntries.push({ gov:'empire', text:`[${ALERT_NAMES[alertValue]}] ${intensity}: Fighter squadron spawned at ${spawnPlanetName}` });
       }
     }
   }

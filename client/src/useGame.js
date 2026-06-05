@@ -102,7 +102,7 @@ export function useGame() {
       // Recruit bonus
       if (recruitBonus) {
         notify('SYMPATHIZERS JOIN THE CAUSE — MILITIA SPAWNED');
-        setFeedEntries(prev => [{ gov:'recruit', text: 'REBEL MILITIA UNIT SPAWNED at ' + recruitBonus.planetId }, ...prev].slice(0,60));
+        setFeedEntries(prev => [{ gov:'recruit', text: `REBEL MILITIA UNIT SPAWNED at ${recruitBonus.planetName || recruitBonus.planetId}` }, ...prev].slice(0,60));
       }
 
       // Sabotage bonus

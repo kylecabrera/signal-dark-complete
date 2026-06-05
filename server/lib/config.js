@@ -7,7 +7,7 @@ const CONFIG = {
   // ─────────────────────────────────────────────
   // Turn structure
   // ─────────────────────────────────────────────
-  ACTIONS_PER_TURN: 2,
+  ACTIONS_PER_TURN: 4,
   TURN_TIMEOUT_SECONDS: 300,
   MAX_PLAYERS: 4,
   STARTING_CREDITS: 5,

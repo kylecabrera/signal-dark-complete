@@ -1,10 +1,9 @@
 {
   "build": {
-    "builder": "nixpacks",
-    "buildCommand": "npm run build --prefix=server"
+    "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "npm start --prefix=server",
+    "startCommand": "cd server && npm start",
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 5
   }

@@ -38,6 +38,12 @@ io.on('error', (err) => {
   console.error('Socket.io error:', err);
 });
 
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} from ${req.ip}`);
+  next();
+});
+
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());

@@ -407,6 +407,8 @@ export function Sidebar({ game }) {
   const forceSide = privateState?.forceSide ?? 'grey';
   const myUnits = privateState?.myUnits || [];
   const jediAlive = myUnits.some(u => u.unit_type === 'jedi_avatar');
+  const isDetained = privateState?.isDetained ?? false;
+  const detentionTurns = privateState?.detentionTurns ?? 0;
   const alreadySubmitted = submittedPlayers?.includes(playerId);
   const isHere        = planet?.id === myPlanet;
   const isAdjacent    = planet && myPlanet && isAdj(lanes, myPlanet, planet.id);
@@ -497,6 +499,11 @@ export function Sidebar({ game }) {
                   {suspicion}%
                 </span>
               </div>
+              {isDetained && (
+                <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#ff6b6b', marginTop:3, letterSpacing:'0.1em' }}>
+                  🚔 DETAINED ({detentionTurns} TURN{detentionTurns !== 1 ? 'S' : ''})
+                </div>
+              )}
             </div>
           )}
 

@@ -203,14 +203,7 @@ export function useGame() {
     socket.on('fine_resolved', ({ success, message, detained, detentionTurns, creditsRemaining }) => {
       notify(message?.toUpperCase() || 'FINE RESOLVED');
       setFeedEntries(prev => [{ gov:'system', text: message }, ...prev].slice(0,60));
-      if (!success && detained) {
-        setDetentionAlert({
-          triggered: true,
-          message: `DETAINED FOR ${detentionTurns} TURN${detentionTurns > 1 ? 'S' : ''}`
-        });
-      } else {
-        setDetentionAlert(null);
-      }
+      setDetentionAlert(null);
     });
 
     socket.on('fine_rejected', ({ reason }) => {

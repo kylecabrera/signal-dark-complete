@@ -26,8 +26,6 @@ export function FactionPanel({ game }) {
   const [selectedFaction, setSelectedFaction] = useState(null);
   const [contributeAmount, setContributeAmount] = useState(1);
   const [newName, setNewName]       = useState('');
-  const [newIdeology, setNewIdeology] = useState('liberation_front');
-  const [newHome, setNewHome]       = useState('p03');
 
   const credits  = privateState?.credits || 0;
   const myPlanet = privateState?.currentPlanet;
@@ -40,8 +38,8 @@ export function FactionPanel({ game }) {
   }
 
   function handleFound() {
-    if (!newName.trim() || !newIdeology || !newHome) return;
-    foundFaction(newName.trim(), newIdeology, newHome);
+    if (!newName.trim()) return;
+    foundFaction(newName.trim(), 'liberation_front', myPlanet);
     setNewName(''); setTab('browse');
   }
 
@@ -183,34 +181,18 @@ export function FactionPanel({ game }) {
       {tab === 'found' && (
         <div>
           <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'#5a7090', marginBottom:8 }}>
-            COST: 5 CREDITS · AVAILABLE: {credits}cr
+            COST: 200 CREDITS · AVAILABLE: {credits}cr · LOCATION: {getPlanetName(myPlanet)}
           </div>
           <input placeholder="Faction name…" value={newName} onChange={e=>setNewName(e.target.value)}
             style={{ width:'100%', padding:'6px 8px', background:'rgba(255,255,255,0.04)',
               border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:6, outline:'none', boxSizing:'border-box' }}
+              fontFamily:'var(--mono)', fontSize:10, marginBottom:8, outline:'none', boxSizing:'border-box' }}
           />
-          <select value={newIdeology} onChange={e=>setNewIdeology(e.target.value)}
-            style={{ width:'100%', padding:'6px 8px', background:'rgba(10,15,30,0.95)',
-              border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:6 }}>
-            {Object.entries(IDEOLOGY_LABELS).map(([k,v])=>(
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-          <select value={newHome} onChange={e=>setNewHome(e.target.value)}
-            style={{ width:'100%', padding:'6px 8px', background:'rgba(10,15,30,0.95)',
-              border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:8 }}>
-            {planets.map(p=>(
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-          <button onClick={handleFound} disabled={credits < 5 || !newName.trim()}
+          <button onClick={handleFound} disabled={credits < 200 || !newName.trim()}
             style={{ width:'100%', padding:'8px', background:'rgba(58,143,232,0.12)',
               border:'1px solid rgba(58,143,232,0.35)', borderRadius:4, color:'#3a8fe8',
               fontFamily:'var(--mono)', fontSize:10, letterSpacing:'0.1em', cursor:'pointer',
-              opacity: credits < 5 ? 0.4 : 1 }}>
+              opacity: credits < 200 ? 0.4 : 1 }}>
             FOUND FACTION
           </button>
         </div>

@@ -58,8 +58,8 @@ function assignRandomUnitsToFaction(ideology) {
     return allowedClasses.includes(effectiveClass);
   });
 
-  // Randomly select 3-10 units
-  const count = Math.floor(Math.random() * 8) + 3; // 3-10
+  // Randomly select 3-6 units
+  const count = Math.floor(Math.random() * 4) + 3; // 3-6
   const shuffled = buildableUnits.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }

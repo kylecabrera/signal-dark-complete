@@ -923,7 +923,7 @@ const CONFIG = {
   // Faction system
   // ─────────────────────────────────────────────
   FACTIONS: {
-    FOUND_COST: 5,
+    FOUND_COST: 200,
     MIN_CONTRIBUTION: 1,
     RANKS: {
       sympathiser: 0,

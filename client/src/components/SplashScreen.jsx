@@ -8,104 +8,40 @@ export function SplashScreen({ onDismiss }) {
       title: 'SIGNAL DARK',
       subtitle: 'An Asymmetric Rebellion Game',
       content: (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '14px', lineHeight: 1.8, marginBottom: 16, color: '#a8c5dd' }}>
-            You are rebel commanders leading the uprising against the Imperial regime.
-          </div>
-          <div style={{ fontSize: '13px', color: '#7a9aad' }}>
-            Four AI Governors (Siris, Crassus, Maren, Vektis) control the Empire's forces.
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'THE GOAL',
-      content: (
         <div style={{ fontSize: '13px', lineHeight: 2, color: '#a8c5dd' }}>
-          <div>🎯 <strong>Win by Rebellion:</strong> Reach 100 rebellion strength</div>
-          <div>🎯 <strong>Lose by Suppression:</strong> Reach 100 suppression level</div>
+          <div>You are Jedi survivors building a rebellion to overthrow the Empire.</div>
+          <div style={{ marginTop: 8 }}>🎯 <strong>Win:</strong> Reach 100 rebellion strength</div>
+          <div>🎯 <strong>Lose:</strong> Reach 100 suppression level</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Planets start under Imperial control (loyalty 100%). Lower loyalty to 0 to claim them. Raise it back to 100 to flip them back to Empire.
+            Four AI Governors (Siris-tactical, Crassus-military, Maren-enforcer, Vektis-adaptive) command Imperial forces. Lower planet loyalty from 100% to 0% to claim them. Covert actions raise suspicion slower.
           </div>
         </div>
       ),
     },
     {
-      title: 'ACTIONS & RESOURCES',
+      title: 'CORE MECHANICS',
       content: (
         <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>5 Actions per turn</strong> — Move, recruit, intel, sabotage, or incite</div>
-          <div><strong>Credits</strong> — Spend on units and founding factions</div>
-          <div><strong>Jedi Avatar</strong> — Your personal Force user. If defeated, you can't move.</div>
+          <div><strong>4 Actions/turn:</strong> Recruit, intel, sabotage, incite, hide, earn/steal money, move, produce units, attack</div>
+          <div><strong>Credits:</strong> Build units, found factions (200cr), establish cells (75cr), control (500cr), upgrade units</div>
+          <div><strong>Jedi Avatar:</strong> Strength 12 Force user. Embed in ships. Death = elimination.</div>
+          <div><strong>Factions:</strong> Discover via intel. Contribute to build ranks. Found cells for intel. Establish fleets for cohesive movement.</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Each action costs loyalty on the planet (helps you control it). Some actions are covert, others are overt.
+            Planets have surface and orbit layers. Combat triggers automatically when units meet. Unit production varies by cost, time, and strength.
           </div>
         </div>
       ),
     },
     {
-      title: 'FACTIONS & ALLIANCES',
+      title: 'ADVANCED SYSTEMS',
       content: (
         <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>Discover Factions:</strong> Use Intel actions to find them</div>
-          <div><strong>Contribute Credits:</strong> Build influence and unlock ship classes</div>
-          <div><strong>Form Alliances:</strong> Unite factions under a shared banner</div>
+          <div><strong>Force Powers:</strong> Discover Force mysteries to unlock 9 unique abilities (shield, lightning, healing, domination)</div>
+          <div><strong>Alignment System:</strong> Lightside (+50 healing) vs darkside (-70 choke). Affects unit combat effectiveness.</div>
+          <div><strong>Fleets:</strong> Group units by location. Move entire fleets with one action. Rigid cohesion enforced.</div>
+          <div><strong>Alert Level:</strong> Rises 1-5 from overt actions. When ≥3, governors coordinate via Quorum.</div>
           <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Factions control planets when they flip to rebel. Alliances let multiple factions work together strategically.
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'UNIT PRODUCTION',
-      content: (
-        <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>Build Units:</strong> On planets you control with economy output</div>
-          <div><strong>Faction Units:</strong> Different factions provide different ship classes</div>
-          <div><strong>Hidden vs. Visible:</strong> Some units start hidden; revealed when discovered</div>
-          <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Build time and cost vary by unit type. Stronger units take longer and cost more.
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'COMBAT & MOVEMENT',
-      content: (
-        <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>Move:</strong> Teleport to adjacent planets via hyperlanes</div>
-          <div><strong>Combat:</strong> Automatic when units occupy the same planet/layer</div>
-          <div><strong>Intel:</strong> Reveals hidden enemy units and faction cells</div>
-          <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Planets have surface and orbit layers. Some units can only exist in one layer.
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'THE GOVERNORS',
-      content: (
-        <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div><strong>Siris-Vael:</strong> Tactical analyst. Tracks your movements.</div>
-          <div><strong>Crassus-9:</strong> Military strategist. Commands the main fleet.</div>
-          <div><strong>Maren Osk:</strong> Brutal enforcer. Crushes rebellions.</div>
-          <div><strong>Vektis-4:</strong> Mysterious droid. Unpredictable actions.</div>
-          <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Alert level (1-5) activates the Quorum. When alert ≥ 3, all governors coordinate.
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'STRATEGY TIPS',
-      content: (
-        <div style={{ fontSize: '13px', lineHeight: 2.2, color: '#a8c5dd' }}>
-          <div>💡 <strong>Plan your moves:</strong> Actions reset each turn. Use them wisely.</div>
-          <div>💡 <strong>Discover factions:</strong> Build alliances to unlock powerful units.</div>
-          <div>💡 <strong>Control planets:</strong> Economy output fuels production and credits.</div>
-          <div>💡 <strong>Stay hidden:</strong> Covert actions raise suspicion slower.</div>
-          <div style={{ marginTop: 12, color: '#7a9aad', fontSize: '12px' }}>
-            Each governor has different strategies. Learn their patterns to predict their moves.
+            Balance action economy carefully. Learn governor patterns. Economy output fuels production and credits. Hidden units reveal only via intel.
           </div>
         </div>
       ),

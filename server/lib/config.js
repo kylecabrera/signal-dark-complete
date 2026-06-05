@@ -7,9 +7,9 @@ const CONFIG = {
   // ─────────────────────────────────────────────
   // Turn structure
   // ─────────────────────────────────────────────
-  ACTIONS_PER_TURN: 2,
+  ACTIONS_PER_TURN: 4,
   TURN_TIMEOUT_SECONDS: 300,
-  MAX_PLAYERS: 4,
+  MAX_PLAYERS: 12,
   STARTING_CREDITS: 5,
 
   // ─────────────────────────────────────────────
@@ -368,64 +368,64 @@ const CONFIG = {
     worldcraft: { label: 'Worldcraft', designation: 'Habitation Sphere', cost: 40, buildTime: 4, strength: 20, hp: 10, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 20, description: 'Worldcraft (Worldship).',  requiredPlanetTypes: ['Core Worlds','Deep Core'], requiredPlanetIds: ['p45'],},
 
     // Star Dreadnought
-    assertor: { label: 'Assertor', designation: 'Star Dreadnought', cost: 15, buildTime: 3, strength: 12, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Assertor (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    bellator: { label: 'Bellator', designation: 'Star Dreadnought', cost: 14, buildTime: 3, strength: 14, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Bellator (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    executor: { label: 'Executor', designation: 'Star Dreadnought', cost: 16, buildTime: 4, strength: 14, hp: 8, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Executor (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    mandator_i: { label: 'Mandator I', designation: 'Star Dreadnought', cost: 14, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator I (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    mandator_ii: { label: 'Mandator II', designation: 'Star Dreadnought', cost: 14, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator II (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    mandator_iii: { label: 'Mandator III', designation: 'Star Dreadnought', cost: 14, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator III (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    assertor: { label: 'Assertor', designation: 'Star Dreadnought', cost: 30, buildTime: 3, strength: 12, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Assertor (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    bellator: { label: 'Bellator', designation: 'Star Dreadnought', cost: 28, buildTime: 3, strength: 14, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Bellator (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    executor: { label: 'Executor', designation: 'Star Dreadnought', cost: 32, buildTime: 4, strength: 14, hp: 8, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Executor (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    mandator_i: { label: 'Mandator I', designation: 'Star Dreadnought', cost: 28, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator I (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    mandator_ii: { label: 'Mandator II', designation: 'Star Dreadnought', cost: 28, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator II (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    mandator_iii: { label: 'Mandator III', designation: 'Star Dreadnought', cost: 28, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator III (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
     mandator_iv: { label: 'Mandator IV', designation: 'Siege Dreadnought', cost: 14, buildTime: 3, strength: 14, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Mandator IV (Star Dreadnought).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    praetor_mk_ii: { label: 'Praetor Mk. II', designation: 'Battlecruiser', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Praetor Mk. II (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    starhawk: { label: 'Starhawk', designation: 'Battleship', cost: 15, buildTime: 3, strength: 10, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Starhawk (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p148'],},
-    torpedo_sphere: { label: 'Torpedo Sphere', designation: 'Star Dreadnought', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Torpedo Sphere (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
+    praetor_mk_ii: { label: 'Praetor Mk. II', designation: 'Battlecruiser', cost: 24, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Praetor Mk. II (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    starhawk: { label: 'Starhawk', designation: 'Battleship', cost: 30, buildTime: 3, strength: 10, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Starhawk (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p148'],},
+    torpedo_sphere: { label: 'Torpedo Sphere', designation: 'Star Dreadnought', cost: 24, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Torpedo Sphere (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
     viscount: { label: 'Viscount', designation: 'Star Defender', cost: 16, buildTime: 4, strength: 13, hp: 8, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Viscount (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    warspite_class: { label: 'Warspite-class', designation: 'Battleship', cost: 14, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Warspite-class (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    warspite_class: { label: 'Warspite-class', designation: 'Battleship', cost: 28, buildTime: 3, strength: 13, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Warspite-class (Star Dreadnought).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
 
     // Battlecruiser
-    spirit_of_endor: { label: 'Spirit of Endor', designation: 'Expeditionary Carrier', cost: 12, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Spirit of Endor (Battlecruiser).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    allegiance: { label: 'Allegiance', designation: 'Battlecruiser', cost: 12, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Allegiance (Battlecruiser).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    bulwark_mk_iii: { label: 'Bulwark Mk. III', designation: 'Battlecruiser', cost: 11, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Bulwark Mk. III (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    spirit_of_endor: { label: 'Spirit of Endor', designation: 'Expeditionary Carrier', cost: 24, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Spirit of Endor (Battlecruiser).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    allegiance: { label: 'Allegiance', designation: 'Battlecruiser', cost: 24, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Allegiance (Battlecruiser).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    bulwark_mk_iii: { label: 'Bulwark Mk. III', designation: 'Battlecruiser', cost: 22, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Bulwark Mk. III (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
     evakmar_kdy: { label: 'Evakmar-KDY', designation: 'Transport', cost: 14, buildTime: 3, strength: 8, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Evakmar-KDY (Battlecruiser).',  imperialOnly: true, requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    lucrehulk: { label: 'Lucrehulk', designation: 'Battleship', cost: 14, buildTime: 3, strength: 12, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Lucrehulk (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    mc80_home_one: { label: 'MC80 "Home One"', designation: 'Star Cruiser', cost: 14, buildTime: 3, strength: 11, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80 "Home One" (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
-    mc85_raddus: { label: 'MC85 Raddus', designation: 'Command Cruiser', cost: 13, buildTime: 3, strength: 11, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC85 Raddus (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
-    procurator_ii_class_battlecruiser: { label: 'Procurator II-class Battlecruiser', designation: 'Battlecruiser', cost: 12, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Procurator II-class Battlecruiser (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
-    sovereign: { label: 'Sovereign', designation: 'Battlecruiser', cost: 12, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Sovereign (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
-    sovereign_refit: { label: 'Sovereign Refit', designation: 'Battlecruiser', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Sovereign Refit (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
-    viscount_class_star_defender: { label: 'Viscount-Class Star Defender', designation: 'Battlecruiser', cost: 14, buildTime: 3, strength: 14, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Viscount-Class Star Defender (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
+    lucrehulk: { label: 'Lucrehulk', designation: 'Battleship', cost: 28, buildTime: 3, strength: 12, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Lucrehulk (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    mc80_home_one: { label: 'MC80 "Home One"', designation: 'Star Cruiser', cost: 28, buildTime: 3, strength: 11, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80 "Home One" (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
+    mc85_raddus: { label: 'MC85 Raddus', designation: 'Command Cruiser', cost: 26, buildTime: 3, strength: 11, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC85 Raddus (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
+    procurator_ii_class_battlecruiser: { label: 'Procurator II-class Battlecruiser', designation: 'Battlecruiser', cost: 24, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Procurator II-class Battlecruiser (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'],},
+    sovereign: { label: 'Sovereign', designation: 'Battlecruiser', cost: 24, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Sovereign (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
+    sovereign_refit: { label: 'Sovereign Refit', designation: 'Battlecruiser', cost: 24, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Sovereign Refit (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p100'],},
+    viscount_class_star_defender: { label: 'Viscount-Class Star Defender', designation: 'Battlecruiser', cost: 28, buildTime: 3, strength: 14, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Viscount-Class Star Defender (Battlecruiser).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim'], requiredPlanetIds: ['p48'],},
 
     // Star Destroyer
     citadel: { label: 'Citadel', designation: 'Fleet Carrier', cost: 11, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Citadel (Star Destroyer).', },
-    crimson_victory: { label: 'Crimson Victory', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Crimson Victory (Star Destroyer).', },
-    dauntless: { label: 'Dauntless', designation: 'Heavy Cruiser', cost: 11, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Dauntless (Star Destroyer).', },
+    crimson_victory: { label: 'Crimson Victory', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Crimson Victory (Star Destroyer).', },
+    dauntless: { label: 'Dauntless', designation: 'Heavy Cruiser', cost: 22, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Dauntless (Star Destroyer).', },
     endurance: { label: 'Endurance', designation: 'Fleet Carrier', cost: 11, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Endurance (Star Destroyer).', },
-    imperial_i: { label: 'Imperial I', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial I (Star Destroyer).', },
-    imperial_i_refit: { label: 'Imperial I Refit', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial I Refit (Star Destroyer).',  imperialOnly: true,},
-    imperial_ii: { label: 'Imperial II', designation: 'Star Destroyer', cost: 12, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial II (Star Destroyer).', },
-    imperial_ii_refit: { label: 'Imperial II Refit', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial II Refit (Star Destroyer).',  imperialOnly: true,},
-    interdictor: { label: 'Interdictor', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 8, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Interdictor (Star Destroyer).',  imperialOnly: true,},
-    keldabe: { label: 'Keldabe', designation: 'Battleship', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Keldabe (Star Destroyer).', },
-    mc75: { label: 'MC75', designation: 'Star Cruiser', cost: 11, buildTime: 3, strength: 8, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC75 (Star Destroyer).',  requiredPlanetIds: ['p48'],},
+    imperial_i: { label: 'Imperial I', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial I (Star Destroyer).', },
+    imperial_i_refit: { label: 'Imperial I Refit', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial I Refit (Star Destroyer).',  imperialOnly: true,},
+    imperial_ii: { label: 'Imperial II', designation: 'Star Destroyer', cost: 24, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial II (Star Destroyer).', },
+    imperial_ii_refit: { label: 'Imperial II Refit', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial II Refit (Star Destroyer).',  imperialOnly: true,},
+    interdictor: { label: 'Interdictor', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 8, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Interdictor (Star Destroyer).',  imperialOnly: true,},
+    keldabe: { label: 'Keldabe', designation: 'Battleship', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Keldabe (Star Destroyer).', },
+    mc75: { label: 'MC75', designation: 'Star Cruiser', cost: 22, buildTime: 3, strength: 8, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC75 (Star Destroyer).',  requiredPlanetIds: ['p48'],},
     mc75a: { label: 'MC75a', designation: 'Star Carrier', cost: 11, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC75a (Star Destroyer).',  requiredPlanetIds: ['p48'],},
-    mc80_liberty: { label: 'MC80 "Liberty"', designation: 'Star Cruiser', cost: 11, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80 "Liberty" (Star Destroyer).',  requiredPlanetIds: ['p48'],},
-    mc80a: { label: 'MC80a', designation: 'Star Cruiser', cost: 11, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80a (Star Destroyer).',  requiredPlanetIds: ['p48'],},
-    mc80b: { label: 'MC80b', designation: 'Star Cruiser', cost: 11, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80b (Star Destroyer).',  requiredPlanetIds: ['p48'],},
-    mc90: { label: 'MC90', designation: 'Star Cruiser', cost: 12, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC90 (Star Destroyer).',  requiredPlanetIds: ['p48'],},
+    mc80_liberty: { label: 'MC80 "Liberty"', designation: 'Star Cruiser', cost: 22, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80 "Liberty" (Star Destroyer).',  requiredPlanetIds: ['p48'],},
+    mc80a: { label: 'MC80a', designation: 'Star Cruiser', cost: 22, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80a (Star Destroyer).',  requiredPlanetIds: ['p48'],},
+    mc80b: { label: 'MC80b', designation: 'Star Cruiser', cost: 22, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC80b (Star Destroyer).',  requiredPlanetIds: ['p48'],},
+    mc90: { label: 'MC90', designation: 'Star Cruiser', cost: 24, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC90 (Star Destroyer).',  requiredPlanetIds: ['p48'],},
     mc90_2: { label: 'MC90', designation: 'Heavy Star Cruiser', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MC90 (Star Destroyer).', },
     nebula: { label: 'Nebula', designation: 'Star Defender', cost: 12, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Nebula (Star Destroyer).',  requiredPlanetIds: ['p70'],},
     nebula_2: { label: 'Nebula', designation: 'Star Defender', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Nebula (Star Destroyer).', },
     providence: { label: 'Providence', designation: 'Destroyer', cost: 11, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Providence (Star Destroyer).', },
     providence_ii: { label: 'Providence II', designation: 'Destroyer', cost: 11, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Providence II (Star Destroyer).', },
     recusant: { label: 'Recusant', designation: 'Light Destroyer', cost: 11, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Recusant (Star Destroyer).', },
-    republic: { label: 'Republic', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Republic (Star Destroyer).', },
-    secutor: { label: 'Secutor', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Secutor (Star Destroyer).', },
-    tector: { label: 'Tector', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Tector (Star Destroyer).', },
-    tector_ii: { label: 'Tector II', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Tector II (Star Destroyer).',  requiredPlanetIds: ['p59'],},
-    venator: { label: 'Venator', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Venator (Star Destroyer).', },
-    victory_i: { label: 'Victory I', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Star Destroyer).',  requiredPlanetIds: ['p128'],},
-    victory_ii: { label: 'Victory II', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Star Destroyer).',  requiredPlanetIds: ['p128'],},
-    victory_iii: { label: 'Victory III', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 12, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).',  imperialOnly: true,},
-    victory_iii_2: { label: 'Victory III', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
+    republic: { label: 'Republic', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Republic (Star Destroyer).', },
+    secutor: { label: 'Secutor', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Secutor (Star Destroyer).', },
+    tector: { label: 'Tector', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Tector (Star Destroyer).', },
+    tector_ii: { label: 'Tector II', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Tector II (Star Destroyer).',  requiredPlanetIds: ['p59'],},
+    venator: { label: 'Venator', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Venator (Star Destroyer).', },
+    victory_i: { label: 'Victory I', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Star Destroyer).',  requiredPlanetIds: ['p128'],},
+    victory_ii: { label: 'Victory II', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Star Destroyer).',  requiredPlanetIds: ['p128'],},
+    victory_iii: { label: 'Victory III', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 12, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).',  imperialOnly: true,},
+    victory_iii_2: { label: 'Victory III', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
 
     // Space Station
     boonta: { label: 'Boonta', designation: 'Asteroid Base', cost: 11, buildTime: 3, strength: 7, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 0, transportCapacity: 10, description: 'Boonta (Space Station).',  requiredPlanetTypes: ['Core Worlds','Deep Core','Colonies','Inner Rim','Expansion Region'], requiredPlanetIds: ['p115'],},
@@ -442,26 +442,26 @@ const CONFIG = {
     acclamator_i: { label: 'Acclamator I', designation: 'Assault Ship', cost: 12, buildTime: 3, strength: 7, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Acclamator I (Heavy Cruiser).',  imperialOnly: true,},
     acclamator_ii: { label: 'Acclamator II', designation: 'Assault Ship', cost: 12, buildTime: 3, strength: 8, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Acclamator II (Heavy Cruiser).',  imperialOnly: true,},
     acclamator_iii: { label: 'Acclamator III', designation: 'Assault Ship', cost: 11, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 20, description: 'Acclamator III (Heavy Cruiser).',  imperialOnly: true,},
-    assault_frigate_mk_i: { label: 'Assault Frigate Mk I', designation: 'Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Assault Frigate Mk I (Heavy Cruiser).', },
-    assault_frigate_mk_ii: { label: 'Assault Frigate Mk II', designation: 'Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Assault Frigate Mk II (Heavy Cruiser).', },
+    assault_frigate_mk_i: { label: 'Assault Frigate Mk I', designation: 'Cruiser', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Assault Frigate Mk I (Heavy Cruiser).', },
+    assault_frigate_mk_ii: { label: 'Assault Frigate Mk II', designation: 'Cruiser', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Assault Frigate Mk II (Heavy Cruiser).', },
     aurora: { label: 'Aurora', designation: 'Freighter', cost: 11, buildTime: 3, strength: 7, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Aurora (Heavy Cruiser).',  requiredPlanetIds: ['p98'],},
-    bellerophon: { label: 'Bellerophon', designation: 'Heavy Cruiser', cost: 11, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Bellerophon (Heavy Cruiser).',  requiredPlanetIds: ['p100'],},
+    bellerophon: { label: 'Bellerophon', designation: 'Heavy Cruiser', cost: 22, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Bellerophon (Heavy Cruiser).',  requiredPlanetIds: ['p100'],},
     defender: { label: 'Defender', designation: 'Assault Carrier', cost: 10, buildTime: 2, strength: 5, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Defender (Heavy Cruiser).', },
-    dreadnought: { label: 'Dreadnought', designation: 'Heavy Cruiser', cost: 8, buildTime: 2, strength: 8, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Dreadnought (Heavy Cruiser).', },
-    dreadnought_refit: { label: 'Dreadnought Refit', designation: 'Heavy Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Dreadnought Refit (Heavy Cruiser).', },
+    dreadnought: { label: 'Dreadnought', designation: 'Heavy Cruiser', cost: 16, buildTime: 2, strength: 8, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Dreadnought (Heavy Cruiser).', },
+    dreadnought_refit: { label: 'Dreadnought Refit', designation: 'Heavy Cruiser', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Dreadnought Refit (Heavy Cruiser).', },
     enforcer: { label: 'Enforcer', designation: 'Picket Cruiser', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Enforcer (Heavy Cruiser).', },
-    halcyon: { label: 'Halcyon', designation: 'Cruiser', cost: 11, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Halcyon (Heavy Cruiser).',  imperialOnly: true,},
-    immobilizer_418: { label: 'Immobilizer 418', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Immobilizer 418 (Heavy Cruiser).', },
+    halcyon: { label: 'Halcyon', designation: 'Cruiser', cost: 22, buildTime: 3, strength: 9, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Halcyon (Heavy Cruiser).',  imperialOnly: true,},
+    immobilizer_418: { label: 'Immobilizer 418', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Immobilizer 418 (Heavy Cruiser).', },
     imperial: { label: 'Imperial', designation: 'Cargo Ship', cost: 11, buildTime: 3, strength: 7, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 20, description: 'Imperial (Heavy Cruiser).',  imperialOnly: true,},
     ionizer: { label: 'Ionizer', designation: 'Assault Ship', cost: 11, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Ionizer (Heavy Cruiser).',  requiredPlanetIds: ['p59'],},
     ionizer_ii: { label: 'Ionizer II', designation: 'Assault Ship', cost: 11, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Ionizer II (Heavy Cruiser).',  requiredPlanetIds: ['p59'],},
-    kontos: { label: 'Kontos', designation: 'Star Cruiser', cost: 11, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Kontos (Heavy Cruiser).', },
-    majestic: { label: 'Majestic', designation: 'Heavy Cruiser', cost: 11, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Majestic (Heavy Cruiser).', },
+    kontos: { label: 'Kontos', designation: 'Star Cruiser', cost: 22, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Kontos (Heavy Cruiser).', },
+    majestic: { label: 'Majestic', designation: 'Heavy Cruiser', cost: 22, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Majestic (Heavy Cruiser).', },
     mc81_sphaerolana: { label: 'MC81 Sphaerolana', designation: 'Haeavy Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC81 Sphaerolana (Heavy Cruiser).',  requiredPlanetIds: ['p48'],},
     munificent: { label: 'Munificent', designation: 'Star Frigate', cost: 13, buildTime: 3, strength: 9, hp: 7, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Munificent (Heavy Cruiser).', },
     neutron_star: { label: 'Neutron Star', designation: 'Bulk Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Neutron Star (Heavy Cruiser).', },
-    vindicator: { label: 'Vindicator', designation: 'Heavy Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vindicator (Heavy Cruiser).', },
-    vindicator_ii_class_heavy_cruiser: { label: 'Vindicator II-class Heavy Cruiser', designation: 'Heavy Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vindicator II-class Heavy Cruiser (Heavy Cruiser).', },
+    vindicator: { label: 'Vindicator', designation: 'Heavy Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vindicator (Heavy Cruiser).', },
+    vindicator_ii_class_heavy_cruiser: { label: 'Vindicator II-class Heavy Cruiser', designation: 'Heavy Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vindicator II-class Heavy Cruiser (Heavy Cruiser).', },
 
     // Cruiser
     belarus: { label: 'Belarus', designation: 'Medium Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Belarus (Cruiser).', },
@@ -470,49 +470,49 @@ const CONFIG = {
     seahorse_class_supply_ship: { label: 'Seahorse-Class Supply Ship', designation: 'Fleet Tender', cost: 10, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Seahorse-Class Supply Ship (Cruiser).', },
     contentor: { label: 'Contentor', designation: 'Fleet Tender', cost: 10, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Contentor (Cruiser).',  imperialOnly: true,},
     fulgor_class_light_cruiser: { label: 'Fulgor-class Light Cruiser', designation: 'Light Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Fulgor-class Light Cruiser (Cruiser).', },
-    gladiator: { label: 'Gladiator', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Gladiator (Cruiser).', },
-    imperial_ii_2: { label: 'Imperial II', designation: 'Frigate', cost: 10, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Imperial II (Cruiser).', },
-    imperial_iii: { label: 'Imperial III', designation: 'Frigate', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Imperial III (Cruiser).',  imperialOnly: true,},
-    liberator: { label: 'Liberator', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Liberator (Cruiser).', },
-    mc30c: { label: 'MC30C', designation: 'Frigate', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'MC30C (Cruiser).',  requiredPlanetIds: ['p48'],},
+    gladiator: { label: 'Gladiator', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Gladiator (Cruiser).', },
+    imperial_ii_2: { label: 'Imperial II', designation: 'Frigate', cost: 20, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Imperial II (Cruiser).', },
+    imperial_iii: { label: 'Imperial III', designation: 'Frigate', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 10, description: 'Imperial III (Cruiser).',  imperialOnly: true,},
+    liberator: { label: 'Liberator', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Liberator (Cruiser).', },
+    mc30c: { label: 'MC30C', designation: 'Frigate', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'MC30C (Cruiser).',  requiredPlanetIds: ['p48'],},
     mc40a: { label: 'MC40A', designation: 'Light Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC40A (Cruiser).',  requiredPlanetIds: ['p48'],},
     mc40b: { label: 'MC40B', designation: 'Light Cruiser', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC40B (Cruiser).',  requiredPlanetIds: ['p48'],},
-    medstar_class_cruiser: { label: 'MedStar-class Cruiser', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MedStar-class Cruiser (Cruiser).', },
+    medstar_class_cruiser: { label: 'MedStar-class Cruiser', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'MedStar-class Cruiser (Cruiser).', },
     pursuit: { label: 'Pursuit', designation: 'Light Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Pursuit (Cruiser).', },
     stalwart: { label: 'Stalwart', designation: 'Light Frigate', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Stalwart (Cruiser).', },
     strike: { label: 'Strike', designation: 'Medium Cruiser', cost: 9, buildTime: 2, strength: 8, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Strike (Cruiser).', },
     warrior: { label: 'Warrior', designation: 'Medium Cruiser', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Warrior (Cruiser).', },
-    thunderer: { label: 'Thunderer', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Thunderer (Cruiser).', },
+    thunderer: { label: 'Thunderer', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Thunderer (Cruiser).', },
     ton_falk: { label: 'Ton-Falk', designation: 'Escort Carrier', cost: 8, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Ton-Falk (Cruiser).', },
 
     // Frigate
-    u_418_escort: { label: '418 Escort', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: '418 Escort (Frigate).',  imperialOnly: true,},
-    u_418_escort_varient: { label: '418 Escort Varient', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: '418 Escort Varient (Frigate).',  imperialOnly: true,},
-    arquitens: { label: 'Arquitens', designation: 'Command Cruiser', cost: 8, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Arquitens (Frigate).', },
-    black_swan: { label: 'Black Swan', designation: 'Frigate', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Black Swan (Frigate).', },
+    u_418_escort: { label: '418 Escort', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: '418 Escort (Frigate).',  imperialOnly: true,},
+    u_418_escort_varient: { label: '418 Escort Varient', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: '418 Escort Varient (Frigate).',  imperialOnly: true,},
+    arquitens: { label: 'Arquitens', designation: 'Command Cruiser', cost: 16, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Arquitens (Frigate).', },
+    black_swan: { label: 'Black Swan', designation: 'Frigate', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Black Swan (Frigate).', },
     carrack: { label: 'Carrack', designation: 'Light Cruiser', cost: 9, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Carrack (Frigate).', },
-    cc_2200: { label: 'CC-2200', designation: 'Frigate', cost: 9, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'CC-2200 (Frigate).', },
+    cc_2200: { label: 'CC-2200', designation: 'Frigate', cost: 18, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'CC-2200 (Frigate).', },
     cc_7700: { label: 'CC-7700', designation: 'Interdictor Frigate', cost: 10, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'CC-7700 (Frigate).', },
-    cc_9600: { label: 'CC-9600', designation: 'Frigate', cost: 9, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'CC-9600 (Frigate).', },
-    corona: { label: 'Corona', designation: 'Frigate', cost: 10, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Corona (Frigate).', },
-    ef76_nebulon_b2: { label: 'EF76 Nebulon B2', designation: 'Frigate', cost: 9, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'EF76 Nebulon B2 (Frigate).', },
+    cc_9600: { label: 'CC-9600', designation: 'Frigate', cost: 18, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'CC-9600 (Frigate).', },
+    corona: { label: 'Corona', designation: 'Frigate', cost: 20, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Corona (Frigate).', },
+    ef76_nebulon_b2: { label: 'EF76 Nebulon B2', designation: 'Frigate', cost: 18, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'EF76 Nebulon B2 (Frigate).', },
     ef76_nebulon_b: { label: 'EF76 Nebulon-B', designation: 'Escort Frigate', cost: 9, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'EF76 Nebulon-B (Frigate).', },
-    gladius: { label: 'Gladius', designation: 'Corvette', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Gladius (Frigate).',  imperialOnly: true,},
-    lancer: { label: 'Lancer', designation: 'Frigate', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Lancer (Frigate).', },
-    marauder: { label: 'Marauder', designation: 'Corvette', cost: 10, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Marauder (Frigate).', },
-    mc76_shoreline: { label: 'MC76 Shoreline', designation: 'Frigate', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC76 Shoreline (Frigate).',  requiredPlanetIds: ['p48'],},
-    medstar_class_frigate: { label: 'MedStar-class Frigate', designation: 'Frigate', cost: 9, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MedStar-class Frigate (Frigate).', },
-    pelta: { label: 'Pelta', designation: 'Frigate', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Pelta (Frigate).', },
+    gladius: { label: 'Gladius', designation: 'Corvette', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Gladius (Frigate).',  imperialOnly: true,},
+    lancer: { label: 'Lancer', designation: 'Frigate', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Lancer (Frigate).', },
+    marauder: { label: 'Marauder', designation: 'Corvette', cost: 20, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Marauder (Frigate).', },
+    mc76_shoreline: { label: 'MC76 Shoreline', designation: 'Frigate', cost: 20, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MC76 Shoreline (Frigate).',  requiredPlanetIds: ['p48'],},
+    medstar_class_frigate: { label: 'MedStar-class Frigate', designation: 'Frigate', cost: 18, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'MedStar-class Frigate (Frigate).', },
+    pelta: { label: 'Pelta', designation: 'Frigate', cost: 14, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Pelta (Frigate).', },
     quasar_fire: { label: 'Quasar Fire', designation: 'Bulk Cruiser', cost: 8, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Quasar Fire (Frigate).', },
     sacheen: { label: 'Sacheen', designation: 'Light Escort', cost: 11, buildTime: 2, strength: 7, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 1, description: 'Sacheen (Frigate).', },
 
     // Freighter
-    star_galleon: { label: 'Star Galleon', designation: 'Frigate', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 5, description: 'Star Galleon (Freighter).', },
+    star_galleon: { label: 'Star Galleon', designation: 'Frigate', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 5, description: 'Star Galleon (Freighter).', },
 
     // Frigate
     test: { label: 'Test', designation: 'Carrier', cost: 9, buildTime: 2, strength: 6, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 5, description: 'Test (Frigate).', },
-    velox_class_star_frigate: { label: 'Velox-class Star Frigate', designation: 'Frigate', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Velox-class Star Frigate (Frigate).', },
-    vigil: { label: 'Vigil', designation: 'Corvette', cost: 9, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vigil (Frigate).', },
+    velox_class_star_frigate: { label: 'Velox-class Star Frigate', designation: 'Frigate', cost: 20, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Velox-class Star Frigate (Frigate).', },
+    vigil: { label: 'Vigil', designation: 'Corvette', cost: 18, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Vigil (Frigate).', },
     vigilant_loadout_1: { label: 'Vigilant (Loadout 1)', designation: 'Battle Frigate', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Vigilant (Loadout 1) (Frigate).',  imperialOnly: true,},
     vigilant_loadout_2: { label: 'Vigilant (Loadout 2)', designation: 'Battle Frigate', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Vigilant (Loadout 2) (Frigate).',  imperialOnly: true,},
     vigilant_loadout_3: { label: 'Vigilant (Loadout 3)', designation: 'Battle Frigate', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Vigilant (Loadout 3) (Frigate).',  imperialOnly: true,},
@@ -521,16 +521,16 @@ const CONFIG = {
     agave: { label: 'Agave', designation: 'Picket Ship', cost: 8, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 1, description: 'Agave (Corvette).', },
     aiwha: { label: 'Aiwha', designation: 'Star Corvette', cost: 8, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 1, description: 'Aiwha (Corvette).', },
     bayonet: { label: 'Bayonet', designation: 'Light Cruiser', cost: 9, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Bayonet (Corvette).', },
-    consular: { label: 'Consular', designation: 'Cruiser', cost: 7, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Consular (Corvette).', },
-    cr90: { label: 'CR90', designation: 'Corvette', cost: 8, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'CR90 (Corvette).', },
-    cr92a_assassin: { label: 'CR92a Assassin', designation: 'Corvette', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'CR92a Assassin (Corvette).', },
-    crusader: { label: 'Crusader', designation: 'Corvette', cost: 8, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Crusader (Corvette).', },
-    dp20: { label: 'DP20', designation: 'Frigate', cost: 8, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'DP20 (Corvette).', },
-    fd79_tessek: { label: 'FD79 Tessek', designation: 'Corvette', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'FD79 Tessek (Corvette).', },
+    consular: { label: 'Consular', designation: 'Cruiser', cost: 14, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Consular (Corvette).', },
+    cr90: { label: 'CR90', designation: 'Corvette', cost: 16, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'CR90 (Corvette).', },
+    cr92a_assassin: { label: 'CR92a Assassin', designation: 'Corvette', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'CR92a Assassin (Corvette).', },
+    crusader: { label: 'Crusader', designation: 'Corvette', cost: 16, buildTime: 2, strength: 4, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Crusader (Corvette).', },
+    dp20: { label: 'DP20', designation: 'Frigate', cost: 16, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'DP20 (Corvette).', },
+    fd79_tessek: { label: 'FD79 Tessek', designation: 'Corvette', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'FD79 Tessek (Corvette).', },
     free_virgillia: { label: 'Free Virgillia', designation: 'Bunkerbuster', cost: 9, buildTime: 2, strength: 5, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Free Virgillia (Corvette).', },
     imperial_2: { label: 'Imperial', designation: 'Light Corvette', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Imperial (Corvette).', },
-    pankpa: { label: 'Pankpa', designation: 'Corvette', cost: 8, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 1, description: 'Pankpa (Corvette).', },
-    raider: { label: 'Raider', designation: 'Corvette', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Raider (Corvette).', },
+    pankpa: { label: 'Pankpa', designation: 'Corvette', cost: 16, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 1, description: 'Pankpa (Corvette).', },
+    raider: { label: 'Raider', designation: 'Corvette', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Raider (Corvette).', },
     tartan: { label: 'Tartan', designation: 'Patrol Cruiser', cost: 8, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Tartan (Corvette).', },
     warrior_2: { label: 'Warrior', designation: 'Gunship', cost: 9, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 2, description: 'Warrior (Corvette).', },
 
@@ -678,6 +678,12 @@ const CONFIG = {
     ird_starfighter: { label: 'IRD Starfighter', designation: 'Starfighter', cost: 3, buildTime: 1, strength: 1, hp: 1, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 0, transportCapacity: 1, description: 'IRD Starfighter (Starfighter).', },
     ird_a_starfighter: { label: 'IRD/A Starfighter', designation: 'Starfighter', cost: 3, buildTime: 1, strength: 3, hp: 2, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 0, transportCapacity: 1, description: 'IRD/A Starfighter (Starfighter).', },
     ixiyen_fast_attack_craft: { label: 'Ixiyen Fast Attack Craft', designation: 'Starfighter', cost: 6, buildTime: 1, strength: 4, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 3, transportCapacity: 1, description: 'Ixiyen Fast Attack Craft (Starfighter).', },
+    // Imperial TIE Fighters (imperialOnly variants)
+    tie_ln_fighter: { label: 'TIE/ln Fighter', designation: 'TIE Fighter', cost: 2, buildTime: 1, strength: 2, hp: 1, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 0, description: 'TIE/ln Standard Fighter. Fast and expendable.', imperialOnly: true, },
+    tie_x1_advanced: { label: 'TIE/x1 Advanced', designation: 'Advanced Fighter', cost: 4, buildTime: 1, strength: 4, hp: 2, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 0, description: 'TIE/x1 Advanced Fighter. Superior performance.', imperialOnly: true, },
+    tie_interceptor: { label: 'TIE Interceptor', designation: 'Interceptor', cost: 3, buildTime: 1, strength: 3, hp: 1, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 0, description: 'TIE Interceptor. Built for speed and precision.', imperialOnly: true, },
+    tie_bomber: { label: 'TIE/sa Bomber', designation: 'Bomber', cost: 4, buildTime: 1, strength: 3, hp: 2, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 2, description: 'TIE/sa Bomber. Close air support specialist.', imperialOnly: true, },
+
     k_wing_starfighter: { label: 'K-wing starfighter', designation: 'Starfighter', cost: 6, buildTime: 1, strength: 6, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 3, transportCapacity: 1, description: 'K-wing starfighter (Starfighter).', },
     kihraxz_light_fighter: { label: 'Kihraxz Light Fighter', designation: 'Starfighter', cost: 4, buildTime: 1, strength: 4, hp: 2, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'Kihraxz Light Fighter (Starfighter).', },
     l_301_shrike: { label: 'L-301 Shrike', designation: 'Space Superiority Fighter', cost: 6, buildTime: 1, strength: 4, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 3, transportCapacity: 1, description: 'L-301 Shrike (Starfighter).',  requiredPlanetIds: ['p100'],},
@@ -754,20 +760,20 @@ const CONFIG = {
     tie_lc_lancet_aerial_bomber: { label: 'TIE/lc Lancet Aerial Bomber', designation: 'Aerocraft', cost: 2, buildTime: 1, strength: 2, hp: 1, canOrbit: false, canSurface: true, hidden: true, jumpDistance: 0, transportCapacity: 1, description: 'TIE/lc Lancet Aerial Bomber (Aerocraft).', },
 
     // Frigate
-    black_swan_mod: { label: 'Black Swan (mod.)', designation: 'Frigate', cost: 9, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Black Swan (mod.) (Frigate).', },
+    black_swan_mod: { label: 'Black Swan (mod.)', designation: 'Frigate', cost: 18, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Black Swan (mod.) (Frigate).', },
 
     // Starfighter
     f8_gladiator: { label: 'F8 Gladiator', designation: 'Bomber', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'F8 Gladiator (Starfighter).', },
     f7a_hornet: { label: 'F7A Hornet', designation: 'Starfighter', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'F7A Hornet (Starfighter).', },
 
     // Star Destroyer
-    repulse: { label: 'Repulse', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Repulse (Star Destroyer).', },
+    repulse: { label: 'Repulse', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Repulse (Star Destroyer).', },
 
     // Small Transport
     b_8: { label: 'B-8', designation: 'Light Freighter', cost: 6, buildTime: 1, strength: 1, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'B-8 (Small Transport).',  requiredPlanetIds: ['p100'],},
 
     // Frigate
-    wasp: { label: 'Wasp', designation: 'Frigate', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Wasp (Frigate).',  requiredPlanetIds: ['p98'],},
+    wasp: { label: 'Wasp', designation: 'Frigate', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Wasp (Frigate).',  requiredPlanetIds: ['p98'],},
 
     // Starfighter
     tau: { label: 'Tau', designation: 'Starfighter', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 3, transportCapacity: 1, description: 'Tau (Starfighter).',  requiredPlanetIds: ['p116'],},
@@ -776,14 +782,14 @@ const CONFIG = {
     viper: { label: 'Viper', designation: 'Escort Carrier', cost: 9, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Viper (Frigate).', },
 
     // Cruiser
-    dreadful: { label: 'Dreadful', designation: 'Cruiser', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Dreadful (Cruiser).',  requiredPlanetIds: ['p98'],},
+    dreadful: { label: 'Dreadful', designation: 'Cruiser', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Dreadful (Cruiser).',  requiredPlanetIds: ['p98'],},
 
     // Starfighter
     reaver_mk_i: { label: 'Reaver mk. I', designation: 'Starfighter', cost: 6, buildTime: 1, strength: 4, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 3, transportCapacity: 1, description: 'Reaver mk. I (Starfighter).',  requiredPlanetIds: ['p98'],},
     reaver_mk_ii: { label: 'Reaver mk. II', designation: 'Starfighter', cost: 5, buildTime: 1, strength: 4, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 0, transportCapacity: 1, description: 'Reaver mk. II (Starfighter).',  requiredPlanetIds: ['p98'],},
 
     // Star Destroyer
-    imperial_iii_2: { label: 'Imperial III', designation: 'Star Destroyer', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial III (Star Destroyer).', },
+    imperial_iii_2: { label: 'Imperial III', designation: 'Star Destroyer', cost: 24, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Imperial III (Star Destroyer).', },
 
     // Large Starfighter
     xg_9: { label: 'XG.9', designation: 'Assault Missile Gunboat', cost: 6, buildTime: 1, strength: 6, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'XG.9 (Large Starfighter).',  imperialOnly: true,},
@@ -792,20 +798,20 @@ const CONFIG = {
     vigilant_ii: { label: 'Vigilant II', designation: 'Battle Frigate', cost: 10, buildTime: 2, strength: 8, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Vigilant II (Frigate).',  imperialOnly: true,},
 
     // Freighter
-    interceptor_iv: { label: 'Interceptor IV', designation: 'Frigate', cost: 7, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 1, description: 'Interceptor IV (Freighter).', },
-    robber_baron_star_galleon_custom_unit: { label: 'Robber Baron (Star Galleon Custom Unit)', designation: 'Frigate', cost: 8, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 5, description: 'Robber Baron (Star Galleon Custom Unit) (Freighter).', },
+    interceptor_iv: { label: 'Interceptor IV', designation: 'Frigate', cost: 14, buildTime: 2, strength: 5, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 1, description: 'Interceptor IV (Freighter).', },
+    robber_baron_star_galleon_custom_unit: { label: 'Robber Baron (Star Galleon Custom Unit)', designation: 'Frigate', cost: 16, buildTime: 2, strength: 6, hp: 4, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 5, description: 'Robber Baron (Star Galleon Custom Unit) (Freighter).', },
 
     // Large Transport
     ipv_1: { label: 'IPV-1', designation: 'System Patrol Craft', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 0, transportCapacity: 1, description: 'IPV-1 (Large Transport).', },
 
     // Star Destroyer
-    vanquisher: { label: 'Vanquisher', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Vanquisher (Star Destroyer).', },
+    vanquisher: { label: 'Vanquisher', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Vanquisher (Star Destroyer).', },
 
     // Heavy Cruiser
-    tempest: { label: 'Tempest', designation: 'Heavy Cruiser', cost: 11, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Tempest (Heavy Cruiser).',  imperialOnly: true,},
+    tempest: { label: 'Tempest', designation: 'Heavy Cruiser', cost: 22, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Tempest (Heavy Cruiser).',  imperialOnly: true,},
 
     // Star Destroyer
-    valiant: { label: 'Valiant', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Valiant (Star Destroyer).',  imperialOnly: true,},
+    valiant: { label: 'Valiant', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 5, description: 'Valiant (Star Destroyer).',  imperialOnly: true,},
 
     // Large Starfighter
     aegis_a3g_vanguard_harbinger_2: { label: 'Aegis A3G Vanguard Harbinger', designation: 'Fighter-Bomber', cost: 7, buildTime: 1, strength: 5, hp: 3, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 2, transportCapacity: 1, description: 'Aegis A3G Vanguard Harbinger (Large Starfighter).', },
@@ -814,8 +820,8 @@ const CONFIG = {
     halbred: { label: 'Halbred', designation: 'Destroyer', cost: 9, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Halbred (Cruiser).',  imperialOnly: true,},
 
     // Corvette
-    wolf: { label: 'Wolf', designation: 'Corvette', cost: 8, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Wolf (Corvette).', },
-    wolf_c: { label: 'Wolf (C)', designation: 'Corvette', cost: 8, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 2, description: 'Wolf (C) (Corvette).', },
+    wolf: { label: 'Wolf', designation: 'Corvette', cost: 16, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 2, description: 'Wolf (Corvette).', },
+    wolf_c: { label: 'Wolf (C)', designation: 'Corvette', cost: 16, buildTime: 2, strength: 7, hp: 4, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 1, transportCapacity: 2, description: 'Wolf (C) (Corvette).', },
 
     // Starfighter
     class_9_stealth: { label: 'Class 9 Stealth', designation: 'Torpedo', cost: 2, buildTime: 1, strength: 4, hp: 1, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 1, description: 'Class 9 Stealth (Starfighter).',  imperialOnly: true,},
@@ -833,16 +839,16 @@ const CONFIG = {
     rhe_recon: { label: 'RHE Recon', designation: 'Sensor Drone', cost: 2, buildTime: 1, strength: 4, hp: 1, canOrbit: true, canSurface: false, hidden: true, jumpDistance: 1, transportCapacity: 1, description: 'RHE Recon (Starfighter).',  imperialOnly: true,},
 
     // Star Destroyer
-    victory_i_2: { label: 'Victory I', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Star Destroyer).', },
-    victory_ii_2: { label: 'Victory II', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Star Destroyer).', },
-    victory_iii_3: { label: 'Victory III', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 12, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
-    victory_iii_4: { label: 'Victory III', designation: 'Star Destroyer', cost: 10, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
+    victory_i_2: { label: 'Victory I', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 11, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Star Destroyer).', },
+    victory_ii_2: { label: 'Victory II', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Star Destroyer).', },
+    victory_iii_3: { label: 'Victory III', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 12, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
+    victory_iii_4: { label: 'Victory III', designation: 'Star Destroyer', cost: 20, buildTime: 2, strength: 10, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Star Destroyer).', },
 
     // Heavy Cruiser
-    victory_i_3: { label: 'Victory I', designation: 'Star Destroyer', cost: 12, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Heavy Cruiser).', },
-    victory_ii_3: { label: 'Victory II', designation: 'Star Destroyer', cost: 11, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Heavy Cruiser).', },
-    victory_iii_5: { label: 'Victory III', designation: 'Star Destroyer', cost: 12, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Heavy Cruiser).', },
-    victory_iii_6: { label: 'Victory III', designation: 'Star Destroyer', cost: 11, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Heavy Cruiser).', },
+    victory_i_3: { label: 'Victory I', designation: 'Star Destroyer', cost: 24, buildTime: 3, strength: 11, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory I (Heavy Cruiser).', },
+    victory_ii_3: { label: 'Victory II', designation: 'Star Destroyer', cost: 22, buildTime: 2, strength: 9, hp: 5, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 3, transportCapacity: 10, description: 'Victory II (Heavy Cruiser).', },
+    victory_iii_5: { label: 'Victory III', designation: 'Star Destroyer', cost: 24, buildTime: 3, strength: 12, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Heavy Cruiser).', },
+    victory_iii_6: { label: 'Victory III', designation: 'Star Destroyer', cost: 22, buildTime: 3, strength: 10, hp: 6, canOrbit: true, canSurface: false, hidden: false, jumpDistance: 2, transportCapacity: 10, description: 'Victory III (Heavy Cruiser).', },
 
         // ── Ground units (unchanged) ─────────────────────────────────────────
     garrison: {
@@ -883,12 +889,12 @@ const CONFIG = {
       description: 'The hidden Emperor. Immobile.',
     },
     jedi_avatar: {
-      label: 'Jedi', designation: 'Jedi',
-      cost: 0, buildTime: 0, strength: 3, hp: 3,
+      label: 'Jedi', designation: 'Jedi Avatar',
+      cost: 0, buildTime: 0, strength: 12, hp: 10,
       canOrbit: true, canSurface: true, hidden: true,
-      jumpDistance: 2, transportCapacity: 0,
+      jumpDistance: 3, transportCapacity: 0,
       rebelOnly: true,
-      description: 'The player\'s Jedi avatar. Death eliminates the player.',
+      description: 'The player\'s powerful Jedi avatar. Can be embedded in ships. Death eliminates the player.',
     },
   },
 
@@ -917,13 +923,18 @@ const CONFIG = {
   // Faction system
   // ─────────────────────────────────────────────
   FACTIONS: {
-    FOUND_COST: 5,
+    FOUND_COST: 200,
+    CELL_COST: 75,
+    CONTROL_COST: 500,
     MIN_CONTRIBUTION: 1,
     RANKS: {
       sympathiser: 0,
-      operative: 10,
-      cell_leader: 25,
-      commander: 50,
+      operative: 15,
+      cell_leader: 40,
+      regional_commander: 100,
+      sector_commander: 200,
+      military_leader: 350,
+      faction_controller: 500,
     },
     IDEOLOGIES: {
       liberation_front: {
@@ -1061,6 +1072,11 @@ const CONFIG = {
     't_47_airspeeder':          'aerocraft',
     'ut_60d_u_wing_fighter':    'large_starfighter',
     'x4_gunship':               'large_starfighter',
+    // Imperial TIE fighters
+    'tie_ln_fighter':           'starfighter',
+    'tie_x1_advanced':          'starfighter',
+    'tie_interceptor':          'starfighter',
+    'tie_bomber':               'starfighter',
   },
     WRONG_DENUNCIATION_PENALTY: 8,
     CORRECT_DENUNCIATION_REWARD: 15,
@@ -1079,12 +1095,15 @@ const CONFIG = {
     hide:      { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0 },
     contribute:{ rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.05 },
     found:     { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.1  },
+    found_cell:{ rebellion_delta: 2,  empire_delta: 2, base_leak_chance: 0.15 },
     investigate:{ rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0.05 },
     denounce:  { rebellion_delta: 0,  empire_delta: 0, always_overt: true },
     unit_move: { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.1  },
+    fleet_move: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0.1  },
     unit_produce: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
     unit_attack: { rebellion_delta: 5, empire_delta: 4, always_leaks: true },
     rebel_attack: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
+    discover_force_mysteries: { rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0 },
   },
 
   // ─────────────────────────────────────────────
@@ -1106,10 +1125,13 @@ const CONFIG = {
       denounce:   -2,   // manipulation
       contribute:  0,
       found:       1,
+      found_cell:  1,
       investigate: 1,
       unit_move:   0,
+      fleet_move:  0,
       unit_produce: 0,
       unit_attack: -3,
+      discover_force_mysteries: 0,
     },
     // Bonus stats by starting planet region
     STARTING_BONUSES: {
@@ -1152,9 +1174,92 @@ const CONFIG = {
         name: 'Find Apprentice',
         description: 'Sense a potential Force user nearby and recruit them',
         costPoints: 5,
-        duration: 2,  // rounds active
-        baseChance: 0.15,  // base 15% chance
-        range: 'adjacent',  // search adjacent planets (same as intel)
+        duration: 2,
+        baseChance: 0.15,
+        range: 'adjacent',
+        alignment: 0,
+      },
+      discover_force_mysteries: {
+        name: 'Discover Force Mysteries',
+        description: 'Uncover hidden Force powers available in this sector',
+        costPoints: 0,
+        baseChance: 1.0,
+        unlocks: ['force_shield', 'force_push', 'force_lightning', 'mind_trick', 'healing_touch'],
+        alignment: 0,
+      },
+      // LIGHTSIDE POWERS
+      force_shield: {
+        name: 'Force Shield',
+        description: 'Create a protective barrier. +25% defense for all units this turn',
+        costPoints: 8,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: 40,
+      },
+      healing_touch: {
+        name: 'Healing Touch',
+        description: 'Restore damaged units. Heal 3 HP to any unit at current planet',
+        costPoints: 6,
+        duration: 0,
+        baseChance: 1.0,
+        alignment: 50,
+      },
+      sense_danger: {
+        name: 'Sense Danger',
+        description: 'Foresee threats. Reveal all hidden units within 2 planets',
+        costPoints: 7,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: 30,
+      },
+      inspire_allies: {
+        name: 'Inspire Allies',
+        description: 'Bolster morale. +2 rebellion strength and double unit production next turn',
+        costPoints: 10,
+        duration: 2,
+        baseChance: 0.8,
+        alignment: 35,
+      },
+      // DARKSIDE POWERS
+      force_lightning: {
+        name: 'Force Lightning',
+        description: 'Strike with lightning. Deal 5 damage to any enemy unit at current planet',
+        costPoints: 9,
+        duration: 0,
+        baseChance: 0.9,
+        alignment: -50,
+      },
+      mind_trick: {
+        name: 'Mind Trick',
+        description: 'Cloud minds. Enemy units at this planet lose 30% combat effectiveness for 2 turns',
+        costPoints: 8,
+        duration: 2,
+        baseChance: 0.85,
+        alignment: -40,
+      },
+      force_choke: {
+        name: 'Force Choke',
+        description: 'Crush your enemies. Instantly destroy one enemy unit on this planet',
+        costPoints: 12,
+        duration: 0,
+        baseChance: 0.6,
+        alignment: -60,
+      },
+      dark_vision: {
+        name: 'Dark Vision',
+        description: 'See through darkness. Reveal all hidden enemies across entire sector for 1 turn',
+        costPoints: 10,
+        duration: 1,
+        baseChance: 1.0,
+        alignment: -35,
+      },
+      dominate_will: {
+        name: 'Dominate Will',
+        description: 'Enslave minds. Permanently convert one enemy unit to your side',
+        costPoints: 15,
+        duration: 0,
+        baseChance: 0.4,
+        alignment: -70,
       },
     },
   },
@@ -1168,19 +1273,118 @@ const CONFIG = {
   // Initial architect unit placement
   // ─────────────────────────────────────────────
   INITIAL_ARCHITECT_UNITS: [
-    { planet_id: 'p01', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
-    { planet_id: 'p02', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
-    { planet_id: 'p06', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    // ── CRASSUS-9 (Military Commander) — Orbital firepower ──
+    { planet_id: 'p01', unit_type: 'star_destroyer', layer: 'orbit', strength: 10, hp: 5, owner: 'empire:crassus' },
     { planet_id: 'p01', unit_type: 'star_destroyer', layer: 'orbit', strength: 10, hp: 5, owner: 'empire:crassus' },
     { planet_id: 'p02', unit_type: 'star_destroyer', layer: 'orbit', strength: 10, hp: 5, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'star_destroyer', layer: 'orbit', strength: 10, hp: 5, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'heavy_cruiser', layer: 'orbit', strength: 9, hp: 5, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'heavy_cruiser', layer: 'orbit', strength: 9, hp: 5, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:crassus' },
+    // TIE Fighter squadrons for Crassus
+    { planet_id: 'p01', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p01', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p01', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:crassus' },
+    // Ground garrisons for Crassus
+    { planet_id: 'p01', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p01', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p02', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p06', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+    { planet_id: 'p12', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:crassus' },
+
+    // ── SIRIS-VAEL (Intelligence Director) — Scout and intercept fleet ──
+    { planet_id: 'p04', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p04', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p11', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p11', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p14', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p14', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:siris' },
+    { planet_id: 'p18', unit_type: 'corvette', layer: 'orbit', strength: 6, hp: 4, owner: 'empire:siris' },
+    { planet_id: 'p18', unit_type: 'corvette', layer: 'orbit', strength: 6, hp: 4, owner: 'empire:siris' },
+    // TIE Fighter squadrons for Siris (Interceptor-focused)
+    { planet_id: 'p04', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p04', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p11', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p11', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p14', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p14', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:siris' },
+    { planet_id: 'p18', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:siris' },
+    { planet_id: 'p18', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:siris' },
+    { planet_id: 'p04', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:siris' },
+    { planet_id: 'p11', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:siris' },
+    // Ground presence for Siris
+    { planet_id: 'p04', unit_type: 'garrison', layer: 'surface', strength: 2, hp: 3, owner: 'empire:siris' },
     { planet_id: 'p04', unit_type: 'garrison', layer: 'surface', strength: 2, hp: 3, owner: 'empire:siris' },
     { planet_id: 'p11', unit_type: 'garrison', layer: 'surface', strength: 2, hp: 3, owner: 'empire:siris' },
-    // Governor avatars (hidden units)
+    { planet_id: 'p11', unit_type: 'garrison', layer: 'surface', strength: 2, hp: 3, owner: 'empire:siris' },
+
+    // ── MAREN OSK (Political Operator) — Defensive fleet ──
+    { planet_id: 'p12', unit_type: 'heavy_cruiser', layer: 'orbit', strength: 9, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p12', unit_type: 'heavy_cruiser', layer: 'orbit', strength: 9, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p22', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p22', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p25', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:maren' },
+    { planet_id: 'p25', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:maren' },
+    // TIE Fighter squadrons for Maren (Bomber-focused for ground support)
+    { planet_id: 'p12', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p12', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p22', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p22', unit_type: 'tie_bomber', layer: 'orbit', strength: 3, hp: 2, owner: 'empire:maren' },
+    { planet_id: 'p25', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:maren' },
+    { planet_id: 'p25', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:maren' },
+    { planet_id: 'p12', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'tie_ln_fighter', layer: 'orbit', strength: 2, hp: 1, owner: 'empire:maren' },
+    // Ground garrisons for Maren
+    { planet_id: 'p12', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:maren' },
+    { planet_id: 'p12', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:maren' },
+    { planet_id: 'p17', unit_type: 'garrison', layer: 'surface', strength: 3, hp: 3, owner: 'empire:maren' },
+
+    // ── VEKTIS-4 (Adaptive Intelligence) — Rapid response fleet ──
+    { planet_id: 'p06', unit_type: 'star_destroyer', layer: 'orbit', strength: 10, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p06', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p14', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p14', unit_type: 'cruiser', layer: 'orbit', strength: 8, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p32', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p32', unit_type: 'frigate', layer: 'orbit', strength: 7, hp: 5, owner: 'empire:vektis' },
+    { planet_id: 'p45', unit_type: 'corvette', layer: 'orbit', strength: 6, hp: 4, owner: 'empire:vektis' },
+    { planet_id: 'p45', unit_type: 'corvette', layer: 'orbit', strength: 6, hp: 4, owner: 'empire:vektis' },
+    // TIE Fighter squadrons for Vektis (Advanced & Interceptor mix)
+    { planet_id: 'p06', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:vektis' },
+    { planet_id: 'p06', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:vektis' },
+    { planet_id: 'p14', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:vektis' },
+    { planet_id: 'p14', unit_type: 'tie_x1_advanced', layer: 'orbit', strength: 4, hp: 2, owner: 'empire:vektis' },
+    { planet_id: 'p32', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    { planet_id: 'p32', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    { planet_id: 'p45', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    { planet_id: 'p45', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    { planet_id: 'p06', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    { planet_id: 'p14', unit_type: 'tie_interceptor', layer: 'orbit', strength: 3, hp: 1, owner: 'empire:vektis' },
+    // Ground presence for Vektis
+    { planet_id: 'p06', unit_type: 'garrison', layer: 'surface', strength: 2, hp: 3, owner: 'empire:vektis' },
+
+    // ── GOVERNOR AVATARS (Hidden units) ──
     { planet_id: 'p01', unit_type: 'governor_avatar', layer: 'surface', strength: 5, hp: 5, owner: 'empire:crassus', designation: 'Governor-General Crassus-9' },
     { planet_id: 'p04', unit_type: 'governor_avatar', layer: 'surface', strength: 5, hp: 5, owner: 'empire:siris', designation: 'Director Siris-Vael' },
     { planet_id: 'p12', unit_type: 'governor_avatar', layer: 'surface', strength: 5, hp: 5, owner: 'empire:maren', designation: 'Governor Maren Osk' },
     { planet_id: 'p06', unit_type: 'governor_avatar', layer: 'surface', strength: 5, hp: 5, owner: 'empire:vektis', designation: 'Governor Vektis-4' },
-    // The Emperor (hidden unit)
+
+    // ── THE EMPEROR (Hidden unit) ──
     { planet_id: 'p01', unit_type: 'emperor', layer: 'surface', strength: 8, hp: 8, owner: 'empire:emperor', designation: 'The Emperor' },
   ],
 };

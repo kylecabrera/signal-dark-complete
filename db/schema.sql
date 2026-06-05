@@ -122,6 +122,23 @@ CREATE TABLE units (
   transport_capacity INTEGER NOT NULL DEFAULT 0,    -- max friendly units this ship can carry
   transported_by    UUID REFERENCES units(id),      -- which fleet is transporting this unit
   designation       TEXT,                           -- display label (e.g. "Star Destroyer")
+  fleet_id          UUID,                           -- which fleet this unit belongs to (nullable = ungrouped)
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────────────
+-- Fleets — groups of units moving together
+-- ─────────────────────────────────────────────
+CREATE TABLE fleets (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id        UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
+  owner             TEXT NOT NULL,         -- 'rebel:<player_id>'|'empire:<governor>'|'faction:<faction_id>'
+  name              TEXT NOT NULL,
+  planet_id         TEXT NOT NULL,
+  layer             TEXT NOT NULL,         -- orbit|surface
+  auto_grouped      BOOLEAN NOT NULL DEFAULT FALSE,
+  created_round     INTEGER,
   created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -174,19 +191,21 @@ CREATE TABLE combat_feed (
 -- Factions
 -- ─────────────────────────────────────────────
 CREATE TABLE factions (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  session_id      UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
-  name            TEXT NOT NULL,
-  ideology        TEXT NOT NULL,        -- liberation_front|workers_alliance|fringe_collective|shadow_network|loyalist_splinter
-  home_planet     TEXT NOT NULL,
-  is_traitor      BOOLEAN NOT NULL DEFAULT FALSE,  -- sealed — never sent to clients
-  resource_pool   INTEGER NOT NULL DEFAULT 0,
-  reputation      INTEGER NOT NULL DEFAULT 50,     -- 0-100, visible to all
-  is_denounced    BOOLEAN NOT NULL DEFAULT FALSE,
-  denounced_by    UUID REFERENCES players(id),
-  denounced_round INTEGER,
-  created_by      UUID REFERENCES players(id),
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id            UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
+  name                  TEXT NOT NULL,
+  ideology              TEXT NOT NULL,        -- liberation_front|workers_alliance|fringe_collective|shadow_network|loyalist_splinter
+  home_planet           TEXT NOT NULL,
+  is_traitor            BOOLEAN NOT NULL DEFAULT FALSE,  -- sealed — never sent to clients
+  resource_pool         INTEGER NOT NULL DEFAULT 0,
+  reputation            INTEGER NOT NULL DEFAULT 50,     -- 0-100, visible to all
+  is_denounced          BOOLEAN NOT NULL DEFAULT FALSE,
+  denounced_by          UUID REFERENCES players(id),
+  denounced_round       INTEGER,
+  created_by            UUID REFERENCES players(id),
+  unlocked_ship_classes JSONB NOT NULL DEFAULT '[]',
+  allowed_unit_types    JSONB NOT NULL DEFAULT '[]',
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- RLS: clients can see everything EXCEPT is_traitor
@@ -242,7 +261,7 @@ CREATE TABLE investigations (
 CREATE TABLE force_users (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   session_id    UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
-  player_id     UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  player_id     UUID REFERENCES players(id) ON DELETE CASCADE,
   force_tier    INTEGER NOT NULL DEFAULT 1,        -- 1-10 progression tier
   force_points  INTEGER NOT NULL DEFAULT 0,        -- accumulated points
   alignment     INTEGER NOT NULL DEFAULT 0,        -- -100 to 100 (dark to light)
@@ -250,7 +269,24 @@ CREATE TABLE force_users (
   apprentice_ids TEXT DEFAULT '[]',                -- JSON array of apprentice UUIDs
   discovered_round INTEGER,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(session_id, player_id)
+);
+
+-- ─────────────────────────────────────────────
+-- Discovered fleets — tracks which fleets player has seen through intel
+-- ─────────────────────────────────────────────
+CREATE TABLE discovered_fleets (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id    UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
+  player_id     UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  fleet_owner   TEXT NOT NULL,         -- 'empire:<gov>|faction:<id>|rebel:<player_id>'
+  planet_id     TEXT NOT NULL,
+  round_discovered INTEGER NOT NULL,
+  unit_count    INTEGER NOT NULL DEFAULT 1,
+  strongest_unit TEXT,                 -- designation of strongest unit in fleet
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(session_id, player_id, fleet_owner, planet_id)
 );
 
 -- ─────────────────────────────────────────────
@@ -318,6 +354,11 @@ CREATE INDEX idx_factions_session ON factions(session_id);
 CREATE INDEX idx_contributions_faction ON faction_contributions(faction_id, player_id);
 CREATE INDEX idx_cells_faction ON faction_cells(faction_id, planet_id);
 CREATE INDEX idx_investigations ON investigations(session_id, player_id, faction_id);
+CREATE INDEX idx_force_users_session ON force_users(session_id, player_id);
+CREATE INDEX idx_force_power_uses_session ON force_power_uses(session_id, force_user_id);
+CREATE INDEX idx_units_fleet ON units(fleet_id);
+CREATE INDEX idx_fleets_session_owner ON fleets(session_id, owner);
+CREATE INDEX idx_fleets_location ON fleets(session_id, planet_id, layer);
 
 -- ─────────────────────────────────────────────
 -- updated_at trigger
@@ -362,3 +403,10 @@ ALTER TABLE factions ADD COLUMN IF NOT EXISTS unlocked_ship_classes JSONB DEFAUL
 ALTER TABLE rebel_state ADD COLUMN IF NOT EXISTS force_alignment INTEGER DEFAULT 0;
 ALTER TABLE rebel_state ADD COLUMN IF NOT EXISTS force_strength INTEGER DEFAULT 0;
 ALTER TABLE rebel_state ADD COLUMN IF NOT EXISTS starting_planet TEXT;
+
+-- ─────────────────────────────────────────────
+-- Migration: add fleet system
+-- ─────────────────────────────────────────────
+ALTER TABLE units ADD COLUMN IF NOT EXISTS fleet_id UUID;
+ALTER TABLE units DROP CONSTRAINT IF EXISTS units_fleet_id_fkey;
+ALTER TABLE units ADD CONSTRAINT units_fleet_id_fkey FOREIGN KEY (fleet_id) REFERENCES fleets(id) ON DELETE SET NULL;

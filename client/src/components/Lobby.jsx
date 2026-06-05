@@ -70,7 +70,7 @@ export function Lobby({ game }) {
               </span>
             </div>
           ))}
-          {lobbyPlayers.length < 4 && Array.from({ length: 4-lobbyPlayers.length }, (_,i) => (
+          {lobbyPlayers.length < 12 && Array.from({ length: 12-lobbyPlayers.length }, (_,i) => (
             <div key={`e${i}`} style={{ display:'flex', alignItems:'center', gap:10,
               padding:'8px 0', borderBottom:'1px solid rgba(80,120,180,0.07)', opacity:0.3 }}>
               <div style={{ width:10, height:10, borderRadius:'50%', background:'#2a3a4a' }}/>

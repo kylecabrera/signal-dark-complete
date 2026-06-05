@@ -69,10 +69,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .player-pulse-outer{animation:playerPulse 2s ease-in-out infinite;}
 @keyframes playerPulse{0%,100%{opacity:0.9;r:28;}50%{opacity:0.15;r:38;}}
 .lane-unit-reach{stroke:rgba(232,208,48,0.35);stroke-width:1.5;}
-.suspect-halo{fill:rgba(160,80,220,0.1);stroke:rgba(160,80,220,0.28);stroke-width:1;
-  stroke-dasharray:4 3;animation:susp 2s ease-in-out infinite;}
-.sweep-halo{fill:rgba(232,64,64,0.08);stroke:rgba(232,64,64,0.4);stroke-width:1.5;}
-.vektis-halo{fill:rgba(232,160,48,0.07);stroke:rgba(232,160,48,0.3);stroke-width:1;stroke-dasharray:2 4;}
+.suspect-halo{fill:rgba(160,80,220,0.15);stroke:rgba(160,80,220,0.5);stroke-width:1.5;
+  stroke-dasharray:4 3;animation:susp 2s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(160,80,220,0.4));}
+.sweep-halo{fill:rgba(232,64,64,0.15);stroke:rgba(232,64,64,0.55);stroke-width:2;
+  filter:drop-shadow(0 0 10px rgba(232,64,64,0.5));}
+.vektis-halo{fill:rgba(232,160,48,0.12);stroke:rgba(232,160,48,0.5);stroke-width:1.5;stroke-dasharray:2 4;
+  filter:drop-shadow(0 0 8px rgba(232,160,48,0.4));}
 @keyframes susp{0%,100%{opacity:0.12;}50%{opacity:0.35;}}
 .suspicion-token{animation:tok 0.5s cubic-bezier(0.34,1.56,0.64,1);}
 @keyframes tok{from{opacity:0;transform:scale(0);}to{opacity:1;transform:scale(1);}}
@@ -185,5 +187,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
   background:rgba(60,0,0,0.95);border:1px solid var(--accent-red);
   border-radius:4px;padding:8px 24px;font-family:var(--mono);font-size:10px;
   color:var(--accent-red);letter-spacing:0.1em;z-index:300;
+  animation:alert-pulse 0.5s ease-out;}
+.jedi-death-alert{position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  background:rgba(20,0,60,0.95);border:1px solid #8040e0;
+  border-radius:4px;padding:8px 24px;font-family:var(--mono);font-size:10px;
+  color:#d070ff;letter-spacing:0.1em;z-index:300;
   animation:alert-pulse 0.5s ease-out;}
 @keyframes alert-pulse{from{opacity:0;transform:translateX(-50%) scale(0.95);}to{opacity:1;transform:translateX(-50%) scale(1);}}

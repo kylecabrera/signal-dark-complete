@@ -259,7 +259,15 @@ router.get('/admin/:sessionId/state', async (req, res) => {
     const factions = await db.getFactions(req.params.sessionId, true); // includes is_traitor
     const leaks    = await db.getRecentLeaks(req.params.sessionId, 20);
 
-    res.json({ session, players, units, queue, factions, leaks });
+    // Get fleets (gracefully handle if table doesn't exist)
+    let fleets = [];
+    try {
+      fleets = await db.getFleets(req.params.sessionId);
+    } catch (err) {
+      // Table may not exist yet
+    }
+
+    res.json({ session, players, units, queue, factions, leaks, fleets });
   } catch(err) {
     res.status(500).json({ error:err.message });
   }

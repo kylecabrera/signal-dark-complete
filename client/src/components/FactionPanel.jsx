@@ -18,19 +18,14 @@ const IDEOLOGY_COLORS = {
 
 export function FactionPanel({ game }) {
   const { privateState, publicState, playerId,
-          contribute, foundFaction, investigate, denounce,
+          contribute, foundFaction, foundCell, investigate, denounce,
           investigateResult, setInvestigateResult } = game;
   const factions = privateState?.factions || [];
 
-  const [tab, setTab] = useState('browse'); // browse|found|research
+  const [tab, setTab] = useState('browse'); // browse|found
   const [selectedFaction, setSelectedFaction] = useState(null);
-  const [selectedFactionForResearch, setSelectedFactionForResearch] = useState(null);
-  const [selectedUnitForResearch, setSelectedUnitForResearch] = useState(null);
   const [contributeAmount, setContributeAmount] = useState(1);
-  const [researchAmount, setResearchAmount] = useState(1);
   const [newName, setNewName]       = useState('');
-  const [newIdeology, setNewIdeology] = useState('liberation_front');
-  const [newHome, setNewHome]       = useState('p03');
 
   const credits  = privateState?.credits || 0;
   const myPlanet = privateState?.currentPlanet;
@@ -42,17 +37,9 @@ export function FactionPanel({ game }) {
     setSelectedFaction(null);
   }
 
-  function handleContributeToResearch() {
-    if (!selectedFactionForResearch || !selectedUnitForResearch || researchAmount < 1) return;
-    contribute(selectedFactionForResearch.id, researchAmount, 'research', selectedUnitForResearch.unit_type);
-    setSelectedUnitForResearch(null);
-    setSelectedFactionForResearch(null);
-    setResearchAmount(1);
-  }
-
   function handleFound() {
-    if (!newName.trim() || !newIdeology || !newHome) return;
-    foundFaction(newName.trim(), newIdeology, newHome);
+    if (!newName.trim()) return;
+    foundFaction(newName.trim(), 'liberation_front', myPlanet);
     setNewName(''); setTab('browse');
   }
 
@@ -74,7 +61,7 @@ export function FactionPanel({ game }) {
   return (
     <div style={{ padding:'0 0 8px' }}>
       <div style={{ display:'flex', gap:6, marginBottom:10 }}>
-        {['browse','found','research'].map(t => (
+        {['browse','found'].map(t => (
           <button key={t} onClick={()=>setTab(t)} style={{
             flex:1, padding:'5px 0', background:tab===t?'rgba(58,143,232,0.15)':'transparent',
             border:`1px solid ${tab===t?'rgba(58,143,232,0.4)':'rgba(80,140,220,0.18)'}`,
@@ -175,6 +162,14 @@ export function FactionPanel({ game }) {
                     color:'#a080e0', fontFamily:'var(--mono)', fontSize:8, cursor:'pointer',
                   }}>AUDIT</button>
 
+                  {/* Found cell */}
+                  <button onClick={()=>foundCell(f.id)} disabled={credits < 75} style={{
+                    padding:'3px 6px', background:'rgba(58,143,232,0.1)',
+                    border:'1px solid rgba(58,143,232,0.25)', borderRadius:3,
+                    color:'#3a8fe8', fontFamily:'var(--mono)', fontSize:8, cursor: credits >= 75 ? 'pointer' : 'not-allowed',
+                    opacity: credits >= 75 ? 1 : 0.5,
+                  }}>FOUND CELL (75cr)</button>
+
                   {/* Denounce if enough clues */}
                   {f.myContribution > 0 && (
                     <button onClick={()=>handleDenounce(f.id)} style={{
@@ -194,218 +189,23 @@ export function FactionPanel({ game }) {
       {tab === 'found' && (
         <div>
           <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'#5a7090', marginBottom:8 }}>
-            COST: 5 CREDITS · AVAILABLE: {credits}cr
+            COST: 200 CREDITS · AVAILABLE: {credits}cr · LOCATION: {getPlanetName(myPlanet)}
           </div>
           <input placeholder="Faction name…" value={newName} onChange={e=>setNewName(e.target.value)}
             style={{ width:'100%', padding:'6px 8px', background:'rgba(255,255,255,0.04)',
               border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:6, outline:'none', boxSizing:'border-box' }}
+              fontFamily:'var(--mono)', fontSize:10, marginBottom:8, outline:'none', boxSizing:'border-box' }}
           />
-          <select value={newIdeology} onChange={e=>setNewIdeology(e.target.value)}
-            style={{ width:'100%', padding:'6px 8px', background:'rgba(10,15,30,0.95)',
-              border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:6 }}>
-            {Object.entries(IDEOLOGY_LABELS).map(([k,v])=>(
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-          <select value={newHome} onChange={e=>setNewHome(e.target.value)}
-            style={{ width:'100%', padding:'6px 8px', background:'rgba(10,15,30,0.95)',
-              border:'1px solid rgba(80,140,220,0.2)', borderRadius:4, color:'#c8d8f0',
-              fontFamily:'var(--mono)', fontSize:10, marginBottom:8 }}>
-            {planets.map(p=>(
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-          <button onClick={handleFound} disabled={credits < 5 || !newName.trim()}
+          <button onClick={handleFound} disabled={credits < 200 || !newName.trim()}
             style={{ width:'100%', padding:'8px', background:'rgba(58,143,232,0.12)',
               border:'1px solid rgba(58,143,232,0.35)', borderRadius:4, color:'#3a8fe8',
               fontFamily:'var(--mono)', fontSize:10, letterSpacing:'0.1em', cursor:'pointer',
-              opacity: credits < 5 ? 0.4 : 1 }}>
+              opacity: credits < 200 ? 0.4 : 1 }}>
             FOUND FACTION
           </button>
         </div>
       )}
 
-      {/* Unit research tab */}
-      {tab === 'research' && (
-        <div>
-          {factions.length === 0 ? (
-            <div style={{ color:'#5a7090', fontFamily:'var(--mono)', fontSize:9, textAlign:'center', padding:'12px 0' }}>
-              NO FACTIONS TO RESEARCH
-            </div>
-          ) : !selectedFactionForResearch ? (
-            // Show faction list
-            <div>
-              <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginBottom:6 }}>
-                SELECT A FACTION TO RESEARCH
-              </div>
-              {factions.map(f => {
-                const unitResearch = f.unit_research || {};
-                const unlockedCount = Object.values(unitResearch).filter(r => r.unlocked).length;
-                const lockedCount = Object.values(unitResearch).filter(r => !r.unlocked).length;
-
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => setSelectedFactionForResearch(f)}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(30,50,90,0.2)',
-                      border: '1px solid rgba(80,140,220,0.15)',
-                      borderRadius: 4,
-                      padding: '8px 10px',
-                      marginBottom: 6,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <span style={{ fontSize: 11, fontWeight: 500, color: '#e8f4ff' }}>
-                      {f.name}
-                    </span>
-                    <span style={{ fontFamily: 'var(--mono)', fontSize: 8, color: '#5a7090' }}>
-                      ✓{unlockedCount} ⊕{lockedCount}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            // Show research units for selected faction
-            <div>
-              <button
-                onClick={() => {
-                  setSelectedFactionForResearch(null);
-                  setSelectedUnitForResearch(null);
-                }}
-                style={{
-                  width: '100%',
-                  marginBottom: 8,
-                  padding: '6px 8px',
-                  background: 'rgba(80,140,220,0.1)',
-                  border: '1px solid rgba(80,140,220,0.2)',
-                  borderRadius: 3,
-                  color: '#3a8fe8',
-                  fontFamily: 'var(--mono)',
-                  fontSize: 8,
-                  cursor: 'pointer',
-                }}>
-                ← BACK TO FACTION LIST
-              </button>
-
-              <div style={{ fontSize: 11, fontWeight: 500, color: '#e8f4ff', marginBottom: 4 }}>
-                {selectedFactionForResearch.name}
-              </div>
-              <div style={{ fontSize: 8, color: '#5a7090', marginBottom: 8, fontFamily: 'var(--mono)' }}>
-                Can produce: {(selectedFactionForResearch.allowed_ship_classes || []).join(', ') || '(none)'}
-              </div>
-
-              {(() => {
-                const unitResearch = selectedFactionForResearch.unit_research || {};
-                const allowedClasses = selectedFactionForResearch.allowed_ship_classes || [];
-
-                // Filter to only show units the faction can produce
-                const units = Object.values(unitResearch).filter(u => {
-                  // Unit type itself is the class if not in base classes mapping
-                  return allowedClasses.includes(u.unit_type);
-                });
-
-                const unlockedUnits = units.filter(r => r.unlocked).sort((a, b) => a.unit_type.localeCompare(b.unit_type));
-                const lockedUnits = units.filter(r => !r.unlocked).sort((a, b) => a.unit_type.localeCompare(b.unit_type));
-
-                if (units.length === 0) {
-                  return <div style={{ color:'#5a7090', fontFamily:'var(--mono)', fontSize:9, textAlign:'center', padding:'12px 0' }}>NO RESEARCH DATA</div>;
-                }
-
-                return (
-                  <>
-                  {unlockedUnits.length > 0 && (
-                    <div style={{ marginBottom:8, background:'rgba(64,200,128,0.05)', border:'1px solid rgba(64,200,128,0.2)', borderRadius:3, padding:'6px 8px' }}>
-                      <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#40c880', marginBottom:4, fontWeight:500 }}>
-                        ✓ UNLOCKED ({unlockedUnits.length})
-                      </div>
-                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:4 }}>
-                        {unlockedUnits.map(u => (
-                          <div key={u.unit_type} style={{
-                            fontFamily:'var(--mono)', fontSize:8, padding:'4px 6px',
-                            background:'rgba(64,200,128,0.1)', color:'#40c880',
-                            border:'1px solid rgba(64,200,128,0.3)', borderRadius:2,
-                            textAlign:'center', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'
-                          }}>
-                            {u.unit_type.replace(/_/g, ' ')}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {lockedUnits.length > 0 && (
-                    <div>
-                      <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#a080e0', marginBottom:4, fontWeight:500 }}>
-                        ⊕ LOCKED ({lockedUnits.length})
-                      </div>
-                      {lockedUnits.slice(0, 4).map(u => (
-                        <div key={u.unit_type} style={{
-                          background:'rgba(160,128,224,0.08)', border:'1px solid rgba(160,128,224,0.2)',
-                          borderRadius:3, padding:'6px 8px', marginBottom:4,
-                        }}>
-                          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
-                            <span style={{ fontFamily:'var(--mono)', fontSize:9, color:'#c8d8f0' }}>
-                              {u.unit_type.replace(/_/g, ' ')}
-                            </span>
-                            <span style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090' }}>
-                              {u.progressPercent}% · {u.research_points}/{u.cost}
-                            </span>
-                          </div>
-                          <div style={{ height:4, background:'rgba(255,255,255,0.06)', borderRadius:2, overflow:'hidden', marginBottom:3 }}>
-                            <div style={{
-                              height:'100%', width:`${u.progressPercent}%`,
-                              background:'rgba(160,128,224,0.4)', borderRadius:2,
-                              transition:'width 0.3s',
-                            }} />
-                          </div>
-
-                          {selectedUnitForResearch?.unit_type === u.unit_type ? (
-                            <div style={{ display:'flex', gap:3 }}>
-                              <input type="number" min={1} max={credits} value={researchAmount}
-                                onChange={e=>setResearchAmount(parseInt(e.target.value)||1)}
-                                style={{ width:35, background:'transparent', border:'1px solid rgba(160,128,224,0.3)',
-                                  borderRadius:2, color:'#c8d8f0', fontFamily:'var(--mono)', fontSize:8, padding:'2px 3px' }}
-                              />
-                              <button onClick={handleContributeToResearch} style={{
-                                flex:1, padding:'2px 4px', background:'rgba(160,128,224,0.15)',
-                                border:'1px solid rgba(160,128,224,0.35)', borderRadius:2,
-                                color:'#a080e0', fontFamily:'var(--mono)', fontSize:8, cursor:'pointer',
-                              }}>COMMIT</button>
-                              <button onClick={()=>setSelectedUnitForResearch(null)} style={{
-                                padding:'2px 4px', background:'transparent', border:'1px solid rgba(80,140,220,0.2)',
-                                borderRadius:2, color:'#5a7090', fontFamily:'var(--mono)', fontSize:8, cursor:'pointer',
-                              }}>×</button>
-                            </div>
-                          ) : (
-                            <button onClick={()=>setSelectedUnitForResearch(u)} style={{
-                              width:'100%', padding:'3px', background:'rgba(160,128,224,0.1)',
-                              border:'1px solid rgba(160,128,224,0.25)', borderRadius:2,
-                              color:'#a080e0', fontFamily:'var(--mono)', fontSize:8, cursor:'pointer',
-                            }}>CONTRIBUTE ({credits}cr available)</button>
-                          )}
-                        </div>
-                      ))}
-                      {lockedUnits.length > 4 && (
-                        <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', textAlign:'center', padding:'6px 0', background:'rgba(160,128,224,0.05)', borderRadius:3, marginTop:4 }}>
-                          +{lockedUnits.length - 4} more units locked
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  </>
-                );
-              })()}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Investigate result overlay */}
       {investigateResult && (

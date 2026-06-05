@@ -134,6 +134,7 @@ export function SectorMap({ game }) {
   const lockedLanes  = publicState?.lockedLanes   || [];
   const myPlanet     = privateState?.currentPlanet;
   const isRebelPhase = publicState?.phase === 'rebel';
+  const discoveredFleets = privateState?.discoveredFleets || [];
 
   const adjSet = buildAdjSet(lanes);
   const allIds = planets.map(p => p.id);
@@ -403,6 +404,50 @@ export function SectorMap({ game }) {
                     {planet.econ_output}⚡
                   </text>
                 )}
+
+                {/* Discovered fleets indicators */}
+                {(() => {
+                  const fleetsHere = discoveredFleets.filter(f => f.planet_id === planet.id);
+                  if (fleetsHere.length === 0) return null;
+                  return fleetsHere.map((fleet, idx) => {
+                    const isRebel = fleet.fleet_owner?.startsWith('rebel:');
+                    const isEmpire = fleet.fleet_owner?.startsWith('empire:');
+                    const isFaction = fleet.fleet_owner?.startsWith('faction:');
+                    const fleetColor = isRebel ? '#40c880' : isEmpire ? '#e84040' : '#e8d030';
+                    const glowColor = isRebel ? 'rgba(64,200,128,0.6)' : isEmpire ? 'rgba(232,64,64,0.6)' : 'rgba(232,208,48,0.6)';
+                    const angle = (idx / Math.max(fleetsHere.length, 1)) * Math.PI * 2 - Math.PI / 2;
+                    const fx = x + Math.cos(angle) * 30;
+                    const fy = y + Math.sin(angle) * 30;
+                    const icon = isRebel ? '◆' : isEmpire ? '▲' : '●';
+                    return (
+                      <g key={`fleet-${fleet.fleet_owner}-${idx}`}>
+                        {/* Glow halo */}
+                        <circle cx={fx} cy={fy} r={16} fill={glowColor} opacity={0.4} />
+                        <circle cx={fx} cy={fy} r={12} fill="none" stroke={fleetColor} strokeWidth={1.5} strokeOpacity={0.5} />
+
+                        {/* Fleet icon */}
+                        <text
+                          x={fx} y={fy}
+                          textAnchor="middle" dominantBaseline="central"
+                          fontSize={16} fill={fleetColor} fontWeight="bold"
+                          style={{ pointerEvents: 'none', filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.9))' }}>
+                          {icon}
+                        </text>
+
+                        {/* Unit count label */}
+                        {fleet.unit_count && (
+                          <text
+                            x={fx + 10} y={fy + 10}
+                            textAnchor="middle" dominantBaseline="central"
+                            fontSize={7} fill={fleetColor} fontWeight="bold"
+                            style={{ pointerEvents: 'none', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.9))' }}>
+                            {fleet.unit_count}
+                          </text>
+                        )}
+                      </g>
+                    );
+                  });
+                })()}
               </g>
             );
           })}

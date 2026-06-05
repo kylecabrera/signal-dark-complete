@@ -2,7 +2,7 @@ const db = require('./db');
 const { processMovesIntoLeaks, updateSirisModel, applyGovernorActionResults } = require('./intel');
 const { runAllGovernors } = require('./governors');
 const { resolveAllCombat, runProductionPhase, buildPublicUnitState } = require('./units');
-const { contributeToFaction, contributeToUnitResearch, foundFaction, investigateFaction, denounceFaction, getFactionBonuses, buildClientFactionState, buildAllianceState } = require('./factions');
+const { contributeToFaction, foundFaction, foundFactionCell, investigateFaction, denounceFaction, getFactionBonuses, buildClientFactionState, buildAllianceState } = require('./factions');
 const { ALERT_LEVELS, isAdjacent, LANES } = require('./world');
 const CONFIG = require('./config');
 
@@ -234,6 +234,62 @@ async function applyRebelAction(sessionId, playerId, action) {
           }
         }
       }
+
+      // Discover nearby fleets on adjacent planets (30% chance per fleet)
+      const { LANES } = require('./world');
+      const adjSet = new Set();
+      for (const [a, b] of (LANES || [])) { adjSet.add(`${a}|${b}`); adjSet.add(`${b}|${a}`); }
+      const adjacentPlanets = [];
+      for (const planet of session.planet_state) {
+        if (adjSet.has(`${planetId}|${planet.id}`)) {
+          adjacentPlanets.push(planet.id);
+        }
+      }
+
+      const allUnits = await db.getUnits(sessionId);
+      for (const adjPlanetId of adjacentPlanets) {
+        const unitsOnAdjPlanet = allUnits.filter(u => u.planet_id === adjPlanetId);
+        const fleetsByOwner = {};
+
+        for (const unit of unitsOnAdjPlanet) {
+          if (unit.owner?.startsWith('rebel:') && unit.owner !== `rebel:${playerId}`) {
+            // Rebel ally fleet (other players)
+            if (!fleetsByOwner[unit.owner]) fleetsByOwner[unit.owner] = [];
+            fleetsByOwner[unit.owner].push(unit);
+          } else if (unit.owner?.startsWith('empire:') || unit.owner?.startsWith('faction:')) {
+            // Enemy fleet
+            if (!fleetsByOwner[unit.owner]) fleetsByOwner[unit.owner] = [];
+            fleetsByOwner[unit.owner].push(unit);
+          }
+        }
+
+        for (const [owner, units] of Object.entries(fleetsByOwner)) {
+          if (Math.random() < 0.30) { // 30% chance per fleet
+            const adjPlanetName = session.planet_state.find(p => p.id === adjPlanetId)?.name || adjPlanetId;
+            const strongest = units.reduce((max, u) =>
+              (CONFIG.UNIT_TYPES[u.unit_type]?.strength || 0) > (CONFIG.UNIT_TYPES[max.unit_type]?.strength || 0) ? u : max
+            );
+
+            try {
+              await db.recordFleetDiscovery(sessionId, playerId, owner, adjPlanetId, session.round, units.length, strongest.designation || strongest.unit_type);
+            } catch (err) {
+              // discovered_fleets table may not exist yet — skip recording
+            }
+
+            const isRebel = owner.startsWith('rebel:');
+            const ownerLabel = isRebel ? 'Rebel ally' : owner.startsWith('empire:') ? `${owner.slice(7)} fleet` : 'Faction forces';
+
+            result.discoveries = result.discoveries || [];
+            result.discoveries.push({
+              type: 'fleet_discovered',
+              text: `Intel: ${ownerLabel} spotted at ${adjPlanetName} (${units.length} unit${units.length!==1?'s':''}, strongest: ${strongest.designation || strongest.unit_type})`,
+              fleetOwner: owner,
+              fleetPlanet: adjPlanetId,
+              unitCount: units.length,
+            });
+          }
+        }
+      }
     }
 
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
@@ -286,27 +342,6 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       (rebelState.credits||0) - (amount||1));
 
-  // ── Faction: research unit ────────────────
-  } else if (type === 'research') {
-    if (!factionId || !amount || !targetId) return { ok:false, error:'Need factionId, amount, and unitType (targetId)' };
-    try {
-      const rResult = await contributeToUnitResearch(sessionId, playerId, factionId, targetId, amount||1, session.round);
-      if (!rResult.ok) return rResult;
-      covert = true;
-      label  = `Contributed ${amount} credits to research ${targetId}`;
-      metadata = { faction_id: factionId, unit_type: targetId };
-      result.researchUnlocked = rResult.unlocked;
-      result.researchProgress = rResult.progressPercent;
-      result.unlockedUnit = rResult.unlockedUnit;
-      await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
-        (rebelState.credits||0) - (amount||1));
-    } catch (err) {
-      if (err.message && err.message.includes('faction_unit_research')) {
-        return { ok:false, error:'Unit research system not yet available. Ask admin to run database migration.' };
-      }
-      throw err;
-    }
-
   // ── Faction: found ────────────────────────
   } else if (type === 'found') {
     if (!factionName || !ideology || !planetId) return { ok:false, error:'Need name, ideology, homePlanet' };
@@ -318,6 +353,17 @@ async function applyRebelAction(sessionId, playerId, action) {
     result.faction = fResult.faction;
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       (rebelState.credits||0) - CONFIG.FACTIONS.FOUND_COST);
+
+  // ── Faction: found cell ────────────────────
+  } else if (type === 'found_cell') {
+    if (!factionId || !planetId) return { ok:false, error:'Need factionId and planetId' };
+    const cResult = await foundFactionCell(sessionId, playerId, factionId, planetId, session.round);
+    if (!cResult.ok) return cResult;
+    covert = true;
+    label  = `Established faction cell at ${planetId}`;
+    result.cellFounded = true;
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
+      (rebelState.credits||0) - CONFIG.FACTIONS.CELL_COST);
 
   // ── Faction: investigate ──────────────────
   } else if (type === 'investigate') {
@@ -353,6 +399,18 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       rebelState.credits||0);
 
+  // ── Fleet: move ───────────────────────────
+  } else if (type === 'fleet_move') {
+    if (!action.fleetId || !targetId) return { ok:false, error:'Need fleetId and targetId' };
+    const { applyFleetMove } = require('./units');
+    const fResult = await applyFleetMove(sessionId, playerId, action.fleetId, targetId, action.layer||'orbit');
+    if (!fResult.ok) return fResult;
+    covert = true;
+    label  = `Moved fleet (${fResult.unitCount} units) to ${targetId}`;
+    result.fleet = fResult.fleet;
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
+      rebelState.credits||0);
+
   // ── Unit: produce ─────────────────────────
   } else if (type === 'unit_produce') {
     if (!unitType || !planetId) return { ok:false, error:'Need unitType and planetId' };
@@ -365,11 +423,36 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used,
       pResult.newCredits);
 
-  // ── Unit: attack ──────────────────────────
+  // ── Unit: attack empire/faction ───────────
   } else if (type === 'unit_attack') {
+    if (!planetId) planetId = currentPlanet;
+    const targetLayer = action.layer || 'orbit'; // default to orbit combat
+
+    // Get all units at this planet
+    const allUnitsHere = await db.getUnitsAtPlanet(sessionId, planetId);
+    const myUnits = allUnitsHere.filter(u => u.owner === `rebel:${playerId}` && u.layer === targetLayer);
+    const enemyUnits = allUnitsHere.filter(u => {
+      const isEnemy = u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:');
+      return isEnemy && u.layer === targetLayer && !u.is_hidden;
+    });
+
+    if (myUnits.length === 0) {
+      return { ok:false, error:`No units to attack with on ${targetLayer}` };
+    }
+    if (enemyUnits.length === 0) {
+      return { ok:false, error:`No enemy units visible on ${targetLayer}` };
+    }
+
+    // Trigger immediate combat
+    const { resolveCombat } = require('./units');
+    const combatResult = await resolveCombat(sessionId, session.round, planetId, targetLayer,
+      myUnits, enemyUnits, 'rebel', 'empire');
+
     covert = false;
-    label  = `Unit attack on ${targetId||planetId} [OVERT]`;
-    metadata = { target_planet: targetId||planetId };
+    label = `Attacked ${targetLayer} forces at ${planetId} [OVERT]`;
+    metadata = { target_planet: planetId, layer: targetLayer, combatOutcome: combatResult.outcome };
+    result.combat = combatResult;
+
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       rebelState.credits||0);
 
@@ -417,14 +500,33 @@ async function applyRebelAction(sessionId, playerId, action) {
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
 
   // ── Force Powers (nested action) ──────────
+  // ── Force: discover mysteries ──────────────
+  } else if (type === 'discover_force_mysteries') {
+    let forceUser = await db.getForceUser(sessionId, playerId);
+    if (!forceUser) {
+      forceUser = await db.getOrCreateForceUser(sessionId, playerId, CONFIG.FORCE.BASE_STRENGTH, 0);
+    }
+
+    if (!forceUser) return { ok:false, error:'Force user not initialized' };
+
+    // Unlock all available force powers for this player
+    const availablePowers = ['force_shield', 'healing_touch', 'sense_danger', 'inspire_allies',
+                             'force_lightning', 'mind_trick', 'force_choke', 'dark_vision', 'dominate_will'];
+
+    result.discoveredPowers = availablePowers;
+    covert = true;
+    label = `Discovered Force mysteries!`;
+    result.forcePowersUnlocked = availablePowers.length;
+
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
+
   } else if (type === 'force_powers') {
     const { powerName } = action;
     if (!powerName) return { ok:false, error:'Power name required' };
 
-    // Get or create force user
     let forceUser = await db.getForceUser(sessionId, playerId);
     if (!forceUser) {
-      forceUser = await db.getOrCreateForceUser(sessionId, playerId, rebelState.force_strength||0, rebelState.force_alignment||0);
+      forceUser = await db.getOrCreateForceUser(sessionId, playerId, CONFIG.FORCE.BASE_STRENGTH, 0);
     }
 
     if (!forceUser) return { ok:false, error:'Force user not initialized' };
@@ -432,27 +534,24 @@ async function applyRebelAction(sessionId, playerId, action) {
     const powerConfig = CONFIG.FORCE.FORCE_POWERS[powerName];
     if (!powerConfig) return { ok:false, error:`Unknown force power: ${powerName}` };
 
-    // Check if power is already active
     const activePowers = await db.getActiveForcePowers(sessionId, forceUser.id, session.round);
     if (activePowers.some(p => p.power_name === powerName)) {
       return { ok:false, error:`${powerConfig.name} is already active` };
     }
 
-    // Check force points
     if (forceUser.force_points < powerConfig.costPoints) {
       return { ok:false, error:`Need ${powerConfig.costPoints} force points (have ${forceUser.force_points})` };
     }
 
-    // Handle specific powers
     if (powerName === 'find_apprentice') {
       const chance = (powerConfig.baseChance + (forceUser.force_tier * 0.01));
       if (Math.random() < chance) {
-        // Successfully found an apprentice!
-        // In the future, this would spawn a new Force user as their apprentice
+        const apprentice = await db.createForceApprentice(sessionId, forceUser.id);
         result.forcePowerResult = {
           success: true,
           text: `Successfully sensed a Force user! They have been drawn to you as your apprentice.`,
           apprenticeFound: true,
+          apprenticeId: apprentice?.id,
         };
       } else {
         result.forcePowerResult = {
@@ -462,7 +561,6 @@ async function applyRebelAction(sessionId, playerId, action) {
       }
     }
 
-    // Consume force points and record power use
     await db.addForcePoints(forceUser.id, -powerConfig.costPoints);
     await db.recordForcePowerUse(sessionId, forceUser.id, powerName, session.round, powerConfig.duration);
 
@@ -483,14 +581,33 @@ async function applyRebelAction(sessionId, playerId, action) {
     planetId||currentPlanet, covert, label, metadata, targetId||null
   );
 
-  // Apply Force alignment shift
-  const shift = CONFIG.FORCE.ALIGNMENT_SHIFTS[type] ?? 0;
-  if (shift !== 0) {
-    const rs = await db.getRebelState(sessionId, playerId);
-    const newAlignment = Math.max(-100, Math.min(100, (rs.force_alignment||0) + shift));
-    await db.upsertRebelState(sessionId, playerId, rs.current_planet,
-      rs.actions_used, rs.credits, { alignment: newAlignment });
-    result.forceAlignment = newAlignment;
+  // Update Force user: earn points, apply alignment shift, check tier advancement
+  let forceUser = await db.getForceUser(sessionId, playerId);
+  if (forceUser) {
+    // Earn 1-3 force points per action
+    const pointsEarned = Math.floor(Math.random() * 3) + 1;
+    forceUser = await db.addForcePoints(forceUser.id, pointsEarned);
+    result.forcePointsEarned = pointsEarned;
+
+    // Apply alignment shift
+    const alignmentShift = CONFIG.FORCE.ALIGNMENT_SHIFTS[type] ?? 0;
+    if (alignmentShift !== 0) {
+      forceUser = await db.updateForceAlignment(forceUser.id, forceUser.alignment + alignmentShift);
+      result.forceAlignment = forceUser.alignment;
+    }
+
+    // Check tier advancement
+    let currentTier = forceUser.force_tier;
+    for (let tier = currentTier + 1; tier <= 10; tier++) {
+      const tierConfig = CONFIG.FORCE.TIERS[tier];
+      if (forceUser.force_points >= tierConfig.pointsRequired) {
+        await db.updateForceTier(forceUser.id, tier);
+        result.forceTierAdvanced = tier;
+        currentTier = tier;
+      } else {
+        break;
+      }
+    }
   }
 
   return { ok:true, covert, label, ...result };
@@ -714,6 +831,14 @@ async function buildPublicState(session, players) {
     factions.map(f => [f.id, { name: f.name, ideology: f.ideology }])
   );
 
+  // Get all fleets (public view of all fleets)
+  let fleets = [];
+  try {
+    fleets = await db.getFleets(session.id);
+  } catch (err) {
+    // Table may not exist yet
+  }
+
   return {
     sessionId:         session.id,
     code:              session.code,
@@ -731,6 +856,7 @@ async function buildPublicState(session, players) {
     lockedLanes:       session.locked_lanes,
     submittedPlayers:  session.submitted_players,
     units,
+    fleets,
     factionMap,
     productionQueue:   queue.filter(q=>q.owner.startsWith('empire')), // only architect queue public
     winner:            session.winner,
@@ -749,8 +875,31 @@ async function buildPrivateState(sessionId, playerId) {
   const myQueue     = (await db.getProductionQueue(sessionId)).filter(q=>q.owner===`rebel:${playerId}`);
   const factions    = await buildClientFactionState(sessionId, playerId);
 
-  const alignment    = rebelState.force_alignment || 0;
-  const forceStr     = rebelState.force_strength  || CONFIG.FORCE.BASE_STRENGTH;
+  // Get player's own fleets
+  let myFleets = [];
+  try {
+    myFleets = await db.getFleets(sessionId, `rebel:${playerId}`);
+  } catch (err) {
+    // Table may not exist yet
+  }
+
+  // Get discovered fleets (gracefully handle if table doesn't exist yet)
+  let discoveredFleets = [];
+  try {
+    discoveredFleets = await db.getDiscoveredFleets(sessionId, playerId);
+  } catch (err) {
+    // Table may not exist yet — that's ok
+  }
+
+  // Get force user data
+  let forceUser = await db.getForceUser(sessionId, playerId);
+  if (!forceUser) {
+    forceUser = await db.getOrCreateForceUser(sessionId, playerId, CONFIG.FORCE.BASE_STRENGTH, 0);
+  }
+
+  const alignment    = forceUser?.alignment || 0;
+  const forcePoints  = forceUser?.force_points || 0;
+  const forceTier    = forceUser?.force_tier || 1;
   const forceSide    = alignment > CONFIG.FORCE.ALIGNMENT_THRESHOLD  ? 'light'
                      : alignment < -CONFIG.FORCE.ALIGNMENT_THRESHOLD ? 'dark'
                      : 'grey';
@@ -762,7 +911,8 @@ async function buildPrivateState(sessionId, playerId) {
     actionsRemaining:  CONFIG.ACTIONS_PER_TURN - rebelState.actions_used,
     credits:           rebelState.credits || 0,
     forceAlignment:    alignment,
-    forceStrength:     forceStr,
+    forcePoints,
+    forceTier,
     forceSide,
     sealedLog: sealedMoves.map(m=>({
       round:  m.round,
@@ -773,8 +923,10 @@ async function buildPrivateState(sessionId, playerId) {
     })),
     myUnits:           myUnits.filter(u=>u.owner===`rebel:${playerId}`),
     myProductionQueue: myQueue,
+    myFleets,
     factions,
     alliances:         await buildAllianceState(sessionId, playerId),
+    discoveredFleets,
   };
 }
 

@@ -143,13 +143,15 @@ const ACTION_DESCRIPTIONS = {
   sabotage: 'Loyalty -8 · +2cr · 18% chance: block empire production 2 rounds [OVERT]',
   incite:   'Loyalty -10 · +2cr · 18% chance: damage/kill imperial unit [OVERT]',
   hide:     'Suspicion -1 · Lay low and avoid detection',
+  earn_money: 'Generate income through honest work and trade',
+  steal_money: 'Steal credits through criminal activity [OVERT]',
 };
 
 function FleetTab({ game, privateState, planetState, productionQueue }) {
   const myUnits  = privateState?.myUnits || [];
   const myPlanet = privateState?.currentPlanet;
   const credits = privateState?.credits || 0;
-  const { produceUnit, toggleUnitHidden } = game;
+  const { produceUnit, toggleUnitHidden, publicState } = game;
 
   const escort   = myUnits.filter(u => u.layer === 'orbit' && u.planet_id === myPlanet);
   const deployed = myUnits.filter(u => !(u.layer === 'orbit' && u.planet_id === myPlanet));
@@ -281,6 +283,51 @@ function FleetTab({ game, privateState, planetState, productionQueue }) {
           </div>
         </div>
       )}
+
+      {/* Discovered Fleets */}
+      {(privateState?.discoveredFleets || []).length > 0 && (
+        <div className="sb">
+          <div className="sbt" style={{ color:'#e84040' }}>▲ Discovered Enemy Fleets</div>
+          {privateState.discoveredFleets.map(fleet => {
+            const isRebel = fleet.fleet_owner?.startsWith('rebel:');
+            const isEmpire = fleet.fleet_owner?.startsWith('empire:');
+            const isFaction = fleet.fleet_owner?.startsWith('faction:');
+
+            const ownerName = isRebel ? 'Rebel Ally'
+                            : isEmpire ? `${fleet.fleet_owner.slice(7)} Fleet`
+                            : isFaction ? 'Faction Forces'
+                            : 'Unknown';
+
+            const fleetColor = isRebel ? '#40c880'
+                             : isEmpire ? '#e84040'
+                             : isFaction ? '#e8d030'
+                             : '#5a7090';
+
+            const planetName = (planetState || []).find(p => p.id === fleet.planet_id)?.name || fleet.planet_id;
+
+            return (
+              <div key={`${fleet.fleet_owner}-${fleet.planet_id}`} style={{
+                marginBottom:8, padding:'6px 8px', borderRadius:3,
+                background: `rgba(${isRebel ? '64,200,128' : isEmpire ? '232,64,64' : '232,208,48'},0.08)`,
+                border: `1px solid rgba(${isRebel ? '64,200,128' : isEmpire ? '232,64,64' : '232,208,48'},0.3)`
+              }}>
+                <div style={{ fontFamily:'var(--mono)', fontSize:8, color: fleetColor, fontWeight:600, marginBottom:2 }}>
+                  {isRebel ? '◆' : isEmpire ? '▲' : '●'} {ownerName}
+                </div>
+                <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginBottom:2 }}>
+                  Location: {planetName}
+                </div>
+                <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', marginBottom:2 }}>
+                  Units: {fleet.unit_count} · Strongest: {fleet.strongest_unit || 'Unknown'}
+                </div>
+                <div style={{ fontFamily:'var(--mono)', fontSize:7, color:'#5a7090', opacity:0.7 }}>
+                  Sighted: Round {fleet.round_discovered}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -289,11 +336,11 @@ export function Sidebar({ game }) {
   const {
     publicState, privateState, feedEntries, governorThinking,
     selectedPlanet, playerId, submitTurn, endTurnEarly,
-    recruit, intel, sabotage, incite, hide,
+    recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
     produceUnit,
   } = game;
 
-  const [sidebarTab, setSidebarTab] = useState('actions'); // actions|fleet|factions|feed|log
+  const [sidebarTab, setSidebarTab] = useState('actions'); // actions|combat|fleet|factions|feed|log
 
   if (!publicState) return null;
 
@@ -357,7 +404,7 @@ export function Sidebar({ game }) {
 
       {/* Tab switcher */}
       <div style={{ display:'flex', gap:3, padding:'6px 13px', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
-        {['actions','fleet','factions','feed','log'].map(t => (
+        {['actions','combat','fleet','factions','feed','log'].map(t => (
           <button key={t} onClick={() => setSidebarTab(t)} style={{
             flex:1, padding:'4px 0',
             background: sidebarTab===t ? 'rgba(58,143,232,0.15)' : 'transparent',
@@ -539,39 +586,77 @@ export function Sidebar({ game }) {
                   </div>
                 </div>
 
-                {/* Unit production */}
-                {(() => {
-                  const rebelOwned = planet.controlled_by === 'rebel' ||
-                                    planet.controlled_by?.startsWith('faction:');
-                  const factions = privateState?.factions || [];
-                  const factionsHere = factions.filter(f =>
-                    f.cells?.some(c => c.planet_id === planet.id)
-                  );
-                  const hasFactionPresence = factionsHere.length > 0;
+                {/* Money actions */}
+                <div style={{ marginBottom:2 }}>
+                  <button className="abtn covert" disabled={actionsLeft<=0} onClick={() => earnMoney(planet.id)}>
+                    <span>Earn money (honest work)</span><span className="btag tc">COVERT</span>
+                  </button>
+                  <div style={{ fontSize:'9px', color:'rgba(140,160,200,0.45)', padding:'1px 9px 4px', lineHeight:1.3 }}>
+                    {ACTION_DESCRIPTIONS.earn_money}
+                  </div>
+                </div>
+                <div style={{ marginBottom:2 }}>
+                  <button className="abtn overt" disabled={actionsLeft<=0} onClick={() => stealMoney(planet.id)}>
+                    <span>Steal money (criminal activity)</span><span className="btag to">OVERT</span>
+                  </button>
+                  <div style={{ fontSize:'9px', color:'rgba(140,160,200,0.45)', padding:'1px 9px 4px', lineHeight:1.3 }}>
+                    {ACTION_DESCRIPTIONS.steal_money}
+                  </div>
+                </div>
 
-                  // Determine available classes using baseClass
-                  let allowedClasses = null;  // null = all allowed
-                  if (hasFactionPresence) {
-                    // Collect all ship classes available from factions here
-                    allowedClasses = new Set();
-                    factionsHere.forEach(f => {
-                      (f.allowed_ship_classes || []).forEach(c => allowedClasses.add(c));
-                      (f.unlocked_ship_classes || []).forEach(c => allowedClasses.add(c));
-                    });
-                  }
+                {/* Force Powers */}
+                {privateState?.forceTier && (
+                  <div style={{ marginBottom:6, paddingTop:6, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+                    <div className="sbt" style={{ color:'#a080e0' }}>✦ Force Powers (Tier {privateState.forceTier})</div>
+                    <div style={{ fontSize:8, color:'#5a7090', marginBottom:4 }}>
+                      Points: {privateState.forcePoints} · Alignment: {privateState.forceAlignment > 0 ? '+' : ''}{privateState.forceAlignment}
+                    </div>
+                    <button
+                      onClick={() => useForcePower('find_apprentice')}
+                      disabled={actionsLeft <= 0 || privateState.forcePoints < 5}
+                      style={{
+                        width:'100%',
+                        padding:'4px 6px',
+                        marginBottom:3,
+                        background:'rgba(160,128,224,0.12)',
+                        border:'1px solid rgba(160,128,224,0.3)',
+                        borderRadius:3,
+                        color:'#a080e0',
+                        fontFamily:'var(--mono)',
+                        fontSize:8,
+                        cursor: actionsLeft > 0 && privateState.forcePoints >= 5 ? 'pointer' : 'not-allowed',
+                        opacity: actionsLeft > 0 && privateState.forcePoints >= 5 ? 1 : 0.5,
+                      }}
+                      title={privateState.forcePoints < 5 ? `Need 5 points (have ${privateState.forcePoints})` : 'Find and recruit a Force-sensitive apprentice'}
+                    >
+                      Find Apprentice (5pts)
+                    </button>
+                    <div style={{ fontSize:7, color:'#5a7090', padding:'2px 4px', background:'rgba(160,128,224,0.08)', borderRadius:2 }}>
+                      Success chance: {(15 + privateState.forceTier).toFixed(0)}%
+                    </div>
+                    <button
+                      onClick={() => discoverForceMysteries()}
+                      disabled={actionsLeft <= 0}
+                      style={{
+                        width:'100%',
+                        padding:'4px 6px',
+                        marginTop:6,
+                        background:'rgba(96,64,160,0.12)',
+                        border:'1px solid rgba(96,64,160,0.3)',
+                        borderRadius:3,
+                        color:'#a080e0',
+                        fontFamily:'var(--mono)',
+                        fontSize:8,
+                        cursor: actionsLeft > 0 ? 'pointer' : 'not-allowed',
+                        opacity: actionsLeft > 0 ? 1 : 0.5,
+                      }}
+                      title='Unlock all available Force powers in this sector'
+                    >
+                      Discover Force Mysteries
+                    </button>
+                  </div>
+                )}
 
-                  // If planet is rebel-owned, player has access to all rebel units
-                  // Otherwise, only faction-provided units are available
-                  const availableUnits = rebelOwned
-                    ? ALL_REBEL_UNITS
-                    : (allowedClasses === null ? ALL_REBEL_UNITS : ALL_REBEL_UNITS.filter(u => allowedClasses.has(u.baseClass)));
-
-                  const canProduce = planet.econ_output > 0 && credits >= 2 &&
-                                     (rebelOwned || hasFactionPresence);
-
-                  // Unit production moved to Fleet tab
-                  return null;
-                })()}
               </>}
 
               {!isHere && !isAdjacent && (
@@ -611,6 +696,48 @@ export function Sidebar({ game }) {
                       </button>
                     ));
                 })}
+              </div>
+            );
+          })()}
+
+          {/* Empire/Faction combat */}
+          {isHere && isRebelPhase && !alreadySubmitted && (() => {
+            const enemyLayers = { orbit: false, surface: false };
+            for (const u of (units || [])) {
+              if (!u.planet_id === myPlanet) continue;
+              if (u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:')) {
+                enemyLayers[u.layer] = true;
+              }
+            }
+
+            const myLayers = { orbit: false, surface: false };
+            for (const u of (units || [])) {
+              if (u.owner === `rebel:${playerId}` && u.planet_id === myPlanet) {
+                myLayers[u.layer] = true;
+              }
+            }
+
+            const canAttack = Object.entries(myLayers)
+              .filter(([layer, has]) => has && enemyLayers[layer])
+              .map(([layer]) => layer);
+
+            if (canAttack.length === 0) return null;
+            return (
+              <div style={{ marginTop:6, paddingTop:6, borderTop:'1px solid rgba(232,64,64,0.2)' }}>
+                <div className="sbt" style={{ color:'#e84040' }}>⚔ EMPIRE/FACTION FORCES</div>
+                {canAttack.map(layer => (
+                  <button key={`attack-${layer}`} className="abtn overt"
+                    disabled={actionsLeft <= 0}
+                    onClick={() => game.attackEmpire(myPlanet, layer)}
+                    style={{
+                      borderColor:'rgba(232,64,64,0.4)',
+                      background:'rgba(232,64,64,0.08)',
+                      marginBottom:4
+                    }}>
+                    <span>ENGAGE {layer.toUpperCase()}</span>
+                    <span className="btag to">ATTACK</span>
+                  </button>
+                ))}
               </div>
             );
           })()}
@@ -674,6 +801,51 @@ export function Sidebar({ game }) {
         </div>
       )}
 
+      {/* COMBAT TAB */}
+      {sidebarTab === 'combat' && (
+        <div style={{ overflowY:'auto', flex:1, padding:'8px 13px' }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12 }}>
+            <div style={{ fontWeight:600, color:'#e84040', marginBottom:8 }}>⚔ COMBAT BASICS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>• Combat triggers <strong>automatically</strong> when your units meet enemy units on the same planet/layer</div>
+              <div>• Both orbital and surface layers are separate. Combat can happen independently on each.</div>
+              <div>• Stronger units deal more damage. Your Jedi Avatar has strength 12 — a powerful asset.</div>
+              <div>• Battles resolve immediately. Winners remain, losers are destroyed.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#40c880', marginBottom:8 }}>🛡 COMBAT FACTORS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div><strong>Strength:</strong> Higher = more damage per hit. Unit type determines base strength.</div>
+              <div><strong>HP (Health Points):</strong> How much damage a unit can take before destroyed.</div>
+              <div><strong>Hit Chance:</strong> 40% base. More units improve odds. First-strike advantage in orbit.</div>
+              <div><strong>Defend Bonus:</strong> +10% defense when defending your home planet.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#a080e0', marginBottom:8 }}>✦ JEDI ADVANTAGE</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>Your Jedi Avatar (strength 12, hp 10) is your strongest unit.</div>
+              <div>Can be embedded in any ship, adding both strength and health to that unit.</div>
+              <div>Discover Force Powers to unlock combat abilities: Force Lightning, Force Choke, Force Shield.</div>
+              <div style={{ marginTop:8, color:'#e84040' }}>⚠️ If your Jedi dies in combat, you're eliminated from the game.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#e8d030', marginBottom:8 }}>💡 STRATEGY TIPS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>• Avoid combat until you have superior numbers or strength.</div>
+              <div>• Use Intel to reveal hidden enemy units before engaging.</div>
+              <div>• Grouping units into fleets for cohesive movement reduces attrition.</div>
+              <div>• Factions provide diverse unit types — use variety to counter enemies.</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* FLEET TAB */}
       {sidebarTab === 'fleet' && <FleetTab game={game} privateState={privateState} planetState={planetState} productionQueue={productionQueue} />}
 
@@ -683,6 +855,8 @@ export function Sidebar({ game }) {
           <FactionPanel game={game} />
         </div>
       )}
+
+      {/* FLEETS TAB - Discovered Enemy/Ally Fleets */}
 
       {/* FEED TAB */}
       {sidebarTab === 'feed' && (

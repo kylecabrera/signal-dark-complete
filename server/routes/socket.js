@@ -1,5 +1,6 @@
 const db      = require('../lib/db');
 const engine  = require('../lib/engine');
+const units   = require('../lib/units');
 const CONFIG  = require('../lib/config');
 
 const turnTimers = new Map();
@@ -54,6 +55,7 @@ module.exports = function registerSocketHandlers(io) {
         });
         if (allReady) {
           await db.updateSession(sessionId, { status:'active' });
+          await units.autoGroupFleets(sessionId, db);
           const session = await db.getSessionById(sessionId);
           io.to(sessionId).emit('game_started', await engine.buildPublicState(session, players));
           startTurnTimer(io, sessionId);
@@ -119,6 +121,17 @@ module.exports = function registerSocketHandlers(io) {
         const session = await db.getSessionById(sessionId);
         const players = await db.getPlayers(sessionId);
         io.to(sessionId).emit('state_update', await engine.buildPublicState(session, players));
+
+        // Fleet movement event
+        if (action.type === 'fleet_move' && result.fleet) {
+          io.to(sessionId).emit('fleet_moved', {
+            fleetId: result.fleet.id,
+            owner: result.fleet.owner,
+            planetId: result.fleet.planet_id,
+            layer: result.fleet.layer,
+            unitCount: result.unitCount,
+          });
+        }
 
         // Overt actions emit an event
         if (!result.covert) {

@@ -238,7 +238,7 @@ const LANES = [
 
 const BASE_WATCHED_LANES = [['p01', 'p02'], ['p01', 'p06'], ['p01', 'p143']];
 const STARTING_PLANET = 'p153';
-const PLAYER_COLORS = ['#40c880','#3a8fe8','#e8a030','#e84090'];
+const PLAYER_COLORS = ['#40c880','#3a8fe8','#e8a030','#e84090','#00d4c8','#c040e0','#e84040','#e8d030','#a0d4ff','#40e8d4','#e040a0','#a080e0'];
 const ALERT_LEVELS = ['DORMANT','ELEVATED','MANHUNT','PURGE','ANNIHILATION'];
 
 const FACTION_NAME_POOL = [

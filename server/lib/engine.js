@@ -1148,6 +1148,8 @@ async function buildPrivateState(sessionId, playerId) {
     cellBonusActions,
     credits:           rebelState.credits || 0,
     suspicion:         rebelState.suspicion || 0,
+    isDetained:        rebelState.is_detained || false,
+    detentionTurns:    rebelState.detention_turns || 0,
     forceAlignment:    alignment,
     forcePoints,
     forceTier,

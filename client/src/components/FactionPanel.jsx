@@ -18,7 +18,7 @@ const IDEOLOGY_COLORS = {
 
 export function FactionPanel({ game }) {
   const { privateState, publicState, playerId,
-          contribute, foundFaction, investigate, denounce,
+          contribute, foundFaction, foundCell, investigate, denounce,
           investigateResult, setInvestigateResult } = game;
   const factions = privateState?.factions || [];
 
@@ -161,6 +161,14 @@ export function FactionPanel({ game }) {
                     border:'1px solid rgba(96,64,160,0.3)', borderRadius:3,
                     color:'#a080e0', fontFamily:'var(--mono)', fontSize:8, cursor:'pointer',
                   }}>AUDIT</button>
+
+                  {/* Found cell */}
+                  <button onClick={()=>foundCell(f.id)} disabled={credits < 75} style={{
+                    padding:'3px 6px', background:'rgba(58,143,232,0.1)',
+                    border:'1px solid rgba(58,143,232,0.25)', borderRadius:3,
+                    color:'#3a8fe8', fontFamily:'var(--mono)', fontSize:8, cursor: credits >= 75 ? 'pointer' : 'not-allowed',
+                    opacity: credits >= 75 ? 1 : 0.5,
+                  }}>FOUND CELL (75cr)</button>
 
                   {/* Denounce if enough clues */}
                   {f.myContribution > 0 && (

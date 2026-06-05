@@ -492,8 +492,37 @@ async function buildAllianceState(sessionId, playerId) {
   return result;
 }
 
+// ─────────────────────────────────────────────
+// Found a faction cell at a planet
+// ─────────────────────────────────────────────
+async function foundFactionCell(sessionId, playerId, factionId, planetId, round) {
+  const rebelState = await db.getRebelState(sessionId, playerId);
+  if (!rebelState) return { ok:false, error:'Rebel state not found' };
+
+  const cost = CONFIG.FACTIONS.CELL_COST;
+  if ((rebelState.credits||0) < cost) {
+    return { ok:false, error:`Need ${cost} credits to establish a cell` };
+  }
+
+  const faction = await db.getFactionById(factionId, true);
+  if (!faction || faction.session_id !== sessionId) {
+    return { ok:false, error:'Faction not found' };
+  }
+
+  // Check if cell already exists at this planet
+  const existingCells = await db.getFactionCellsAtPlanet(sessionId, planetId);
+  if (existingCells.some(c => c.faction_id === factionId)) {
+    return { ok:false, error:'Cell already established here' };
+  }
+
+  // Establish cell with strength 1
+  await db.upsertFactionCell(factionId, sessionId, planetId, 1);
+
+  return { ok:true, faction_name: faction.name };
+}
+
 module.exports = {
-  initTraitorFaction, seedInitialFactions, foundFaction, contributeToFaction,
+  initTraitorFaction, seedInitialFactions, foundFaction, foundFactionCell, contributeToFaction,
   investigateFaction, denounceFaction,
   getFactionBonuses, buildClientFactionState, buildGovernorFactionBrief,
   createNewAlliance, joinAlliance, buildAllianceState,

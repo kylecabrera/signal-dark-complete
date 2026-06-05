@@ -2,7 +2,7 @@ const db = require('./db');
 const { processMovesIntoLeaks, updateSirisModel, applyGovernorActionResults } = require('./intel');
 const { runAllGovernors } = require('./governors');
 const { resolveAllCombat, runProductionPhase, buildPublicUnitState } = require('./units');
-const { contributeToFaction, foundFaction, investigateFaction, denounceFaction, getFactionBonuses, buildClientFactionState, buildAllianceState } = require('./factions');
+const { contributeToFaction, foundFaction, foundFactionCell, investigateFaction, denounceFaction, getFactionBonuses, buildClientFactionState, buildAllianceState } = require('./factions');
 const { ALERT_LEVELS, isAdjacent, LANES } = require('./world');
 const CONFIG = require('./config');
 
@@ -353,6 +353,17 @@ async function applyRebelAction(sessionId, playerId, action) {
     result.faction = fResult.faction;
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       (rebelState.credits||0) - CONFIG.FACTIONS.FOUND_COST);
+
+  // ── Faction: found cell ────────────────────
+  } else if (type === 'found_cell') {
+    if (!factionId || !planetId) return { ok:false, error:'Need factionId and planetId' };
+    const cResult = await foundFactionCell(sessionId, playerId, factionId, planetId, session.round);
+    if (!cResult.ok) return cResult;
+    covert = true;
+    label  = `Established faction cell at ${planetId}`;
+    result.cellFounded = true;
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
+      (rebelState.credits||0) - CONFIG.FACTIONS.CELL_COST);
 
   // ── Faction: investigate ──────────────────
   } else if (type === 'investigate') {

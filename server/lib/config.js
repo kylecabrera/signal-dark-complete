@@ -924,12 +924,17 @@ const CONFIG = {
   // ─────────────────────────────────────────────
   FACTIONS: {
     FOUND_COST: 200,
+    CELL_COST: 75,
+    CONTROL_COST: 500,
     MIN_CONTRIBUTION: 1,
     RANKS: {
       sympathiser: 0,
-      operative: 10,
-      cell_leader: 25,
-      commander: 50,
+      operative: 15,
+      cell_leader: 40,
+      regional_commander: 100,
+      sector_commander: 200,
+      military_leader: 350,
+      faction_controller: 500,
     },
     IDEOLOGIES: {
       liberation_front: {
@@ -1090,6 +1095,7 @@ const CONFIG = {
     hide:      { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0 },
     contribute:{ rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.05 },
     found:     { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.1  },
+    found_cell:{ rebellion_delta: 2,  empire_delta: 2, base_leak_chance: 0.15 },
     investigate:{ rebellion_delta: 0, empire_delta: 0, base_leak_chance: 0.05 },
     denounce:  { rebellion_delta: 0,  empire_delta: 0, always_overt: true },
     unit_move: { rebellion_delta: 0,  empire_delta: 0, base_leak_chance: 0.1  },
@@ -1118,6 +1124,7 @@ const CONFIG = {
       denounce:   -2,   // manipulation
       contribute:  0,
       found:       1,
+      found_cell:  1,
       investigate: 1,
       unit_move:   0,
       fleet_move:  0,

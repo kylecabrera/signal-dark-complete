@@ -268,6 +268,8 @@ export function useGame() {
   }, [sendAction, privateState]);
   const foundFaction = useCallback((factionName, ideology, planetId) =>
     sendAction({ type: 'found', planetId, factionName, ideology }), [sendAction]);
+  const foundCell    = useCallback((factionId) =>
+    sendAction({ type: 'found_cell', planetId: privateState?.currentPlanet, factionId }), [sendAction, privateState]);
   const investigate  = useCallback((factionId) =>
     sendAction({ type: 'investigate', planetId: privateState?.currentPlanet, factionId }), [sendAction, privateState]);
   const denounce     = useCallback((factionId) =>
@@ -301,7 +303,7 @@ export function useGame() {
     activeCombatReport, setActiveCombatReport,
     joinGame, markReady, submitTurn, endTurnEarly,
     sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower,
-    contribute, foundFaction, investigate, denounce,
+    contribute, foundFaction, foundCell, investigate, denounce,
     moveUnit, produceUnit, attackWith, attackEmpire, attackRebel, toggleUnitHidden,
   };
 }

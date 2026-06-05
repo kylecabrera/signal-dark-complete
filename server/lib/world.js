@@ -322,10 +322,65 @@ function getPlayerRank(contributionPct) {
   if (contributionPct >= ranks.operative)   return 'operative';
   return 'sympathiser';
 }
+
+// ─────────────────────────────────────────────
+// Sector system for criminality tracking
+// ─────────────────────────────────────────────
+const SECTORS = {
+  'Deep Core': ['p30', 'p50', 'p74', 'p93'],
+  'Core Worlds': ['p01', 'p02', 'p06', 'p13', 'p36', 'p43', 'p44', 'p45', 'p57', 'p58', 'p63', 'p70', 'p73', 'p76', 'p81', 'p84', 'p85', 'p86', 'p89', 'p90', 'p92', 'p96', 'p97', 'p99'],
+  'Inner Rim': ['p20', 'p21', 'p41', 'p51', 'p52', 'p54', 'p55', 'p61', 'p71', 'p75', 'p80', 'p83', 'p94'],
+  'Colonies': ['p04', 'p11', 'p15', 'p16', 'p31', 'p32', 'p40', 'p48', 'p49', 'p59', 'p60', 'p65', 'p66', 'p68', 'p72', 'p79', 'p87', 'p91'],
+  'Expansion Region': ['p10', 'p56', 'p62', 'p64', 'p67', 'p78', 'p82'],
+  'Mid Rim': ['p08', 'p09', 'p22', 'p26', 'p27', 'p33', 'p35', 'p42', 'p53', 'p69', 'p77', 'p88', 'p95', 'p98'],
+  'Outer Rim Territories': ['p03', 'p05', 'p07', 'p12', 'p17', 'p18', 'p19', 'p23', 'p24', 'p25', 'p28', 'p29', 'p34', 'p37', 'p38', 'p39', 'p46', 'p47', 'p57', 'p58', 'p63', 'p70', 'p73', 'p76', 'p81', 'p84', 'p85', 'p86', 'p89', 'p90', 'p92', 'p96', 'p97', 'p99'],
+  'Wild Space': ['p14', 'p47'],
+  'Unknown Regions': ['p47', 'p74'],
+};
+
+// Map planets to their sector
+const PLANET_TO_SECTOR = {};
+Object.entries(SECTORS).forEach(([sector, planets]) => {
+  planets.forEach(planetId => {
+    PLANET_TO_SECTOR[planetId] = sector;
+  });
+});
+
+// Sector adjacency graph
+const SECTOR_ADJACENCY = {
+  'Deep Core': ['Core Worlds', 'Inner Rim'],
+  'Core Worlds': ['Deep Core', 'Inner Rim', 'Colonies', 'Mid Rim'],
+  'Inner Rim': ['Deep Core', 'Core Worlds', 'Colonies', 'Mid Rim', 'Expansion Region'],
+  'Colonies': ['Core Worlds', 'Inner Rim', 'Mid Rim', 'Expansion Region'],
+  'Expansion Region': ['Inner Rim', 'Colonies', 'Mid Rim', 'Outer Rim Territories'],
+  'Mid Rim': ['Core Worlds', 'Inner Rim', 'Colonies', 'Expansion Region', 'Outer Rim Territories'],
+  'Outer Rim Territories': ['Expansion Region', 'Mid Rim', 'Wild Space', 'Unknown Regions'],
+  'Wild Space': ['Outer Rim Territories'],
+  'Unknown Regions': ['Outer Rim Territories'],
+};
+
+const CRIMINALITY_LEVELS = {
+  0: { name: 'Civilian', label: 'CIVILIAN' },
+  1: { name: 'Wanted', label: 'WANTED', detentionChance: 0.20 },
+  2: { name: 'Fugitive', label: 'FUGITIVE', detentionChance: 0.40 },
+  3: { name: 'Outlaw', label: 'OUTLAW', hostile: true, detentionChance: 0.60 },
+  4: { name: 'Terrorist', label: 'TERRORIST', hostile: true, detentionChance: 0.80 },
+};
+
+function getPlanetSector(planetId) {
+  return PLANET_TO_SECTOR[planetId] || null;
+}
+
+function getAdjacentSectors(sectorName) {
+  return SECTOR_ADJACENCY[sectorName] || [];
+}
+
 module.exports = {
   PLANETS, LANES, BASE_WATCHED_LANES, STARTING_PLANET, PLAYER_COLORS,
   ALERT_LEVELS, FACTION_NAME_POOL, TRAITOR_FACTION_NAMES,
+  SECTORS, PLANET_TO_SECTOR, SECTOR_ADJACENCY, CRIMINALITY_LEVELS,
   getNeighbors, isAdjacent, reachableIn, generateGameCode,
   buildInitialPlanetState, buildInitialGovernorState, buildInitialVektisMemory,
   buildTraitorFaction, getRecruitmentMultiplier, getPlayerRank,
+  getPlanetSector, getAdjacentSectors,
 };

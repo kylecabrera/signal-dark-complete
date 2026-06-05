@@ -108,6 +108,57 @@ async function updateRebelStateHasHiddenUnits(sessionId, playerId, hasHidden) {
   return rows[0];
 }
 
+async function updateCriminality(sessionId, playerId, sector, delta) {
+  const { rows: [state] } = await pool.query(
+    `SELECT criminality FROM rebel_state WHERE session_id=$1 AND player_id=$2`,
+    [sessionId, playerId]
+  );
+  if (!state) return null;
+
+  const crim = state.criminality || {};
+  const current = crim[sector] || 0;
+  const newVal = Math.max(0, Math.min(4, current + delta));
+  crim[sector] = newVal;
+
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET criminality = $3
+     WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+    [sessionId, playerId, JSON.stringify(crim)]
+  );
+  return rows[0];
+}
+
+async function setDetention(sessionId, playerId, detained, turns = 0) {
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET is_detained = $3, detention_turns = $4
+     WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+    [sessionId, playerId, detained, turns]
+  );
+  return rows[0];
+}
+
+async function decrementDetentionTurns(sessionId, playerId) {
+  const { rows: [state] } = await pool.query(
+    `SELECT detention_turns FROM rebel_state WHERE session_id=$1 AND player_id=$2`,
+    [sessionId, playerId]
+  );
+  if (!state || state.detention_turns <= 1) {
+    const { rows } = await pool.query(
+      `UPDATE rebel_state SET is_detained = false, detention_turns = 0
+       WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+      [sessionId, playerId]
+    );
+    return rows[0];
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE rebel_state SET detention_turns = detention_turns - 1
+     WHERE session_id=$1 AND player_id=$2 RETURNING *`,
+    [sessionId, playerId]
+  );
+  return rows[0];
+}
+
 // ── Sealed moves ─────────────────────────────
 async function insertSealedMove(sessionId, playerId, round, actionType, planetId, covert, label, metadata={}, targetId=null) {
   const { rows } = await pool.query(
@@ -797,6 +848,7 @@ module.exports = {
   createSession, getSessionByCode, getSessionById, updateSession,
   createPlayer, getPlayers, eliminatePlayer, updatePlayerSocket, getPlayerBySocket,
   upsertRebelState, getRebelState, getAllRebelStates, updateRebelStateSuspicion, updateRebelStateHasHiddenUnits,
+  updateCriminality, setDetention, decrementDetentionTurns,
   insertSealedMove, getSealedMovesForRound, getPlayerSealedMoves,
   insertIntelLeak, getRecentLeaks,
   saveGovernorMemory, getGovernorHistory,

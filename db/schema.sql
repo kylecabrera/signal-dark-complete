@@ -54,6 +54,9 @@ CREATE TABLE rebel_state (
   credits         INTEGER NOT NULL DEFAULT 5,
   suspicion       INTEGER NOT NULL DEFAULT 0,
   has_hidden_units BOOLEAN NOT NULL DEFAULT FALSE,
+  criminality     JSONB NOT NULL DEFAULT '{}',
+  is_detained     BOOLEAN NOT NULL DEFAULT FALSE,
+  detention_turns INTEGER NOT NULL DEFAULT 0,
   UNIQUE(session_id, player_id)
 );
 

@@ -896,6 +896,14 @@ const CONFIG = {
       rebelOnly: true,
       description: 'The player\'s powerful Jedi avatar. Can be embedded in ships. Death eliminates the player.',
     },
+    police_patrol: {
+      label: 'Police Patrol', designation: 'Local Police',
+      cost: 0, buildTime: 0, strength: 3, hp: 2,
+      canOrbit: false, canSurface: true, hidden: false,
+      jumpDistance: 0, transportCapacity: 0,
+      imperialOnly: true,
+      description: 'Planetary law enforcement. Neutral until player criminality reaches Outlaw level.',
+    },
   },
 
   // ─────────────────────────────────────────────

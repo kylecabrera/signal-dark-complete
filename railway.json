@@ -1,9 +1,9 @@
 {
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "echo 'skipping root build'"
+    "buildCommand": "echo 'skipping build'"
   },
   "deploy": {
-    "startCommand": "cd server && npm install && npm start"
+    "startCommand": "npm install && npm start"
   }
 }

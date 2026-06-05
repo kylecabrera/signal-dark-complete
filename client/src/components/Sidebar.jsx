@@ -355,6 +355,7 @@ export function Sidebar({ game }) {
   const isRebelPhase  = phase === 'rebel';
   const actionsLeft   = privateState?.actionsRemaining ?? 0;
   const credits       = privateState?.credits ?? 0;
+  const suspicion     = privateState?.suspicion ?? 0;
   const forceAlignment = privateState?.forceAlignment ?? 0;
   const forceStrength = privateState?.forceStrength ?? 0;
   const forceSide = privateState?.forceSide ?? 'grey';
@@ -444,6 +445,11 @@ export function Sidebar({ game }) {
               </div>
               <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginTop:4 }}>
                 {actionsLeft} ACTION{actionsLeft!==1?'S':''} LEFT · {credits}cr
+              </div>
+              <div style={{ fontFamily:'var(--mono)', fontSize:8, color:'#5a7090', marginTop:3 }}>
+                DETECTION: <span style={{ color: suspicion > 50 ? '#e84040' : suspicion > 25 ? '#e8a030' : '#40c880' }}>
+                  {suspicion}%
+                </span>
               </div>
             </div>
           )}

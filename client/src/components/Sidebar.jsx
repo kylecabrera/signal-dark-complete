@@ -834,22 +834,6 @@ export function Sidebar({ game }) {
               ))}
             </div>
           )}
-
-          {/* Siris intel strip */}
-          <div className="sb intel-strip">
-            <div className="it">SIRIS-VAEL // ANALYSIS</div>
-            <div className="ir"><span>PROBABLE REGION</span>
-              <span className="iv">{govGovState?.siris?.probableRegion||'—'}</span></div>
-            <div className="ir"><span>CONFIDENCE</span>
-              <span className={`iv ${['CERTAIN','HIGH'].includes(govGovState?.siris?.confidence)?'ih':govGovState?.siris?.confidence==='MEDIUM'?'im':''}`}>
-                {govGovState?.siris?.confidence||'—'}
-              </span>
-            </div>
-            <div className="ir" style={{ border:'none' }}>
-              <span>SUSPECTS</span>
-              <span className="iv ih">{govGovState?.siris?.suspectPlanets?.length||0}</span>
-            </div>
-          </div>
         </div>
       )}
 

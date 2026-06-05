@@ -5,6 +5,9 @@ const { Server } = require('socket.io');
 const cors    = require('cors');
 const db      = require('./lib/db');
 
+const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+console.log('SERVER STARTING - CLIENT_ORIGIN:', clientOrigin);
+
 const sessionRoutes = require('./routes/sessions');
 const registerSocketHandlers = require('./routes/socket');
 
@@ -12,7 +15,7 @@ const app        = express();
 const httpServer = http.createServer(app);
 const io         = new Server(httpServer, {
   cors: {
-    origin:      process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin:      clientOrigin,
     methods:     ['GET','POST','PATCH'],
     credentials: true,
   },
@@ -23,7 +26,7 @@ io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 });
 
-app.use(cors({ origin:process.env.CLIENT_ORIGIN||'http://localhost:5173', credentials:true }));
+app.use(cors({ origin: clientOrigin, credentials:true }));
 app.use(express.json());
 app.get('/health', (_, res) => res.json({ status:'ok', ts:Date.now() }));
 app.use('/api', sessionRoutes);

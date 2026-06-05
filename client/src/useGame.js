@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSocket } from './SocketContext';
 
 export function useGame() {
@@ -21,6 +21,7 @@ export function useGame() {
   const [adminOpen, setAdminOpen]               = useState(false);
   const [investigateResult, setInvestigateResult] = useState(null);
   const [traitorAlert, setTraitorAlert]         = useState(false);
+  const [jediDeathAlert, setJediDeathAlert]     = useState(false);
   const [startingPlanetInfo, setStartingPlanetInfo] = useState(null);
   const [pvpCombatResult, setPvpCombatResult]   = useState(null);
   const [activeCombatReport, setActiveCombatReport] = useState(null);
@@ -209,6 +210,20 @@ export function useGame() {
     };
   }, [socket, notify]);
 
+  // Detect when jedi dies
+  const prevJediAliveRef = useRef(true);
+  useEffect(() => {
+    if (!privateState) return;
+    const jediAlive = (privateState.myUnits || []).some(u => u.unit_type === 'jedi_avatar');
+
+    // If jedi was alive but now isn't, show alert
+    if (prevJediAliveRef.current && !jediAlive) {
+      setJediDeathAlert(true);
+      setTimeout(() => setJediDeathAlert(false), 5000);
+    }
+    prevJediAliveRef.current = jediAlive;
+  }, [privateState]);
+
   // Join a game room - waits for socket to be connected first
   const joinGame = useCallback((sid, pid, spInfo) => {
     if (spInfo) setStartingPlanetInfo(spInfo);
@@ -300,7 +315,7 @@ export function useGame() {
     selectedUnit, setSelectedUnit,
     adminOpen, setAdminOpen,
     investigateResult, setInvestigateResult,
-    traitorAlert, startingPlanetInfo,
+    traitorAlert, jediDeathAlert, setJediDeathAlert, startingPlanetInfo,
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
     joinGame, markReady, submitTurn, endTurnEarly,

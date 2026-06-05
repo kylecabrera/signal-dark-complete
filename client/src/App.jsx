@@ -11,7 +11,7 @@ import './app.css';
 
 function GameShell() {
   const game = useGame();
-  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert } = game;
+  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert, jediDeathAlert } = game;
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -66,6 +66,11 @@ function GameShell() {
       {traitorAlert && (
         <div className="traitor-alert">
           INTELLIGENCE ASSET TRIGGERED — YOUR POSITION HAS BEEN EXPOSED
+        </div>
+      )}
+      {jediDeathAlert && (
+        <div className="jedi-death-alert">
+          YOUR JEDI HAS FALLEN — YOU ARE ELIMINATED FROM THIS GAME
         </div>
       )}
       {notification && <div className="notification show">{notification}</div>}

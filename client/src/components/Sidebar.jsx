@@ -340,7 +340,7 @@ export function Sidebar({ game }) {
     produceUnit,
   } = game;
 
-  const [sidebarTab, setSidebarTab] = useState('actions'); // actions|fleet|factions|feed|log
+  const [sidebarTab, setSidebarTab] = useState('actions'); // actions|combat|fleet|factions|feed|log
 
   if (!publicState) return null;
 
@@ -404,7 +404,7 @@ export function Sidebar({ game }) {
 
       {/* Tab switcher */}
       <div style={{ display:'flex', gap:3, padding:'6px 13px', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
-        {['actions','fleet','factions','feed','log'].map(t => (
+        {['actions','combat','fleet','factions','feed','log'].map(t => (
           <button key={t} onClick={() => setSidebarTab(t)} style={{
             flex:1, padding:'4px 0',
             background: sidebarTab===t ? 'rgba(58,143,232,0.15)' : 'transparent',
@@ -796,6 +796,51 @@ export function Sidebar({ game }) {
             <div className="ir" style={{ border:'none' }}>
               <span>SUSPECTS</span>
               <span className="iv ih">{govGovState?.siris?.suspectPlanets?.length||0}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMBAT TAB */}
+      {sidebarTab === 'combat' && (
+        <div style={{ overflowY:'auto', flex:1, padding:'8px 13px' }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12 }}>
+            <div style={{ fontWeight:600, color:'#e84040', marginBottom:8 }}>⚔ COMBAT BASICS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>• Combat triggers <strong>automatically</strong> when your units meet enemy units on the same planet/layer</div>
+              <div>• Both orbital and surface layers are separate. Combat can happen independently on each.</div>
+              <div>• Stronger units deal more damage. Your Jedi Avatar has strength 12 — a powerful asset.</div>
+              <div>• Battles resolve immediately. Winners remain, losers are destroyed.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#40c880', marginBottom:8 }}>🛡 COMBAT FACTORS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div><strong>Strength:</strong> Higher = more damage per hit. Unit type determines base strength.</div>
+              <div><strong>HP (Health Points):</strong> How much damage a unit can take before destroyed.</div>
+              <div><strong>Hit Chance:</strong> 40% base. More units improve odds. First-strike advantage in orbit.</div>
+              <div><strong>Defend Bonus:</strong> +10% defense when defending your home planet.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#a080e0', marginBottom:8 }}>✦ JEDI ADVANTAGE</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>Your Jedi Avatar (strength 12, hp 10) is your strongest unit.</div>
+              <div>Can be embedded in any ship, adding both strength and health to that unit.</div>
+              <div>Discover Force Powers to unlock combat abilities: Force Lightning, Force Choke, Force Shield.</div>
+              <div style={{ marginTop:8, color:'#e84040' }}>⚠️ If your Jedi dies in combat, you're eliminated from the game.</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#e8d030', marginBottom:8 }}>💡 STRATEGY TIPS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div>• Avoid combat until you have superior numbers or strength.</div>
+              <div>• Use Intel to reveal hidden enemy units before engaging.</div>
+              <div>• Grouping units into fleets for cohesive movement reduces attrition.</div>
+              <div>• Factions provide diverse unit types — use variety to counter enemies.</div>
             </div>
           </div>
         </div>

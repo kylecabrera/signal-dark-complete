@@ -142,8 +142,17 @@ async function applyRebelAction(sessionId, playerId, action) {
 
     if (!isAdjacent(currentPlanet, planetId)) return { ok:false, error:'Not adjacent' };
     const lockedLanes = session.locked_lanes || [];
+    const watchedLanes = session.watched_lanes || [];
+
     if (lockedLanes.some(([a,b])=>(a===currentPlanet&&b===planetId)||(a===planetId&&b===currentPlanet)))
       return { ok:false, error:'Hyperlane locked down' };
+
+    // Check if traveling through a watched/monitored lane
+    const isWatchedLane = watchedLanes.some(([a,b])=>(a===currentPlanet&&b===planetId)||(a===planetId&&b===currentPlanet));
+    if (isWatchedLane) {
+      result.watchedLaneWarning = `⚠️ MONITORED HYPERLANE: This lane is under imperial surveillance!`;
+    }
+
     label = `Moved to ${planetId}`;
     await db.upsertRebelState(sessionId, playerId, planetId, rebelState.actions_used+1, rebelState.credits||0);
     await db.escortOrbitalUnits(sessionId, playerId, planetId);
@@ -324,6 +333,23 @@ async function applyRebelAction(sessionId, playerId, action) {
               unitCount: units.length,
             });
           }
+        }
+      }
+
+      // Discover monitored hyperlanes with 40% chance per watched lane
+      const watchedLanes = session.watched_lanes || [];
+      const discoveredLanes = [];
+      for (const [a, b] of watchedLanes) {
+        if (Math.random() < 0.40) {
+          discoveredLanes.push([a, b]);
+          const planetA = session.planet_state.find(p => p.id === a);
+          const planetB = session.planet_state.find(p => p.id === b);
+          result.discoveries = result.discoveries || [];
+          result.discoveries.push({
+            type: 'lane_discovered',
+            text: `Intel: Monitored hyperlane detected — ${planetA?.name || a} ↔ ${planetB?.name || b}`,
+            lane: [a, b],
+          });
         }
       }
     }

@@ -355,22 +355,16 @@ export function SectorMap({ game }) {
                 )}
 
                 {(() => {
-                  // Show red triangles for empire/faction fleets (up to 4)
-                  const imperialUnits = (publicState?.units || [])
-                    .filter(u => u.planet_id === planet.id &&
+                  // Show single red triangle if any empire/faction fleets present
+                  const hasImperialUnits = (publicState?.units || [])
+                    .some(u => u.planet_id === planet.id &&
                              (u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:')) &&
-                             !u.is_hidden)
-                    .slice(0, 4);
-                  return imperialUnits.map((u, i) => {
-                    const angle = (i / Math.max(imperialUnits.length, 1)) * Math.PI * 2 - Math.PI / 2;
-                    const tx = x + Math.cos(angle) * 21, ty = y + Math.sin(angle) * 21;
-                    const pts = [0,1,2].map(j => {
-                      const a = (j/3)*Math.PI*2 - Math.PI/2;
-                      return `${tx+Math.cos(a)*4},${ty+Math.sin(a)*4}`;
-                    }).join(' ');
-                    return <polygon key={`fleet-${u.id}`} points={pts} fill="#e84040" opacity={0.85}
-                      className="imperial-fleet-marker" title={u.designation || u.unit_type} />;
-                  });
+                             !u.is_hidden);
+                  return hasImperialUnits ? (
+                    <polygon key={`fleet-${planet.id}`} points={`${x},${y+5},${x-4},${y-3},${x+4},${y-3}`}
+                      fill="#e84040" opacity={0.85} className="imperial-fleet-marker"
+                      title="Imperial/Faction Fleet Present" />
+                  ) : null;
                 })()}
 
                 {orbitUnits.slice(0, 4).map((u, i) => {

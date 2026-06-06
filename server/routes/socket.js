@@ -112,6 +112,7 @@ module.exports = function registerSocketHandlers(io) {
           cascadeEffects: result.cascadeEffects,
           policeKilled: result.policeKilled,
           policeKillMessage: result.policeKillMessage,
+          watchedLaneWarning: result.watchedLaneWarning,
         });
 
         // If traitor exposed, all governors get the info (board visual)

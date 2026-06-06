@@ -166,7 +166,7 @@ async function applyRebelAction(sessionId, playerId, action) {
     if (!action.combatId) return { ok:false, error:'No active combat' };
 
     const activeCombats = await db.getActiveCombats(sessionId);
-    const combat = activeCombats[action.combatId];
+    const combat = activeCombats.find(c => c.id === action.combatId);
     if (!combat) return { ok:false, error:'Combat not found' };
 
     // Check that player is involved in this combat
@@ -174,28 +174,43 @@ async function applyRebelAction(sessionId, playerId, action) {
     const isDefender = combat.defenderKey === `rebel:${playerId}`;
     if (!isAttacker && !isDefender) return { ok:false, error:'You are not in this combat' };
 
+    // Deduct one action for the combat round
+    const currentPlanet = rebelState.current_planet;
+    await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
+
     // Resolve one round of combat
     const { resolveSingleCombatRound } = require('./units');
-    const roundResult = await resolveSingleCombatRound(sessionId, action.combatId, combat);
+    const { outcome, updatedCombat } = await resolveSingleCombatRound(sessionId, action.combatId, combat);
 
-    label = `Combat Round ${(roundResult.updatedCombat?.round || 0)}`;
-    result.combatResult = roundResult;
+    label = `Combat Round ${updatedCombat.round}`;
+    result.combatRound = {
+      combatId: action.combatId,
+      round: updatedCombat.round,
+      outcome,
+      attackerUnits: updatedCombat.attacker_units,
+      defenderUnits: updatedCombat.defender_units,
+    };
 
-    // If combat ended, update planet control if surface combat
-    if (roundResult.outcome !== 'continuing' && combat.planetId && roundResult.outcome.includes('wins')) {
-      const planetId = combat.planetId;
-      const newControl = roundResult.winner === combat.attackerKey ? 'empire' : 'rebel';
-      const planets = JSON.parse(JSON.stringify(session.planet_state));
-      const planet = planets.find(p => p.id === planetId);
-      if (planet) {
-        planet.controlled_by = newControl;
-        await db.updateSession(sessionId, { planet_state: planets });
-        // Update police allegiance
+    // Update combat state
+    await db.updateCombat(sessionId, action.combatId, updatedCombat);
+
+    // If combat ended, update planet control
+    if (outcome && outcome !== 'continuing') {
+      const victorKey = outcome === 'attacker_wins' ? combat.attackerKey : combat.defenderKey;
+
+      if (combat.planetId && combat.layer === 'surface') {
+        const newControl = victorKey.startsWith('rebel') ? 'rebel' : 'empire';
+        const planets = JSON.parse(JSON.stringify(session.planet_state));
+        const planet = planets.find(p => p.id === combat.planetId);
         if (planet) {
-          const newPoliceOwner = newControl === 'empire' ? 'empire:local_police' : newControl;
-          await db.updatePoliceAllegiance(sessionId, planetId, newPoliceOwner);
+          planet.controlled_by = newControl;
+          await db.updateSession(sessionId, { planet_state: planets });
+          // Update police allegiance
+          const newPoliceOwner = newControl === 'empire' ? 'empire:local_police' : `rebel:${playerId}`;
+          await db.updatePoliceAllegiance(sessionId, combat.planetId, newPoliceOwner);
         }
       }
+
       await db.endCombat(sessionId, action.combatId);
     }
 

@@ -187,6 +187,53 @@ module.exports = function registerSocketHandlers(io) {
             if (defenderPrivate) defenderSock.emit('private_state', defenderPrivate);
           }
         }
+
+        // Combat round update — broadcast to involved players
+        if (result.combatRound) {
+          const { combatId, round, outcome, attackerUnits, defenderUnits } = result.combatRound;
+
+          // Get combat to find involved players
+          const activeCombats = await db.getActiveCombats(sessionId);
+          const combat = activeCombats.find(c => c.id === combatId);
+          if (combat) {
+            const involvedPlayerIds = [];
+            if (combat.attackerKey.startsWith('rebel:')) {
+              involvedPlayerIds.push(combat.attackerKey.split(':')[1]);
+            }
+            if (combat.defenderKey.startsWith('rebel:')) {
+              involvedPlayerIds.push(combat.defenderKey.split(':')[1]);
+            }
+
+            for (const pid of involvedPlayerIds) {
+              const sock = [...io.sockets.sockets.values()].find(s => s.data?.playerId === pid);
+              if (sock) {
+                sock.emit('combat_round_update', {
+                  combatId,
+                  round,
+                  attackerUnits,
+                  defenderUnits,
+                  outcome
+                });
+              }
+            }
+
+            // If combat ended, broadcast end event
+            if (outcome && outcome !== 'continuing') {
+              const victorKey = outcome === 'attacker_wins' ? combat.attackerKey : combat.defenderKey;
+              for (const pid of involvedPlayerIds) {
+                const sock = [...io.sockets.sockets.values()].find(s => s.data?.playerId === pid);
+                if (sock) {
+                  sock.emit('combat_ended', {
+                    combatId,
+                    outcome,
+                    victoryKey,
+                    round
+                  });
+                }
+              }
+            }
+          }
+        }
       } catch(err) {
         console.error('rebel_action error:', err.message, err.stack);
         socket.emit('action_rejected', { reason:err.message || 'Action failed' });
@@ -322,6 +369,79 @@ module.exports = function registerSocketHandlers(io) {
       } catch(err) {
         console.error('toggle_unit_hidden error:', err);
         socket.emit('error', { message:'Toggle failed' });
+      }
+    });
+
+    // ── Combat withdraw ────────────────────────
+    socket.on('combat_withdraw', async ({ combatId, unitsToRemove }) => {
+      try {
+        const { sessionId, playerId } = socket.data;
+        if (!sessionId || !combatId) return;
+
+        const session = await db.getSessionById(sessionId);
+        if (!session) return socket.emit('error', { message:'Session not found' });
+
+        const activeCombats = await db.getActiveCombats(sessionId);
+        const combat = activeCombats.find(c => c.id === combatId);
+        if (!combat) return socket.emit('error', { message:'Combat not found' });
+
+        const playerSide = combat.attackerKey === `rebel:${playerId}` ? 'attacker' :
+                          combat.defenderKey === `rebel:${playerId}` ? 'defender' : null;
+        if (!playerSide) return socket.emit('error', { message:'Not involved in this combat' });
+
+        const unitsToKeep = playerSide === 'attacker' ? combat.attacker_units : combat.defender_units;
+        const unitsToRemoveIds = Object.keys(unitsToRemove || {}).filter(k => unitsToRemove[k]);
+        const remainingUnits = unitsToKeep.filter(u => !unitsToRemoveIds.includes(u.id));
+
+        const updatedCombat = {
+          ...combat,
+          [playerSide === 'attacker' ? 'attacker_units' : 'defender_units']: remainingUnits
+        };
+
+        const involvedPlayerIds = [];
+        if (combat.attackerKey.startsWith('rebel:')) involvedPlayerIds.push(combat.attackerKey.split(':')[1]);
+        if (combat.defenderKey.startsWith('rebel:')) involvedPlayerIds.push(combat.defenderKey.split(':')[1]);
+
+        // If one side now has no units, end combat
+        if (remainingUnits.length === 0) {
+          const victorKey = playerSide === 'attacker' ? combat.defenderKey : combat.attackerKey;
+          await db.endCombat(sessionId, combatId);
+
+          for (const pid of involvedPlayerIds) {
+            const sock = [...io.sockets.sockets.values()].find(s => s.data?.playerId === pid);
+            if (sock) {
+              sock.emit('combat_ended', {
+                combatId,
+                outcome: playerSide === 'attacker' ? 'defender_wins' : 'attacker_wins',
+                victoryKey,
+                round: updatedCombat.round
+              });
+            }
+          }
+        } else {
+          await db.updateCombat(sessionId, combatId, updatedCombat);
+
+          for (const pid of involvedPlayerIds) {
+            const sock = [...io.sockets.sockets.values()].find(s => s.data?.playerId === pid);
+            if (sock) {
+              sock.emit('combat_round_update', {
+                combatId,
+                round: updatedCombat.round,
+                attackerUnits: updatedCombat.attacker_units,
+                defenderUnits: updatedCombat.defender_units,
+                outcome: 'continuing',
+                withdrawal: true
+              });
+            }
+          }
+        }
+
+        const updatedSession = await db.getSessionById(sessionId);
+        const players = await db.getPlayers(sessionId);
+        io.to(sessionId).emit('state_update', await engine.buildPublicState(updatedSession, players));
+      } catch(err) {
+        console.error('combat_withdraw error:', err.message);
+        socket.emit('error', { message:'Withdrawal failed: ' + err.message });
       }
     });
 

@@ -26,6 +26,7 @@ export function useGame() {
   const [pvpCombatResult, setPvpCombatResult]   = useState(null);
   const [activeCombatReport, setActiveCombatReport] = useState(null);
   const [detentionAlert, setDetentionAlert] = useState(null);
+  const [activeCombat, setActiveCombat] = useState(null);
 
   const notify = useCallback((msg) => {
     setNotification(msg);
@@ -224,6 +225,34 @@ export function useGame() {
       notify(`FINE REJECTION: ${reason.toUpperCase()}`);
     });
 
+    socket.on('combat_initiated', ({ attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round }) => {
+      notify('⚔️ COMBAT INITIATED');
+      setActiveCombat({
+        attackerUnits,
+        defenderUnits,
+        attackerKey,
+        defenderKey,
+        planetId,
+        round,
+        playerSide: (publicState?.playerId || playerId) === attackerKey ? 'attacker' : 'defender'
+      });
+    });
+
+    socket.on('combat_round_update', ({ attackerUnits, defenderUnits }) => {
+      setActiveCombat(prev => prev ? {
+        ...prev,
+        attackerUnits,
+        defenderUnits,
+        round: prev.round + 1
+      } : null);
+    });
+
+    socket.on('combat_ended', ({ outcome, summary }) => {
+      setActiveCombat(null);
+      notify(summary?.toUpperCase() || 'COMBAT ENDED');
+      setFeedEntries(prev => [{ gov: 'system', text: summary }, ...prev].slice(0,60));
+    });
+
     socket.on('error', ({ message }) => {
       console.log('socket error event:', message);
       notify(`ERROR: ${message.toUpperCase()}`);
@@ -253,6 +282,9 @@ export function useGame() {
       socket.off('game_over');
       socket.off('fine_resolved');
       socket.off('fine_rejected');
+      socket.off('combat_initiated');
+      socket.off('combat_round_update');
+      socket.off('combat_ended');
       socket.off('error');
     };
   }, [socket, notify]);
@@ -388,6 +420,7 @@ export function useGame() {
     pvpCombatResult, setPvpCombatResult,
     activeCombatReport, setActiveCombatReport,
     detentionAlert, setDetentionAlert,
+    activeCombat, setActiveCombat,
     socket,
     joinGame, markReady, submitTurn, endTurnEarly,
     sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,

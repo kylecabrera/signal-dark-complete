@@ -6,12 +6,13 @@ import { Sidebar } from './components/Sidebar';
 import { Lobby, GameOver } from './components/Lobby';
 import { AdminPanel } from './components/AdminPanel';
 import { CombatReportModal } from './components/CombatReportModal';
+import { CombatModal } from './components/CombatModal';
 import { SplashScreen } from './components/SplashScreen';
 import './app.css';
 
 function GameShell() {
   const game = useGame();
-  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert, jediDeathAlert, detentionAlert, setDetentionAlert } = game;
+  const { publicState, notification, sessionId, adminOpen, setAdminOpen, traitorAlert, jediDeathAlert, detentionAlert, setDetentionAlert, activeCombat } = game;
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -61,6 +62,12 @@ function GameShell() {
           report={game.activeCombatReport}
           isPvp={false}
           onClose={() => game.setActiveCombatReport(null)}
+        />
+      )}
+      {activeCombat && (
+        <CombatModal
+          combat={activeCombat}
+          socket={game.socket}
         />
       )}
       {traitorAlert && (

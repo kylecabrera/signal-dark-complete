@@ -873,6 +873,58 @@ async function ensureFactionResearchInitialized(factionId, sessionId) {
   }
 }
 
+// ── Active Combat Tracking ──────────────
+async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, attackerKey, defenderKey) {
+  const session = await getSessionById(sessionId);
+  if (!session) return null;
+
+  const activeCombats = session.active_combats || {};
+  const combatId = `${planetId}-${Date.now()}`;
+
+  activeCombats[combatId] = {
+    id: combatId,
+    planetId,
+    attackerUnits,
+    defenderUnits,
+    attackerKey,
+    defenderKey,
+    round: 0,
+    status: 'ongoing',
+    createdAt: Date.now()
+  };
+
+  await updateSession(sessionId, { active_combats: activeCombats });
+  return activeCombats[combatId];
+}
+
+async function getActiveCombats(sessionId) {
+  const session = await getSessionById(sessionId);
+  return session?.active_combats || {};
+}
+
+async function updateCombat(sessionId, combatId, updates) {
+  const session = await getSessionById(sessionId);
+  if (!session) return null;
+
+  const activeCombats = session.active_combats || {};
+  if (activeCombats[combatId]) {
+    activeCombats[combatId] = { ...activeCombats[combatId], ...updates };
+    await updateSession(sessionId, { active_combats: activeCombats });
+    return activeCombats[combatId];
+  }
+  return null;
+}
+
+async function endCombat(sessionId, combatId) {
+  const session = await getSessionById(sessionId);
+  if (!session) return null;
+
+  const activeCombats = session.active_combats || {};
+  delete activeCombats[combatId];
+  await updateSession(sessionId, { active_combats: activeCombats });
+  return true;
+}
+
 module.exports = {
   pool,
   createSession, getSessionByCode, getSessionById, updateSession,
@@ -894,4 +946,5 @@ module.exports = {
   recordFleetDiscovery, getDiscoveredFleets, getDiscoveredFleetsByPlanet,
   createFleet, getFleet, getFleets, getFleetsByLocation, updateFleet, deleteFleet, getUnitsByFleet, assignUnitsToFleet,
   createAlliance, getAlliances, getAllianceById, addFactionToAlliance, getAllianceMembers, getFactionAlliance,
+  startCombat, getActiveCombats, updateCombat, endCombat,
 };

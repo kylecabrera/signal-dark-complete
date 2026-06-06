@@ -161,6 +161,44 @@ async function applyRebelAction(sessionId, playerId, action) {
     const suspicionDecrease = Math.floor(Math.random() * 2) + 2; // 2-3 point decrease
     await db.updateRebelStateSuspicion(sessionId, playerId, -suspicionDecrease);
 
+  // ── Combat Round ────────────────────────────
+  } else if (type === 'combat_round') {
+    if (!action.combatId) return { ok:false, error:'No active combat' };
+
+    const activeCombats = await db.getActiveCombats(sessionId);
+    const combat = activeCombats[action.combatId];
+    if (!combat) return { ok:false, error:'Combat not found' };
+
+    // Check that player is involved in this combat
+    const isAttacker = combat.attackerKey === `rebel:${playerId}`;
+    const isDefender = combat.defenderKey === `rebel:${playerId}`;
+    if (!isAttacker && !isDefender) return { ok:false, error:'You are not in this combat' };
+
+    // Resolve one round of combat
+    const { resolveSingleCombatRound } = require('./units');
+    const roundResult = await resolveSingleCombatRound(sessionId, action.combatId, combat);
+
+    label = `Combat Round ${(roundResult.updatedCombat?.round || 0)}`;
+    result.combatResult = roundResult;
+
+    // If combat ended, update planet control if surface combat
+    if (roundResult.outcome !== 'continuing' && combat.planetId && roundResult.outcome.includes('wins')) {
+      const planetId = combat.planetId;
+      const newControl = roundResult.winner === combat.attackerKey ? 'empire' : 'rebel';
+      const planets = JSON.parse(JSON.stringify(session.planet_state));
+      const planet = planets.find(p => p.id === planetId);
+      if (planet) {
+        planet.controlled_by = newControl;
+        await db.updateSession(sessionId, { planet_state: planets });
+        // Update police allegiance
+        if (planet) {
+          const newPoliceOwner = newControl === 'empire' ? 'empire:local_police' : newControl;
+          await db.updatePoliceAllegiance(sessionId, planetId, newPoliceOwner);
+        }
+      }
+      await db.endCombat(sessionId, action.combatId);
+    }
+
   // ── Money earning actions ───────────────────
   } else if (['earn_money','steal_money'].includes(type)) {
     if (planetId !== currentPlanet) return { ok:false, error:'Must be on this planet' };

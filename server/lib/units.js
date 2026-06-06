@@ -2,6 +2,69 @@ const db = require('./db');
 const CONFIG = require('./config');
 
 // ─────────────────────────────────────────────
+// Persistent Combat System
+// ─────────────────────────────────────────────
+async function resolveSingleCombatRound(sessionId, combatId, combatState) {
+  const { attackerUnits, defenderUnits, attackerKey, defenderKey } = combatState;
+
+  if (attackerUnits.length === 0 || defenderUnits.length === 0) {
+    // Combat is over
+    return { outcome: 'combat_ended', winner: attackerUnits.length === 0 ? defenderKey : attackerKey };
+  }
+
+  // Calculate total strength
+  let attackerStrength = attackerUnits.reduce((s, u) => s + u.strength, 0);
+  let defenderStrength = defenderUnits.reduce((s, u) => s + u.strength, 0);
+
+  // Roll for hits
+  let attackerHits = rollHits(attackerStrength, CONFIG.COMBAT.HIT_CHANCE);
+  let defenderHits = rollHits(defenderStrength, CONFIG.COMBAT.HIT_CHANCE + CONFIG.COMBAT.DEFENDER_BONUS);
+
+  // Apply damage
+  const newAttackerUnits = [...attackerUnits];
+  const newDefenderUnits = [...defenderUnits];
+
+  applyDamageToUnits(newDefenderUnits, attackerHits);
+  applyDamageToUnits(newAttackerUnits, defenderHits);
+
+  // Remove destroyed units
+  const survivingAttackers = newAttackerUnits.filter(u => u.hp > 0);
+  const survivingDefenders = newDefenderUnits.filter(u => u.hp > 0);
+
+  // Update combat state
+  const updatedCombat = await db.updateCombat(sessionId, combatId, {
+    attackerUnits: survivingAttackers,
+    defenderUnits: survivingDefenders,
+    round: (combatState.round || 0) + 1,
+    lastDamage: {
+      attackerHits,
+      defenderHits,
+      attackerLosses: attackerUnits.length - survivingAttackers.length,
+      defenderLosses: defenderUnits.length - survivingDefenders.length
+    }
+  });
+
+  // Check if combat is over
+  if (survivingAttackers.length === 0) {
+    return { outcome: 'defender_wins', updatedCombat };
+  } else if (survivingDefenders.length === 0) {
+    return { outcome: 'attacker_wins', updatedCombat };
+  } else {
+    return { outcome: 'continuing', updatedCombat };
+  }
+}
+
+function applyDamageToUnits(units, hits) {
+  let remainingHits = hits;
+  for (const unit of units) {
+    if (remainingHits <= 0) break;
+    const damageToUnit = Math.min(remainingHits, unit.hp);
+    unit.hp -= damageToUnit;
+    remainingHits -= damageToUnit;
+  }
+}
+
+// ─────────────────────────────────────────────
 // Combat resolution — two-phase: orbital then surface
 // ─────────────────────────────────────────────
 async function resolveAllCombat(sessionId, round) {
@@ -657,7 +720,7 @@ async function autoGroupFleets(sessionId, db) {
 }
 
 module.exports = {
-  resolveAllCombat, resolveCombat, resolveRebelVsRebelCombat, runProductionPhase,
+  resolveAllCombat, resolveCombat, resolveRebelVsRebelCombat, resolveSingleCombatRound, runProductionPhase,
   applyRebelUnitMove, applyFleetMove, queueRebelUnitProduction,
   buildPublicUnitState, getAssignedGovernor, autoGroupFleets,
 };

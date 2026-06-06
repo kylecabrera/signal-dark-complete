@@ -355,10 +355,11 @@ export function SectorMap({ game }) {
                 )}
 
                 {(() => {
-                  // Show single red triangle if any empire/faction fleets present
+                  // Show single red triangle if any empire/faction fleets present (excluding police)
                   const hasImperialUnits = (publicState?.units || [])
                     .some(u => u.planet_id === planet.id &&
                              (u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:')) &&
+                             u.unit_type !== 'police_patrol' &&
                              !u.is_hidden);
                   return hasImperialUnits ? (
                     <polygon key={`fleet-${planet.id}`} points={`${x},${y+5},${x-4},${y-3},${x+4},${y-3}`}
@@ -418,6 +419,23 @@ export function SectorMap({ game }) {
                     {planet.econ_output}⚡
                   </text>
                 )}
+
+                {(() => {
+                  const policeUnits = (publicState?.units || [])
+                    .filter(u => u.planet_id === planet.id && u.unit_type === 'police_patrol' && !u.is_hidden);
+                  if (policeUnits.length === 0) return null;
+                  return (
+                    <g key={`police-${planet.id}`}>
+                      <rect x={x-10} y={y-28} width={20} height={10}
+                        fill="rgba(160,120,80,0.7)" stroke="rgba(200,150,100,0.5)" strokeWidth={0.5} rx={2} />
+                      <text x={x} y={y-21} textAnchor="middle"
+                        fontSize={7} fill="rgba(255,220,180,0.9)" fontFamily="monospace" fontWeight="bold"
+                        style={{ pointerEvents: 'none' }}>
+                        🛡️ {policeUnits.length}
+                      </text>
+                    </g>
+                  );
+                })()}
 
                 {/* Discovered fleets indicators */}
                 {(() => {

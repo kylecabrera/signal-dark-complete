@@ -358,9 +358,30 @@ module.exports = function registerSocketHandlers(io) {
         await sleep(300);
       }
 
-      // Combat reports
+      // Combat reports and initiation of persistent combats
       for (const combat of (combatLog||[])) {
-        io.to(sessionId).emit('combat_report', combat);
+        if (combat.status === 'ongoing' && combat.combatId) {
+          // New persistent combat - broadcast to involved players
+          const involvedPlayerIds = combat.involvedPlayerIds || [];
+          for (const playerId of involvedPlayerIds) {
+            const sock = [...io.sockets.sockets.values()].find(s=>s.data?.playerId===playerId);
+            if (sock) {
+              sock.emit('combat_initiated', {
+                combatId: combat.combatId,
+                planetId: combat.planetId,
+                layer: combat.layer,
+                attackerKey: combat.attackerKey,
+                defenderKey: combat.defenderKey,
+                attackerUnits: combat.attackerUnits,
+                defenderUnits: combat.defenderUnits,
+                round: 0
+              });
+            }
+          }
+        } else if (combat.involvedPlayerIds) {
+          // Legacy: resolved combat report
+          io.to(sessionId).emit('combat_report', combat);
+        }
         await sleep(200);
       }
 

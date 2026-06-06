@@ -122,9 +122,11 @@ async function resolveAllCombat(sessionId, round) {
       if (!resolvedCombats.has(combatKey)) {
         resolvedCombats.add(combatKey);
 
-        const result = await resolveCombat(
-          sessionId, round, planetId, layer,
-          sides['rebel'], enemySide, 'rebel', enemyKey
+        // Create persistent combat instead of resolving immediately
+        const combat = await db.startCombat(
+          sessionId, planetId,
+          sides['rebel'], enemySide,
+          'rebel', enemyKey
         );
 
         // Extract involved player IDs
@@ -136,8 +138,19 @@ async function resolveAllCombat(sessionId, round) {
           }
         }
 
-        result.involvedPlayerIds = involvedPlayerIds;
-        combatLog.push(result);
+        // Log combat initiation
+        combatLog.push({
+          combatId: combat.id,
+          planetId,
+          layer,
+          attackerKey: 'rebel',
+          defenderKey: enemyKey,
+          attackerUnits: sides['rebel'],
+          defenderUnits: enemySide,
+          involvedPlayerIds,
+          round: 0,
+          status: 'ongoing'
+        });
       }
     }
   }

@@ -659,8 +659,8 @@ async function applyRebelAction(sessionId, playerId, action) {
     if (policeOnPlanet.length > 0) {
       const killChances = {
         'sabotage': 0.30,      // 30% chance to kill a police unit
-        'incite': 0.25,        // 25% chance to kill a police unit
-        'steal_money': 0.15    // 15% chance to kill a police unit
+        'incite': 0.15,        // 15% chance to kill a police unit
+        'steal_money': 0.05    // 5% chance to kill a police unit
       };
 
       const killChance = killChances[type] || 0;

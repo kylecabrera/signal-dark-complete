@@ -179,6 +179,16 @@ async function forceDetention(sessionId, playerId, turns) {
   return rows[0];
 }
 
+async function updatePoliceAllegiance(sessionId, planetId, newOwner) {
+  // Update police patrol units to match planet's new allegiance
+  const { rows } = await pool.query(
+    `UPDATE units SET owner = $3
+     WHERE session_id=$1 AND planet_id=$2 AND unit_type='police_patrol' RETURNING *`,
+    [sessionId, planetId, newOwner]
+  );
+  return rows;
+}
+
 // ── Sealed moves ─────────────────────────────
 async function insertSealedMove(sessionId, playerId, round, actionType, planetId, covert, label, metadata={}, targetId=null) {
   const { rows } = await pool.query(
@@ -868,7 +878,7 @@ module.exports = {
   createSession, getSessionByCode, getSessionById, updateSession,
   createPlayer, getPlayers, eliminatePlayer, updatePlayerSocket, getPlayerBySocket,
   upsertRebelState, getRebelState, getAllRebelStates, updateRebelStateSuspicion, updateRebelStateHasHiddenUnits,
-  updateCriminality, setDetention, decrementDetentionTurns, payFine, forceDetention,
+  updateCriminality, setDetention, decrementDetentionTurns, payFine, forceDetention, updatePoliceAllegiance,
   insertSealedMove, getSealedMovesForRound, getPlayerSealedMoves,
   insertIntelLeak, getRecentLeaks,
   saveGovernorMemory, getGovernorHistory,

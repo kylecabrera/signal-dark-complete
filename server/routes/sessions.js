@@ -25,6 +25,21 @@ router.post('/sessions', async (req, res) => {
     // Place initial architect units from config
     await createUnitsFromConfig(session.id, CONFIG.INITIAL_ARCHITECT_UNITS);
 
+    // Spawn initial police units on all planets based on planet type's credit value
+    const planets = JSON.parse(JSON.stringify(session.planet_state));
+    for (const planet of planets) {
+      const planetCredits = CONFIG.FORCE.STARTING_BONUSES[planet.type]?.credits || 0;
+      for (let i = 0; i < planetCredits; i++) {
+        await db.createUnit(
+          session.id, 'police_patrol', 'empire:local_police',
+          planet.id, 'surface',
+          CONFIG.UNIT_TYPES.police_patrol.strength,
+          CONFIG.UNIT_TYPES.police_patrol.hp,
+          false, 1, 0, `Police Patrol ${i + 1}`
+        );
+      }
+    }
+
     // Initialise the hidden traitor faction
     await initTraitorFaction(session.id);
 

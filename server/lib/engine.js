@@ -649,10 +649,16 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
   }
 
-  // Check for detention based on criminality level and cascade effects
+  // Check for detention based on criminality level and police presence
   if (sector) {
     const updatedState = await db.getRebelState(sessionId, playerId);
     const sectorCriminality = updatedState.criminality?.[sector] || 0;
+
+    // Count police units on current planet
+    const allUnits = await db.getUnits(sessionId);
+    const policeOnPlanet = allUnits.filter(u =>
+      u.planet_id === currentPlanet && u.unit_type === 'police_patrol' && u.owner?.startsWith('empire')
+    ).length;
 
     const detentionChances = {
       1: 0.20, // Wanted: 20%
@@ -661,7 +667,10 @@ async function applyRebelAction(sessionId, playerId, action) {
       4: 0.80  // Terrorist: 80%
     };
 
-    const detentionChance = detentionChances[sectorCriminality] || 0;
+    let detentionChance = detentionChances[sectorCriminality] || 0;
+    // Increase detention chance by 15% per police unit on planet
+    detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.15), 0.99);
+
     if (detentionChance > 0 && Math.random() < detentionChance) {
       // Detention triggered!
       const fineAmount = sectorCriminality * 50; // 50, 100, 150, 200 credits
@@ -742,13 +751,20 @@ async function applyImmediateEffects(sessionId, session, type, planetId, rebelSt
       const claimingFaction = await determineClaimingFaction(sessionId, planet.id, planets);
       planet.controlled_by = claimingFaction;
       planet.loyalty = CONFIG.LOYALTY_RESET.rebel;
+      // Update police units to new owner
+      await db.updatePoliceAllegiance(sessionId, planet.id, claimingFaction === 'rebel' ? 'empire:local_police' : claimingFaction);
     }
 
     // Loyalty flip: hits 100 → architect claims it, reset to CONFIG.LOYALTY_RESET.architect
     if (planet.loyalty === 100 && !planet.controlled_by.startsWith('empire:')) {
       // Default to architect (no governor specified in rebel actions)
+      const oldControl = planet.controlled_by;
       planet.controlled_by = 'empire';
       planet.loyalty = CONFIG.LOYALTY_RESET.architect;
+      // Update police units to empire ownership
+      if (oldControl === 'rebel' || oldControl?.startsWith('faction:')) {
+        await db.updatePoliceAllegiance(sessionId, planet.id, 'empire:local_police');
+      }
     }
   }
 

@@ -202,6 +202,9 @@ async function resolveCombat(sessionId, round, planetId, layer, attackers, defen
         p.id === planetId ? {...p, controlled_by: newController} : p
       );
       await db.updateSession(sessionId, { planet_state: updatedPlanets });
+      // Update police units to match new control
+      const newPoliceOwner = newController === 'empire' ? 'empire:local_police' : newController;
+      await db.updatePoliceAllegiance(sessionId, planetId, newPoliceOwner);
     }
   } else {
     outcome = 'defender_wins';

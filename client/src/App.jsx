@@ -6,7 +6,7 @@ import { Sidebar } from './components/Sidebar';
 import { Lobby, GameOver } from './components/Lobby';
 import { AdminPanel } from './components/AdminPanel';
 import { CombatReportModal } from './components/CombatReportModal';
-import { CombatModal } from './components/CombatModal';
+import CombatModal from './components/CombatModal';
 import { SplashScreen } from './components/SplashScreen';
 import './app.css';
 

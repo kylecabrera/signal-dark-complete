@@ -225,30 +225,42 @@ export function useGame() {
       notify(`FINE REJECTION: ${reason.toUpperCase()}`);
     });
 
-    socket.on('combat_initiated', ({ attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round }) => {
+    socket.on('combat_initiated', ({ combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round }) => {
       notify('⚔️ COMBAT INITIATED');
       setActiveCombat({
+        combatId,
         attackerUnits,
         defenderUnits,
         attackerKey,
         defenderKey,
         planetId,
         round,
-        playerSide: (publicState?.playerId || playerId) === attackerKey ? 'attacker' : 'defender'
+        playerSide: publicState?.playerId && (publicState?.playerId === attackerKey || publicState?.playerId === defenderKey) ?
+          (publicState?.playerId === attackerKey ? 'attacker' : 'defender') : null
       });
     });
 
-    socket.on('combat_round_update', ({ attackerUnits, defenderUnits }) => {
-      setActiveCombat(prev => prev ? {
-        ...prev,
-        attackerUnits,
-        defenderUnits,
-        round: prev.round + 1
-      } : null);
+    socket.on('combat_round_update', ({ combatId, attackerUnits, defenderUnits, round, outcome }) => {
+      setActiveCombat(prev => {
+        if (!prev || prev.combatId !== combatId) return prev;
+
+        if (outcome && outcome !== 'continuing') {
+          // Combat ended
+          setFeedEntries(prev => [{ gov: 'system', text: `Combat ended: ${outcome}` }, ...prev].slice(0,60));
+          return null;
+        }
+
+        return {
+          ...prev,
+          attackerUnits,
+          defenderUnits,
+          round: round || (prev.round + 1)
+        };
+      });
     });
 
-    socket.on('combat_ended', ({ outcome, summary }) => {
-      setActiveCombat(null);
+    socket.on('combat_ended', ({ combatId, outcome, summary }) => {
+      setActiveCombat(prev => prev?.combatId === combatId ? null : prev);
       notify(summary?.toUpperCase() || 'COMBAT ENDED');
       setFeedEntries(prev => [{ gov: 'system', text: summary }, ...prev].slice(0,60));
     });
@@ -363,6 +375,16 @@ export function useGame() {
     socket?.emit('rebel_action', actionObj);
   }, [socket]);
 
+  const combatRound = useCallback((combatId) => {
+    console.log('combatRound:', combatId);
+    socket?.emit('rebel_action', { type: 'combat_round', combatId });
+  }, [socket]);
+
+  const withdraw = useCallback((combatId) => {
+    console.log('withdraw from combat:', combatId);
+    socket?.emit('combat_withdraw', { combatId });
+  }, [socket]);
+
   const move       = useCallback((planetId) => sendAction({ type: 'move', planetId }), [sendAction]);
   const recruit    = useCallback((planetId) => sendAction({ type: 'recruit', planetId }), [sendAction]);
   const intel      = useCallback((planetId) => sendAction({ type: 'intel', planetId }), [sendAction]);
@@ -423,7 +445,7 @@ export function useGame() {
     activeCombat, setActiveCombat,
     socket,
     joinGame, markReady, submitTurn, endTurnEarly,
-    sendAction, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
+    sendAction, combatRound, withdraw, move, recruit, intel, sabotage, incite, hide, earnMoney, stealMoney, useForcePower, discoverForceMysteries,
     contribute, foundFaction, foundCell, investigate, denounce,
     moveUnit, produceUnit, attackWith, attackEmpire, attackRebel, toggleUnitHidden,
   };

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 
-export default function CombatModal({ combat, onContinue, onWithdraw, socket }) {
+export default function CombatModal({ combat, combatRound, withdraw, socket }) {
   const [selectedToRemove, setSelectedToRemove] = useState({});
   const [withdrawing, setWithdrawing] = useState(false);
 
   if (!combat) return null;
 
-  const { attackerUnits, defenderUnits, attackerKey, defenderKey, round } = combat;
+  const { combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, round, playerSide } = combat;
 
   const handleWithdraw = () => {
     if (withdrawing) {
       // Submit withdrawal with selected units to remove
       socket?.emit('combat_withdraw', {
+        combatId,
         unitsToRemove: selectedToRemove,
-        side: combat.playerSide,
       });
       setWithdrawing(false);
     } else {
@@ -21,10 +21,10 @@ export default function CombatModal({ combat, onContinue, onWithdraw, socket }) 
     }
   };
 
-  const handleContinue = () => {
-    socket?.emit('combat_continue', {
-      side: combat.playerSide,
-    });
+  const handleCombatRound = () => {
+    combatRound(combatId);
+    setSelectedToRemove({});
+    setWithdrawing(false);
   };
 
   const toggleUnitRemoval = (unitId) => {
@@ -202,41 +202,45 @@ export default function CombatModal({ combat, onContinue, onWithdraw, socket }) 
         }}>
           <button
             onClick={handleWithdraw}
+            disabled={!playerSide}
             style={{
               padding: '8px 16px',
               background: withdrawing ? 'rgba(255, 100, 100, 0.3)' : 'rgba(100, 100, 100, 0.3)',
               border: withdrawing ? '1px solid #ff6464' : '1px solid #606080',
               color: withdrawing ? '#ff9999' : '#a0a0c0',
               borderRadius: '2px',
-              cursor: 'pointer',
+              cursor: playerSide ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--mono)',
               fontSize: '10px',
               fontWeight: 500,
-              letterSpacing: '0.1em'
+              letterSpacing: '0.1em',
+              opacity: playerSide ? 1 : 0.5
             }}
-            onMouseEnter={e => e.target.style.background = withdrawing ? 'rgba(255, 100, 100, 0.5)' : 'rgba(100, 100, 100, 0.5)'}
-            onMouseLeave={e => e.target.style.background = withdrawing ? 'rgba(255, 100, 100, 0.3)' : 'rgba(100, 100, 100, 0.3)'}
+            onMouseEnter={e => playerSide && (e.target.style.background = withdrawing ? 'rgba(255, 100, 100, 0.5)' : 'rgba(100, 100, 100, 0.5)')}
+            onMouseLeave={e => playerSide && (e.target.style.background = withdrawing ? 'rgba(255, 100, 100, 0.3)' : 'rgba(100, 100, 100, 0.3)')}
           >
             {withdrawing ? 'CONFIRM WITHDRAWAL' : 'WITHDRAW'}
           </button>
           <button
-            onClick={handleContinue}
+            onClick={handleCombatRound}
+            disabled={!playerSide}
             style={{
               padding: '8px 16px',
               background: 'rgba(0, 150, 0, 0.3)',
               border: '1px solid #00cc00',
               color: '#00ff99',
               borderRadius: '2px',
-              cursor: 'pointer',
+              cursor: playerSide ? 'pointer' : 'not-allowed',
               fontFamily: 'var(--mono)',
               fontSize: '10px',
               fontWeight: 500,
-              letterSpacing: '0.1em'
+              letterSpacing: '0.1em',
+              opacity: playerSide ? 1 : 0.5
             }}
-            onMouseEnter={e => e.target.style.background = 'rgba(0, 150, 0, 0.5)'}
-            onMouseLeave={e => e.target.style.background = 'rgba(0, 150, 0, 0.3)'}
+            onMouseEnter={e => playerSide && (e.target.style.background = 'rgba(0, 150, 0, 0.5)')}
+            onMouseLeave={e => playerSide && (e.target.style.background = 'rgba(0, 150, 0, 0.3)')}
           >
-            CONTINUE FIGHTING
+            COMBAT ROUND (COSTS 1 ACTION)
           </button>
         </div>
       </div>

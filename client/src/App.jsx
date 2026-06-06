@@ -67,6 +67,8 @@ function GameShell() {
       {activeCombat && (
         <CombatModal
           combat={activeCombat}
+          combatRound={game.combatRound}
+          withdraw={game.withdraw}
           socket={game.socket}
         />
       )}

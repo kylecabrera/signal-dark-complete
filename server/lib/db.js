@@ -243,6 +243,11 @@ async function getGovernorHistory(sessionId, governor, limit=5) {
 
 // ── Units ─────────────────────────────────────
 async function createUnit(sessionId, unitType, owner, planetId, layer, strength, hp, isHidden=false, jumpDistance=1, transportCapacity=0, designation=null) {
+  // Police units are always ground forces, never orbital
+  if (unitType === 'police_patrol' && layer !== 'surface') {
+    throw new Error('Police units can only be created on surface layer');
+  }
+
   const { rows } = await pool.query(
     `INSERT INTO units (session_id,unit_type,owner,planet_id,layer,strength,hp,is_hidden,jump_distance,transport_capacity,designation)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,

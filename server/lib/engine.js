@@ -561,6 +561,8 @@ async function applyRebelAction(sessionId, playerId, action) {
       if (!u.owner?.startsWith('empire:') && !u.owner?.startsWith('faction:')) return false; // Not enemy faction
       if (u.layer !== targetLayer) return false; // Wrong layer
       if (u.is_hidden) return false; // Hidden units not visible
+      // Police units are only surface-based ground forces, never orbital
+      if (u.unit_type === 'police_patrol' && targetLayer === 'orbit') return false;
       return true;
     });
 

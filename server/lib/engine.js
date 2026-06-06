@@ -649,6 +649,31 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
   }
 
+  // Police units can be killed by certain criminal actions
+  if (['sabotage', 'incite', 'steal_money'].includes(type)) {
+    const allUnits = await db.getUnits(sessionId);
+    const policeOnPlanet = allUnits.filter(u =>
+      u.planet_id === currentPlanet && u.unit_type === 'police_patrol' && u.owner?.startsWith('empire')
+    );
+
+    if (policeOnPlanet.length > 0) {
+      const killChances = {
+        'sabotage': 0.30,      // 30% chance to kill a police unit
+        'incite': 0.25,        // 25% chance to kill a police unit
+        'steal_money': 0.15    // 15% chance to kill a police unit
+      };
+
+      const killChance = killChances[type] || 0;
+      if (Math.random() < killChance) {
+        // Kill a random police unit on this planet
+        const targetPolice = policeOnPlanet[Math.floor(Math.random() * policeOnPlanet.length)];
+        await db.deleteUnit(targetPolice.id);
+        result.policeKilled = true;
+        result.policeKillMessage = `Police patrol neutralized during ${type === 'sabotage' ? 'infrastructure sabotage' : type === 'incite' ? 'mob incitement' : 'robbery'}!`;
+      }
+    }
+  }
+
   // Check for detention based on criminality level and police presence
   if (sector) {
     const updatedState = await db.getRebelState(sessionId, playerId);
@@ -660,23 +685,28 @@ async function applyRebelAction(sessionId, playerId, action) {
       u.planet_id === currentPlanet && u.unit_type === 'police_patrol' && u.owner?.startsWith('empire')
     ).length;
 
-    const detentionChances = {
-      1: 0.05, // Wanted: 5%
-      2: 0.10, // Fugitive: 10%
-      3: 0.15, // Outlaw: 15%
-      4: 0.20  // Terrorist: 20%
-    };
+    // If no police present, cannot be detained
+    if (policeOnPlanet === 0) {
+      // No detention possible without police
+    } else {
+      const detentionChances = {
+        1: 0.05, // Wanted: 5%
+        2: 0.10, // Fugitive: 10%
+        3: 0.15, // Outlaw: 15%
+        4: 0.20  // Terrorist: 20%
+      };
 
-    let detentionChance = detentionChances[sectorCriminality] || 0;
-    // Increase detention chance by 5% per police unit on planet
-    detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.05), 0.99);
+      let detentionChance = detentionChances[sectorCriminality] || 0;
+      // Increase detention chance by 5% per police unit on planet
+      detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.05), 0.99);
 
-    if (detentionChance > 0 && Math.random() < detentionChance) {
-      // Detention triggered!
-      const fineAmount = sectorCriminality * 50; // 50, 100, 150, 200 credits
-      result.detentionTriggered = true;
-      result.fineAmount = fineAmount;
-      result.detentionMessage = `Apprehended by local authorities! Fine: ${fineAmount}cr to avoid detention.`;
+      if (detentionChance > 0 && Math.random() < detentionChance) {
+        // Detention triggered!
+        const fineAmount = sectorCriminality * 50; // 50, 100, 150, 200 credits
+        result.detentionTriggered = true;
+        result.fineAmount = fineAmount;
+        result.detentionMessage = `Apprehended by local authorities! Fine: ${fineAmount}cr to avoid detention.`;
+      }
     }
 
     // Cascade effects: if player reached Terrorist level, decrease criminality in adjacent sectors

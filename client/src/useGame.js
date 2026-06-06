@@ -84,7 +84,8 @@ export function useGame() {
 
     socket.on('action_confirmed', ({ label, traitorExposed, investigateResult: ir, denounceResult: dr,
                                       discoveries, recruitBonus, sabotageBonus, inciteBonus,
-                                      detentionTriggered, fineAmount, detentionMessage, cascadeEffects }) => {
+                                      detentionTriggered, fineAmount, detentionMessage, cascadeEffects,
+                                      policeKilled, policeKillMessage }) => {
       notify(label?.toUpperCase() || 'ACTION CONFIRMED');
       if (traitorExposed) {
         setTraitorAlert(true);
@@ -92,6 +93,12 @@ export function useGame() {
       }
       if (ir) setInvestigateResult(ir);
       if (dr) notify(`DENUNCIATION: ${dr.outcome?.toUpperCase()} — ${dr.factionName}`);
+
+      // Handle police kills
+      if (policeKilled) {
+        notify(policeKillMessage?.toUpperCase() || 'POLICE NEUTRALIZED');
+        setFeedEntries(prev => [{ gov:'system', text: policeKillMessage }, ...prev].slice(0,60));
+      }
 
       // Handle cascade effects
       if (cascadeEffects?.length) {

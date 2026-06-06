@@ -848,22 +848,34 @@ export function Sidebar({ game }) {
       {sidebarTab === 'combat' && (
         <div style={{ overflowY:'auto', flex:1, padding:'8px 13px' }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12 }}>
-            <div style={{ fontWeight:600, color:'#e84040', marginBottom:8 }}>⚔ COMBAT BASICS</div>
+            <div style={{ fontWeight:600, color:'#e84040', marginBottom:8 }}>⚔ COMBAT SYSTEM</div>
             <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
-              <div>• Combat triggers <strong>automatically</strong> when your units meet enemy units on the same planet/layer</div>
-              <div>• Both orbital and surface layers are separate. Combat can happen independently on each.</div>
-              <div>• Stronger units deal more damage. Your Jedi Avatar has strength 12 — a powerful asset.</div>
-              <div>• Battles resolve immediately. Winners remain, losers are destroyed.</div>
+              <div><strong>When combat starts:</strong> A modal appears showing both sides' units</div>
+              <div><strong>How to fight:</strong> Spend actions to execute combat rounds (1 action = 1 round)</div>
+              <div><strong>Each round:</strong> Both sides deal damage based on unit strength</div>
+              <div><strong>Withdrawal:</strong> Select units to remove and retreat at any time</div>
+              <div><strong>Victory:</strong> Combat ends when one side has no units remaining</div>
             </div>
           </div>
 
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
-            <div style={{ fontWeight:600, color:'#40c880', marginBottom:8 }}>🛡 COMBAT FACTORS</div>
+            <div style={{ fontWeight:600, color:'#00d4c8', marginBottom:8 }}>⚡ PERSISTENT COMBAT</div>
             <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
-              <div><strong>Strength:</strong> Higher = more damage per hit. Unit type determines base strength.</div>
-              <div><strong>HP (Health Points):</strong> How much damage a unit can take before destroyed.</div>
-              <div><strong>Hit Chance:</strong> 40% base. More units improve odds. First-strike advantage in orbit.</div>
-              <div><strong>Defend Bonus:</strong> +10% defense when defending your home planet.</div>
+              <div><strong>Modal Display:</strong> Shows your units vs opponent units side-by-side</div>
+              <div><strong>Action Economy:</strong> Each combat round costs 1 action from your turn pool</div>
+              <div><strong>Continues Across Turns:</strong> Combat persists between rebel and governor phases</div>
+              <div><strong>Axis & Allies Style:</strong> Strategic engagement — you control the pace of battle</div>
+              <div><strong>Damage Display:</strong> See unit HP drop in real-time with each round</div>
+            </div>
+          </div>
+
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, marginBottom:12, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
+            <div style={{ fontWeight:600, color:'#40c880', marginBottom:8 }}>🛡 UNIT MECHANICS</div>
+            <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
+              <div><strong>Strength:</strong> Determines damage dealt per hit. Unit type defines base strength.</div>
+              <div><strong>HP (Health):</strong> Current health shown in modal. Damage reduces HP each round.</div>
+              <div><strong>Hit Chance:</strong> 40% base to damage a unit. More units = better odds.</div>
+              <div><strong>Casualties:</strong> Units destroyed when HP reaches 0. Removed from the battlefield.</div>
             </div>
           </div>
 
@@ -878,12 +890,12 @@ export function Sidebar({ game }) {
           </div>
 
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'#a8c5dd', lineHeight:1.8, paddingTop:8, borderTop:'1px solid rgba(160,128,224,0.2)' }}>
-            <div style={{ fontWeight:600, color:'#e8d030', marginBottom:8 }}>💡 STRATEGY TIPS</div>
+            <div style={{ fontWeight:600, color:'#e8d030', marginBottom:8 }}>💡 COMBAT STRATEGY</div>
             <div style={{ fontSize:9, color:'#5a7090', lineHeight:2 }}>
-              <div>• Avoid combat until you have superior numbers or strength.</div>
-              <div>• Use Intel to reveal hidden enemy units before engaging.</div>
-              <div>• Grouping units into fleets for cohesive movement reduces attrition.</div>
-              <div>• Factions provide diverse unit types — use variety to counter enemies.</div>
+              <div>• <strong>Withdraw Early:</strong> Don't waste actions in unwinnable fights — retreat and rebuild.</div>
+              <div>• <strong>Control Pace:</strong> Spend actions slowly to manage your overall turn economy.</div>
+              <div>• <strong>Selective Withdrawal:</strong> Choose which units to remove when retreating strategically.</div>
+              <div>• <strong>Action Planning:</strong> Each combat round costs an action. Budget accordingly each turn.</div>
             </div>
           </div>
         </div>

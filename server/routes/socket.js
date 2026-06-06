@@ -188,6 +188,24 @@ module.exports = function registerSocketHandlers(io) {
           }
         }
 
+        // Combat initiation — broadcast to involved players
+        if (result.combatInitiated) {
+          const activeCombats = await db.getActiveCombats(sessionId);
+          const combat = activeCombats.find(c => c.id === result.combatInitiated);
+          if (combat) {
+            socket.emit('combat_initiated', {
+              combatId: combat.id,
+              planetId: combat.planetId,
+              layer: combat.layer,
+              attackerKey: combat.attackerKey,
+              defenderKey: combat.defenderKey,
+              attackerUnits: combat.attacker_units,
+              defenderUnits: combat.defender_units,
+              round: combat.round
+            });
+          }
+        }
+
         // Combat round update — broadcast to involved players
         if (result.combatRound) {
           const { combatId, round, outcome, attackerUnits, defenderUnits } = result.combatRound;

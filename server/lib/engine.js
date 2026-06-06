@@ -554,9 +554,14 @@ async function applyRebelAction(sessionId, playerId, action) {
     // Get all units at this planet
     const allUnitsHere = await db.getUnitsAtPlanet(sessionId, planetId);
     const myUnits = allUnitsHere.filter(u => u.owner === `rebel:${playerId}` && u.layer === targetLayer);
+
+    // Enemy units: any non-rebel on this layer that isn't hidden
     const enemyUnits = allUnitsHere.filter(u => {
-      const isEnemy = u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:');
-      return isEnemy && u.layer === targetLayer && !u.is_hidden;
+      if (u.owner === `rebel:${playerId}`) return false; // Not own units
+      if (!u.owner?.startsWith('empire:') && !u.owner?.startsWith('faction:')) return false; // Not enemy faction
+      if (u.layer !== targetLayer) return false; // Wrong layer
+      if (u.is_hidden) return false; // Hidden units not visible
+      return true;
     });
 
     if (myUnits.length === 0) {
@@ -566,15 +571,26 @@ async function applyRebelAction(sessionId, playerId, action) {
       return { ok:false, error:`No enemy units visible on ${targetLayer}` };
     }
 
-    // Trigger immediate combat
-    const { resolveCombat } = require('./units');
-    const combatResult = await resolveCombat(sessionId, session.round, planetId, targetLayer,
-      myUnits, enemyUnits, 'rebel', 'empire');
+    // Create persistent combat instead of resolving immediately
+    const combatId = `combat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const combatState = {
+      id: combatId,
+      planetId,
+      layer: targetLayer,
+      round: 0,
+      attackerKey: `rebel:${playerId}`,
+      defenderKey: 'empire', // Generic empire defender
+      attacker_units: myUnits,
+      defender_units: enemyUnits,
+      created_at: new Date().toISOString()
+    };
+
+    await db.startCombat(sessionId, planetId, myUnits, enemyUnits, `rebel:${playerId}`, 'empire');
 
     covert = false;
-    label = `Attacked ${targetLayer} forces at ${planetId} [OVERT]`;
-    metadata = { target_planet: planetId, layer: targetLayer, combatOutcome: combatResult.outcome };
-    result.combat = combatResult;
+    label = `Initiated combat on ${targetLayer} at ${planetId} [OVERT]`;
+    metadata = { target_planet: planetId, layer: targetLayer, combatId };
+    result.combatInitiated = combatId;
 
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       rebelState.credits||0);

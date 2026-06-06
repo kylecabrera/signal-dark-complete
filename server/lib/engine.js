@@ -668,8 +668,8 @@ async function applyRebelAction(sessionId, playerId, action) {
     };
 
     let detentionChance = detentionChances[sectorCriminality] || 0;
-    // Increase detention chance by 15% per police unit on planet
-    detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.15), 0.99);
+    // Increase detention chance by 5% per police unit on planet
+    detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.05), 0.99);
 
     if (detentionChance > 0 && Math.random() < detentionChance) {
       // Detention triggered!

@@ -227,6 +227,12 @@ export function useGame() {
 
     socket.on('combat_initiated', ({ combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round }) => {
       notify('⚔️ COMBAT INITIATED');
+      // Determine which side this player is on
+      let playerSide = null;
+      if (playerId) {
+        if (attackerKey === `rebel:${playerId}`) playerSide = 'attacker';
+        else if (defenderKey === `rebel:${playerId}`) playerSide = 'defender';
+      }
       setActiveCombat({
         combatId,
         attackerUnits,
@@ -235,8 +241,7 @@ export function useGame() {
         defenderKey,
         planetId,
         round,
-        playerSide: publicState?.playerId && (publicState?.playerId === attackerKey || publicState?.playerId === defenderKey) ?
-          (publicState?.playerId === attackerKey ? 'attacker' : 'defender') : null
+        playerSide
       });
     });
 

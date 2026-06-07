@@ -934,6 +934,137 @@ const LANES = [
   ['p86','p89']
 ];
 
+const BASE_WATCHED_LANES = [['p01', 'p02'], ['p01', 'p06'], ['p01', 'p143']];
+const STARTING_PLANET = 'p153';
+const PLAYER_COLORS = ['#40c880','#3a8fe8','#e8a030','#e84090','#00d4c8','#c040e0','#e84040','#e8d030','#a0d4ff','#40e8d4','#e040a0','#a080e0'];
+const ALERT_LEVELS = ['DORMANT','ELEVATED','MANHUNT','PURGE','ANNIHILATION'];
+
+const FACTION_NAME_POOL = [
+  'Stellar League','Outer Rim Coalition','New Republic Guard','Resistance Command',
+  'Free Worlds Alliance','Border Collective','Independent Defense Force','Frontier Rangers'
+];
+
+const TRAITOR_FACTION_NAMES = [
+  'Shadow Collective','Silent Circle','The Unseen','Phantom Network',
+  'Dark Syndicate','Hidden Cabal','Secret Order','Cloaked Alliance'
+];
+
+const SECTORS = {
+  CORE: {name:'CORE WORLDS', planets:['p01']},
+  INNER: {name:'INNER RIM', planets:['p02','p03','p04']},
+  MIDDLE: {name:'MIDDLE RIM', planets:['p05','p06','p07']},
+  OUTER: {name:'OUTER RIM', planets:['p08','p09','p10']},
+  EXPANSION: {name:'EXPANSION REGION', planets:['p11','p12','p13']},
+  WILD: {name:'WILD SPACE', planets:['p14','p15','p16']}
+};
+
+const PLANET_TO_SECTOR = {};
+Object.keys(SECTORS).forEach(key => {
+  SECTORS[key].planets.forEach(pid => { PLANET_TO_SECTOR[pid] = key; });
+});
+
+const SECTOR_ADJACENCY = {
+  CORE: ['INNER'],
+  INNER: ['CORE','MIDDLE'],
+  MIDDLE: ['INNER','OUTER'],
+  OUTER: ['MIDDLE','EXPANSION'],
+  EXPANSION: ['OUTER','WILD'],
+  WILD: ['EXPANSION']
+};
+
+const CRIMINALITY_LEVELS = {
+  pristine: 0, safe: 20, moderate: 50, dangerous: 80, lawless: 100
+};
+
+function getNeighbors(planetId) {
+  return LANES.filter(l => l[0] === planetId || l[1] === planetId).map(l => l[0] === planetId ? l[1] : l[0]);
+}
+
+function isAdjacent(p1, p2) {
+  return LANES.some(l => (l[0] === p1 && l[1] === p2) || (l[0] === p2 && l[1] === p1));
+}
+
+function reachableIn(from, steps) {
+  const visited = new Set([from]);
+  let current = [from];
+  for (let i = 0; i < steps; i++) {
+    const next = [];
+    for (const p of current) {
+      for (const neighbor of getNeighbors(p)) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          next.push(neighbor);
+        }
+      }
+    }
+    current = next;
+  }
+  return Array.from(visited);
+}
+
+function generateGameCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function buildInitialPlanetState() {
+  return PLANETS.map(p => ({
+    id: p.id,
+    name: p.name,
+    type: p.type || 'standard',
+    x: p.x,
+    y: p.y,
+    econ_output: 1,
+    econ_capacity: 3,
+    loyalty: 50,
+    suspicion: 0,
+    production_queue: []
+  }));
+}
+
+function buildInitialGovernorState() {
+  return {
+    round: 0,
+    alert_value: 0,
+    governors: {}
+  };
+}
+
+function buildInitialVektisMemory() {
+  return { visits: {}, patterns: {} };
+}
+
+function buildTraitorFaction() {
+  const ideologies = ['liberation_front','shadow_network','workers_alliance','mercenary_band','tech_syndicate'];
+  return {
+    name: TRAITOR_FACTION_NAMES[Math.floor(Math.random() * TRAITOR_FACTION_NAMES.length)],
+    ideology: ideologies[Math.floor(Math.random() * ideologies.length)],
+    members: []
+  };
+}
+
+function getRecruitmentMultiplier(planetType) {
+  const base = { core: 2, inner: 1.5, middle: 1, outer: 0.8, expansion: 0.6, wild: 0.4 };
+  return base[planetType] || 1;
+}
+
+function getPlayerRank(round) {
+  if (round < 5) return 'Novice';
+  if (round < 15) return 'Veteran';
+  if (round < 30) return 'Commander';
+  return 'Admiral';
+}
+
+function getPlanetSector(planetId) {
+  return PLANET_TO_SECTOR[planetId] || 'UNKNOWN';
+}
+
+function getAdjacentSectors(sectorKey) {
+  return SECTOR_ADJACENCY[sectorKey] || [];
+}
+
 module.exports = {
   PLANETS, LANES, BASE_WATCHED_LANES, STARTING_PLANET, PLAYER_COLORS,
   ALERT_LEVELS, FACTION_NAME_POOL, TRAITOR_FACTION_NAMES,

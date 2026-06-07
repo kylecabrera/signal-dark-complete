@@ -159,7 +159,7 @@ export function SectorMap({ game }) {
 
   // ── Pan / zoom handlers ────────────────────────────────────────
   const handleMouseDown = useCallback(e => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || !vp) return;
     dragRef.current = { startX: e.clientX, startY: e.clientY, vpX: vp.x, vpY: vp.y };
     movedRef.current = false;
     setGrabbing(true);
@@ -184,6 +184,7 @@ export function SectorMap({ game }) {
   const handleWheel = useCallback(e => {
     const factor = e.deltaY < 0 ? 1.12 : 0.89;
     setVp(v => {
+      if (!v) return v; // Guard against null state
       const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.scale * factor));
       const rect = svgRef.current?.getBoundingClientRect();
       if (!rect) return v;
@@ -198,6 +199,7 @@ export function SectorMap({ game }) {
   }, []);
 
   const resetView = useCallback(() => {
+    if (w === 0 || h === 0) return;
     const scale = Math.min(w, h) / 2100;
     setVp({ x: w / 2 - 1000 * scale, y: h / 2 - 1000 * scale, scale });
   }, [w, h]);

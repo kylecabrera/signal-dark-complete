@@ -473,6 +473,42 @@ module.exports = function registerSocketHandlers(io) {
       }
     });
 
+    // ── Admin: Skip governor phase (F1 admin panel) ────────────────────────────
+    socket.on('admin_skip_governor_phase', async (data) => {
+      const { sessionId, adminToken } = data || {};
+      if (adminToken !== process.env.ADMIN_TOKEN) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
+
+      try {
+        // Immediately skip to rebel phase
+        clearTurnTimer(sessionId);
+        const session = await db.getSessionById(sessionId);
+        const players = await db.getPlayers(sessionId);
+
+        // Just move to next turn without running governors
+        const nextRound = session.round + 1;
+        await db.updateSession(sessionId, { round: nextRound, phase: 'rebel', submitted_players: [] });
+
+        // Broadcast
+        io.to(sessionId).emit('governor_phase_skipped', { message: '[ADMIN] Governor phase skipped' });
+        io.to(sessionId).emit('state_update', await engine.buildPublicState(session, players));
+
+        // Start new rebel phase
+        for (const player of players) {
+          const privateState = await engine.buildPrivateState(sessionId, player.id);
+          const sock = [...io.sockets.sockets.values()].find(s => s.data?.playerId === player.id);
+          if (sock && privateState) sock.emit('private_state', privateState);
+        }
+
+        startTurnTimer(io, sessionId);
+      } catch (err) {
+        console.error('Skip governor phase error:', err.message);
+        socket.emit('error', { message: 'Failed to skip governor phase: ' + err.message });
+      }
+    });
+
     // ── Disconnect ─────────────────────────────
     socket.on('disconnect', async () => {
       const { sessionId, playerId } = socket.data||{};
@@ -495,8 +531,14 @@ module.exports = function registerSocketHandlers(io) {
     io.to(sessionId).emit('governor_phase_started', { message:'All rebels submitted — governors convening…' });
 
     try {
+      // Add timeout to governor phase (60 seconds max)
+      const governorPromise = engine.processGovernorTurn(sessionId);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Governor phase timeout - skipping to next turn')), 60000)
+      );
+
       const { session, feedEntries, leaks, combatLog, newUnits } =
-        await engine.processGovernorTurn(sessionId);
+        await Promise.race([governorPromise, timeoutPromise]);
 
       const players = await db.getPlayers(sessionId);
 

@@ -926,7 +926,12 @@ function buildInitialVektisMemory() {
 }
 
 function buildTraitorFaction() {
-  return { name: TRAITOR_FACTION_NAMES[Math.floor(Math.random() * TRAITOR_FACTION_NAMES.length)], members: [] };
+  const ideologies = ['liberation_front', 'shadow_network', 'workers_alliance', 'mercenary_band', 'tech_syndicate'];
+  return {
+    name: TRAITOR_FACTION_NAMES[Math.floor(Math.random() * TRAITOR_FACTION_NAMES.length)],
+    ideology: ideologies[Math.floor(Math.random() * ideologies.length)],
+    members: []
+  };
 }
 
 function getRecruitmentMultiplier(planetLoyalty) {

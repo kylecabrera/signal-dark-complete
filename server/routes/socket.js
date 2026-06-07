@@ -595,6 +595,16 @@ module.exports = function registerSocketHandlers(io) {
         return;
       }
 
+      // Broadcast new rebel phase and restart timer for next round
+      const updatedSession = await db.getSessionById(sessionId);
+      const updatedPlayers = await db.getPlayers(sessionId);
+      io.to(sessionId).emit('rebel_phase_started', {
+        phase: 'rebel',
+        round: updatedSession.round
+      });
+      io.to(sessionId).emit('state_update', await engine.buildPublicState(updatedSession, updatedPlayers));
+
+      // Reset for new rebel phase
       startTurnTimer(io, sessionId);
     } catch(err) {
       console.error('Governor turn error:', err.message, err.stack);

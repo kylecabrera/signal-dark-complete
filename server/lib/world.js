@@ -864,6 +864,119 @@ const LANES = [
   ['p92','p95']
 ];
 
+const BASE_WATCHED_LANES = [['p01', 'p02'], ['p01', 'p06'], ['p01', 'p143']];
+const STARTING_PLANET = 'p153';
+const PLAYER_COLORS = ['#40c880','#3a8fe8','#e8a030','#e84090','#00d4c8','#c040e0','#e84040','#e8d030','#a0d4ff','#40e8d4','#e040a0','#a080e0'];
+const ALERT_LEVELS = ['DORMANT','ELEVATED','MANHUNT','PURGE','ANNIHILATION'];
+
+const FACTION_NAME_POOL = [
+  'Ember Compact','Iron Accord','Pale Meridian','Voidborn Pact',
+  'Shattered Crown','Free Sector Coalition','Rift Union','Last Light Front',
+  'Constellation Bloc','Deep Current Alliance',
+];
+const TRAITOR_FACTION_NAMES = [
+  'Sector Liberation Front',"People's Compact",'Free Worlds Union',
+  'Democratic Resistance Network','Open Skies Coalition',
+];
+
+function getNeighbors(id) {
+  return LANES.filter(([a,b])=>a===id||b===id).map(([a,b])=>a===id?b:a);
+}
+function isAdjacent(a, b) {
+  return LANES.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));
+}
+function reachableIn(from, steps, visited = new Set()) {
+  if (steps <= 0) return visited;
+  visited.add(from);
+  for (const to of getNeighbors(from)) {
+    if (!visited.has(to)) reachableIn(to, steps - 1, visited);
+  }
+  return visited;
+}
+function generateGameCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function buildInitialPlanetState() {
+  return PLANETS.map(p => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    x: p.x,
+    y: p.y,
+    econ_output: Math.floor(Math.random() * 10) + 5,
+    econ_capacity: Math.floor(Math.random() * 20) + 30,
+    loyalty: p.loyalty || 50,
+    suspicion: p.suspicion || 0,
+    production_queue: [],
+  }));
+}
+
+function buildInitialGovernorState() {
+  return {
+    siris_vael: { location: 'p45', units: [], production_orders: [], treasury: 5000 },
+    crassus_9: { location: 'p30', units: [], production_orders: [], treasury: 5000 },
+    maren_osk: { location: 'p114', units: [], production_orders: [], treasury: 5000 },
+    vektis_4: { location: 'p133', units: [], production_orders: [], treasury: 5000 },
+  };
+}
+
+function buildInitialVektisMemory() {
+  return { visits: {}, actions: {} };
+}
+
+function buildTraitorFaction() {
+  return { name: TRAITOR_FACTION_NAMES[Math.floor(Math.random() * TRAITOR_FACTION_NAMES.length)], members: [] };
+}
+
+function getRecruitmentMultiplier(planetLoyalty) {
+  if (planetLoyalty >= 80) return 0.2;
+  if (planetLoyalty >= 60) return 0.4;
+  if (planetLoyalty >= 40) return 0.6;
+  return 0.8;
+}
+
+function getPlayerRank(rebellionStrength) {
+  if (rebellionStrength >= 80) return 'Rebel Commander';
+  if (rebellionStrength >= 60) return 'Rebel Captain';
+  if (rebellionStrength >= 40) return 'Rebel Lieutenant';
+  return 'Rebel Recruit';
+}
+
+function getPlanetSector(planetId) {
+  const planet = PLANETS.find(p => p.id === planetId);
+  return planet ? PLANET_TO_SECTOR[planet.type] || 'Unknown' : 'Unknown';
+}
+
+function getAdjacentSectors(sector) {
+  return SECTOR_ADJACENCY[sector] || [];
+}
+
+const SECTORS = ['Core Worlds', 'Inner Rim', 'Mid Rim', 'Outer Rim Territories', 'Expansion Region', 'Deep Core', 'Wild Space', 'Unknown Regions', 'Colonies'];
+const PLANET_TO_SECTOR = {
+  'Core Worlds': 'Core Worlds',
+  'Inner Rim': 'Inner Rim',
+  'Mid Rim': 'Mid Rim',
+  'Outer Rim Territories': 'Outer Rim',
+  'Expansion Region': 'Expansion',
+  'Deep Core': 'Deep Core',
+  'Wild Space': 'Wild Space',
+  'Unknown Regions': 'Unknown',
+  'Colonies': 'Colonies',
+};
+const SECTOR_ADJACENCY = {
+  'Core Worlds': ['Inner Rim', 'Deep Core'],
+  'Inner Rim': ['Core Worlds', 'Mid Rim', 'Colonies'],
+  'Mid Rim': ['Inner Rim', 'Outer Rim'],
+  'Outer Rim': ['Mid Rim', 'Expansion', 'Wild Space'],
+  'Expansion': ['Outer Rim', 'Unknown'],
+  'Deep Core': ['Core Worlds', 'Wild Space'],
+  'Wild Space': ['Deep Core', 'Unknown', 'Outer Rim'],
+  'Unknown': ['Expansion', 'Wild Space'],
+  'Colonies': ['Inner Rim', 'Mid Rim'],
+};
+const CRIMINALITY_LEVELS = ['None', 'Low', 'Medium', 'High', 'Extreme'];
+
 module.exports = {
   PLANETS, LANES, BASE_WATCHED_LANES, STARTING_PLANET, PLAYER_COLORS,
   ALERT_LEVELS, FACTION_NAME_POOL, TRAITOR_FACTION_NAMES,

@@ -301,8 +301,8 @@ export function SectorMap({ game }) {
                                  && planet.id !== selectedUnit?.planet_id;
             const hasPatrol = govState.siris?.patrolTokens?.[planet.id];
             const hasSweep  = govState.crassus?.sweepTargets?.includes(planet.id);
-            const orbitUnits   = unitsByLocation[`${planet.id}:orbit`]   || [];
-            const surfaceUnits = unitsByLocation[`${planet.id}:surface`] || [];
+            const orbitUnits   = (unitsByLocation[`${planet.id}:orbit`]   || []).filter(u => u.unit_type !== 'police_patrol');
+            const surfaceUnits = (unitsByLocation[`${planet.id}:surface`] || []).filter(u => u.unit_type !== 'police_patrol');
 
             return (
               <g key={planet.id} onClick={() => handlePlanetClick(planet.id)}
@@ -422,7 +422,7 @@ export function SectorMap({ game }) {
 
                 {(() => {
                   const policeUnits = (publicState?.units || [])
-                    .filter(u => u.planet_id === planet.id && u.unit_type === 'police_patrol' && !u.is_hidden);
+                    .filter(u => u.planet_id === planet.id && u.unit_type === 'police_patrol');
                   if (policeUnits.length === 0) return null;
                   return (
                     <g key={`police-${planet.id}`}>

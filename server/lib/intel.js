@@ -227,7 +227,7 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
         const stmt = getGovernorStatement('maren', 'propaganda');
         if (stmt) feed.push({ gov: 'maren', text: stmt });
         // Loyalty hits 100 → architect claims planet
-        if (p.loyalty === 100 && !p.controlled_by.startsWith('empire:')) {
+        if (p.loyalty === 100 && !p.controlled_by?.startsWith('empire:')) {
           p.controlled_by = `empire:${governor}`;
           p.loyalty = CONFIG.LOYALTY_RESET.architect;
         }

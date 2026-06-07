@@ -235,7 +235,6 @@ export function SectorMap({ game }) {
   return (
     <div className="map-area" style={{ position: 'relative' }}>
       <svg
-        key={vp ? Math.floor(vp.x / 100) : 0} // Force re-render on pan
         ref={svgRef}
         className="map-svg"
         xmlns="http://www.w3.org/2000/svg"

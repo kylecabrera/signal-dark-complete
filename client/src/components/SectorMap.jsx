@@ -81,16 +81,18 @@ function reachableIn(adjSet, allIds, fromId, steps) {
 
 // Compute Voronoi-based territory boundaries for factions
 function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeight = 3735) {
-  const boundaryLines = [];
-  const gridRes = 40;  // Sample every 40 units
-  const grid = new Map();  // key: "x,y" -> { x, y, controlledBy, factionColor }
+  if (!planets || planets.length === 0) return [];
 
-  // Helper: find nearest controlled planet to a point
+  const boundaryLines = [];
+  const gridRes = 40;
+  const grid = new Map();
+
+  // Find nearest controlled planet to a point
   const getNearestControlledPlanet = (px, py) => {
     let nearest = null;
     let minDist = Infinity;
     for (const p of planets) {
-      if (!p.controlled_by && p.controlled_by !== 'empire') continue;  // Only show empire/faction control
+      if (!p.controlled_by || p.controlled_by === 'neutral') continue;
       const dx = p.x - px, dy = p.y - py;
       const dist = dx * dx + dy * dy;
       if (dist < minDist) { minDist = dist; nearest = p; }
@@ -103,8 +105,7 @@ function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeig
     for (let y = 0; y < worldHeight; y += gridRes) {
       const p = getNearestControlledPlanet(x, y);
       if (p) {
-        const key = `${x},${y}`;
-        grid.set(key, {
+        grid.set(`${x},${y}`, {
           x, y,
           controlledBy: p.controlled_by,
           factionColor: p.factionColor || '#606080'
@@ -113,13 +114,15 @@ function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeig
     }
   }
 
-  // Find boundaries: points where adjacent grid cells have different control
+  if (grid.size === 0) return [];
+
+  // Find boundaries
   const gridPoints = Array.from(grid.entries()).map(([k, v]) => {
     const [x, y] = k.split(',').map(Number);
     return { x, y, ...v };
   });
 
-  const boundaries = {};  // key: "control1|control2" -> [lines]
+  const boundaries = {};
   for (const pt of gridPoints) {
     const adj1 = grid.get(`${pt.x + gridRes},${pt.y}`);
     const adj2 = grid.get(`${pt.x},${pt.y + gridRes}`);
@@ -142,8 +145,10 @@ function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeig
     }
   }
 
-  // Build continuous paths from line segments
+  // Build paths from line segments
   for (const [key, lines] of Object.entries(boundaries)) {
+    if (!lines || lines.length === 0) continue;
+
     const paths = [];
     const used = new Set();
 
@@ -170,7 +175,9 @@ function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeig
       if (path.length > 2) paths.push(path);
     }
 
-    boundaryLines.push({ key, paths, lines });
+    if (paths.length > 0) {
+      boundaryLines.push({ key, paths });
+    }
   }
 
   return boundaryLines;

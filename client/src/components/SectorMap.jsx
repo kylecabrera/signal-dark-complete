@@ -167,12 +167,16 @@ export function SectorMap({ game }) {
   }, [vp]);
 
   const handleMouseMove = useCallback(e => {
-    if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
+    const drag = dragRef.current;
+    if (!drag) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
     if (!movedRef.current && Math.abs(dx) + Math.abs(dy) > 4) movedRef.current = true;
     if (movedRef.current) {
-      setVp(v => ({ ...v, x: dragRef.current.vpX + dx, y: dragRef.current.vpY + dy }));
+      setVp(v => {
+        if (!v) return v;
+        return { ...v, x: drag.vpX + dx, y: drag.vpY + dy };
+      });
     }
   }, []);
 

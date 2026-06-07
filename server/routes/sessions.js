@@ -23,7 +23,10 @@ router.post('/sessions', async (req, res) => {
     );
 
     // Place initial architect units from config
+    console.log(`Creating ${CONFIG.INITIAL_ARCHITECT_UNITS.length} initial architect units for session ${session.id}`);
     await createUnitsFromConfig(session.id, CONFIG.INITIAL_ARCHITECT_UNITS);
+    const initialUnits = await db.getUnits(session.id);
+    console.log(`✓ Created units. Total units in session: ${initialUnits.length}`);
 
     // Spawn initial police units on all planets based on planet type's credit value
     const planets = JSON.parse(JSON.stringify(session.planet_state));

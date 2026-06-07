@@ -771,8 +771,9 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
   }
 
-  // Check for detention based on criminality level and police presence
-  if (sector) {
+  // Check for detention based on criminality level and police presence (only on criminal actions)
+  const criminalActions = ['sabotage', 'incite', 'steal_money'];
+  if (sector && criminalActions.includes(type)) {
     const updatedState = await db.getRebelState(sessionId, playerId);
     const sectorCriminality = updatedState.criminality?.[sector] || 0;
 
@@ -782,22 +783,20 @@ async function applyRebelAction(sessionId, playerId, action) {
       u.planet_id === currentPlanet && u.unit_type === 'police_patrol' && u.owner?.startsWith('empire')
     ).length;
 
-    // If no police present, cannot be detained
-    if (policeOnPlanet === 0) {
-      // No detention possible without police
-    } else {
+    // Only check detention if criminality > 0 and police present
+    if (sectorCriminality > 0 && policeOnPlanet > 0) {
       const detentionChances = {
-        1: 0.05, // Wanted: 5%
-        2: 0.10, // Fugitive: 10%
-        3: 0.15, // Outlaw: 15%
-        4: 0.20  // Terrorist: 20%
+        1: 0.08, // Wanted: 8%
+        2: 0.12, // Fugitive: 12%
+        3: 0.18, // Outlaw: 18%
+        4: 0.25  // Terrorist: 25%
       };
 
       let detentionChance = detentionChances[sectorCriminality] || 0;
-      // Increase detention chance by 5% per police unit on planet
-      detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.05), 0.99);
+      // Increase detention chance by 3% per police unit on planet
+      detentionChance = Math.min(detentionChance + (policeOnPlanet * 0.03), 0.95);
 
-      if (detentionChance > 0 && Math.random() < detentionChance) {
+      if (Math.random() < detentionChance) {
         // Detention triggered!
         const fineAmount = sectorCriminality * 50; // 50, 100, 150, 200 credits
         result.detentionTriggered = true;
@@ -1272,12 +1271,15 @@ async function buildPrivateState(sessionId, playerId) {
                      : alignment < -CONFIG.FORCE.ALIGNMENT_THRESHOLD ? 'dark'
                      : 'grey';
 
-  // Calculate cell bonus actions
+  // Calculate cell bonus actions — only count cells founded by this player in current sector
   let cellBonusActions = 0;
   const currentSector = getPlanetSector(rebelState.current_planet);
   if (currentSector) {
-    const cells = await db.getFactionCells(sessionId);
-    cellBonusActions = cells.filter(c => {
+    const playerFactions = await db.getFactions(sessionId);
+    const playerCells = playerFactions
+      .filter(f => f.leader_id === playerId)  // Only factions founded by this player
+      .flatMap(f => f.members || []);  // Get all cells from player's factions
+    cellBonusActions = playerCells.filter(c => {
       const cellSector = getPlanetSector(c.planet_id);
       return cellSector === currentSector;
     }).length;

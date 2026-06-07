@@ -1010,18 +1010,22 @@ function generateGameCode() {
 }
 
 function buildInitialPlanetState() {
-  return PLANETS.map(p => ({
-    id: p.id,
-    name: p.name,
-    type: p.type || 'standard',
-    x: p.x,
-    y: p.y,
-    econ_output: 1,
-    econ_capacity: 3,
-    loyalty: 50,
-    suspicion: 0,
-    production_queue: []
-  }));
+  const CONFIG = require('./config');
+  return PLANETS.map(p => {
+    const econ = CONFIG.PLANET_ECON[p.id] || { output: 1, capacity: 3 };
+    return {
+      id: p.id,
+      name: p.name,
+      type: p.type || 'standard',
+      x: p.x,
+      y: p.y,
+      econ_output: econ.output,
+      econ_capacity: econ.capacity,
+      loyalty: 50,
+      suspicion: 0,
+      production_queue: []
+    };
+  });
 }
 
 function buildInitialGovernorState() {
@@ -1050,11 +1054,13 @@ function getRecruitmentMultiplier(planetType) {
   return base[planetType] || 1;
 }
 
-function getPlayerRank(round) {
-  if (round < 5) return 'Novice';
-  if (round < 15) return 'Veteran';
-  if (round < 30) return 'Commander';
-  return 'Admiral';
+function getPlayerRank(contributionPct) {
+  if (contributionPct <= 0) return 'None';
+  if (contributionPct < 20) return 'Recruit';
+  if (contributionPct < 40) return 'Member';
+  if (contributionPct < 60) return 'Officer';
+  if (contributionPct < 80) return 'Leader';
+  return 'Founder';
 }
 
 function getPlanetSector(planetId) {

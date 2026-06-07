@@ -165,8 +165,8 @@ async function applyRebelAction(sessionId, playerId, action) {
   } else if (type === 'combat_round') {
     if (!action.combatId) return { ok:false, error:'No active combat' };
 
-    const activeCombats = await db.getActiveCombats(sessionId);
-    const combat = activeCombats.find(c => c.id === action.combatId);
+    const activeCombatsObj = await db.getActiveCombats(sessionId);
+    const combat = Object.values(activeCombatsObj).find(c => c.id === action.combatId);
     if (!combat) return { ok:false, error:'Combat not found' };
 
     // Check that player is involved in this combat

@@ -409,8 +409,8 @@ module.exports = function registerSocketHandlers(io) {
         const session = await db.getSessionById(sessionId);
         if (!session) return socket.emit('error', { message:'Session not found' });
 
-        const activeCombats = await db.getActiveCombats(sessionId);
-        const combat = activeCombats.find(c => c.id === combatId);
+        const activeCombatsObj = await db.getActiveCombats(sessionId);
+        const combat = Object.values(activeCombatsObj).find(c => c.id === combatId);
         if (!combat) return socket.emit('error', { message:'Combat not found' });
 
         const playerSide = combat.attackerKey === `rebel:${playerId}` ? 'attacker' :

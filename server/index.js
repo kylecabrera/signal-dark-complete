@@ -11,9 +11,13 @@ console.log('PORT env var:', process.env.PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
 const corsOptions = {
-  origin: true, // Allow all origins for now
+  origin: (origin, callback) => {
+    // Allow all origins in development and production
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 const sessionRoutes = require('./routes/sessions');

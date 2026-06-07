@@ -531,10 +531,10 @@ module.exports = function registerSocketHandlers(io) {
     io.to(sessionId).emit('governor_phase_started', { message:'All rebels submitted — governors convening…' });
 
     try {
-      // Add timeout to governor phase (60 seconds max)
+      // Add timeout to governor phase (30 seconds max)
       const governorPromise = engine.processGovernorTurn(sessionId);
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Governor phase timeout - skipping to next turn')), 60000)
+        setTimeout(() => reject(new Error('Governor phase timeout - skipping to next turn')), 30000)
       );
 
       const { session, feedEntries, leaks, combatLog, newUnits } =

@@ -79,108 +79,35 @@ function reachableIn(adjSet, allIds, fromId, steps) {
   return frontier;
 }
 
-// Compute Voronoi-based territory boundaries for factions
+// Compute simple faction territory regions for coloring
 function computeTerritoryBoundaries(planets, lanes, worldWidth = 3000, worldHeight = 3735) {
   if (!planets || planets.length === 0) return [];
 
-  const boundaryLines = [];
-  const gridRes = 40;
-  const grid = new Map();
+  try {
+    const territories = {};
 
-  // Find nearest controlled planet to a point
-  const getNearestControlledPlanet = (px, py) => {
-    let nearest = null;
-    let minDist = Infinity;
+    // Get all controlled planets grouped by faction
     for (const p of planets) {
       if (!p.controlled_by || p.controlled_by === 'neutral') continue;
-      const dx = p.x - px, dy = p.y - py;
-      const dist = dx * dx + dy * dy;
-      if (dist < minDist) { minDist = dist; nearest = p; }
-    }
-    return nearest;
-  };
-
-  // Build grid of controlled territories
-  for (let x = 0; x < worldWidth; x += gridRes) {
-    for (let y = 0; y < worldHeight; y += gridRes) {
-      const p = getNearestControlledPlanet(x, y);
-      if (p) {
-        grid.set(`${x},${y}`, {
-          x, y,
-          controlledBy: p.controlled_by,
-          factionColor: p.factionColor || '#606080'
-        });
+      if (!territories[p.controlled_by]) {
+        territories[p.controlled_by] = {
+          planets: [],
+          color: p.factionColor || OWNER_COLORS[p.controlled_by] || '#606080'
+        };
       }
+      territories[p.controlled_by].planets.push(p);
     }
+
+    return Object.entries(territories).map(([control, data]) => ({
+      key: control,
+      planets: data.planets,
+      color: data.color,
+      paths: [] // Simplified - no paths needed for colored regions
+    }));
+  } catch (err) {
+    console.warn('Territory computation error:', err);
+    return [];
   }
-
-  if (grid.size === 0) return [];
-
-  // Find boundaries
-  const gridPoints = Array.from(grid.entries()).map(([k, v]) => {
-    const [x, y] = k.split(',').map(Number);
-    return { x, y, ...v };
-  });
-
-  const boundaries = {};
-  for (const pt of gridPoints) {
-    const adj1 = grid.get(`${pt.x + gridRes},${pt.y}`);
-    const adj2 = grid.get(`${pt.x},${pt.y + gridRes}`);
-
-    if (adj1 && adj1.controlledBy !== pt.controlledBy) {
-      const key = [pt.controlledBy, adj1.controlledBy].sort().join('|');
-      if (!boundaries[key]) boundaries[key] = [];
-      boundaries[key].push({
-        x1: pt.x + gridRes / 2, y1: pt.y,
-        x2: pt.x + gridRes / 2, y2: pt.y + gridRes
-      });
-    }
-    if (adj2 && adj2.controlledBy !== pt.controlledBy) {
-      const key = [pt.controlledBy, adj2.controlledBy].sort().join('|');
-      if (!boundaries[key]) boundaries[key] = [];
-      boundaries[key].push({
-        x1: pt.x, y1: pt.y + gridRes / 2,
-        x2: pt.x + gridRes, y2: pt.y + gridRes / 2
-      });
-    }
-  }
-
-  // Build paths from line segments
-  for (const [key, lines] of Object.entries(boundaries)) {
-    if (!lines || lines.length === 0) continue;
-
-    const paths = [];
-    const used = new Set();
-
-    while (used.size < lines.length) {
-      const path = [];
-      let current = lines.findIndex((_, i) => !used.has(i));
-      if (current === -1) break;
-
-      let curLine = lines[current];
-      path.push({ x: curLine.x1, y: curLine.y1 });
-      used.add(current);
-
-      while (true) {
-        path.push({ x: curLine.x2, y: curLine.y2 });
-        const next = lines.findIndex((l, i) =>
-          !used.has(i) &&
-          (Math.abs(l.x1 - curLine.x2) < 5 && Math.abs(l.y1 - curLine.y2) < 5)
-        );
-        if (next === -1) break;
-        curLine = lines[next];
-        used.add(next);
-      }
-
-      if (path.length > 2) paths.push(path);
-    }
-
-    if (paths.length > 0) {
-      boundaryLines.push({ key, paths });
-    }
-  }
-
-  return boundaryLines;
 }
 
 const MIN_ZOOM = 0.15;
@@ -382,30 +309,23 @@ export function SectorMap({ game }) {
             return <line key={i} className={cls} x1={pa_.x} y1={pa_.y} x2={pb_.x} y2={pb_.y} />;
           })}
 
-          {/* Faction Territory Boundaries (Voronoi-based) — Temporarily disabled for debugging */}
-          {false && (() => {
+          {/* Faction Territory Backgrounds */}
+          {(() => {
             const enhancedPlanets = planets.map(p => ({
               ...p,
               factionColor: controlColor(p.controlled_by, factionMap)
             }));
-            const boundaries = computeTerritoryBoundaries(enhancedPlanets, lanes);
-            return boundaries.map((boundary, bIdx) => (
-              <g key={`boundaries-${bIdx}`} opacity={0.3}>
-                {boundary.paths.map((path, pIdx) => {
-                  const pathStr = path.map((pt, i) =>
-                    (i === 0 ? 'M' : 'L') + pt.x + ',' + pt.y
-                  ).join('');
-                  const [ctrl1, ctrl2] = boundary.key.split('|');
-                  const color = OWNER_COLORS[ctrl1] || OWNER_COLORS[ctrl2] || '#606080';
+            const territories = computeTerritoryBoundaries(enhancedPlanets, lanes);
+            return territories.map((territory, tIdx) => (
+              <g key={`territory-${tIdx}`} opacity={0.08}>
+                {territory.planets.map(p => {
+                  const { x, y } = pos(p);
                   return (
-                    <path
-                      key={`path-${pIdx}`}
-                      d={pathStr}
-                      stroke={color}
-                      strokeWidth="2"
-                      fill="none"
-                      opacity="0.6"
-                      strokeDasharray="4,2"
+                    <circle
+                      key={`terr-bg-${p.id}`}
+                      cx={x} cy={y} r={60}
+                      fill={territory.color}
+                      strokeWidth={0}
                     />
                   );
                 })}

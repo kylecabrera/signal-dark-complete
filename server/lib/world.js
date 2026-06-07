@@ -1020,6 +1020,41 @@ function buildInitialPlanetState() {
     governorPlanets[gov].add(unit.planet_id);
   }
 
+  // Add adjacent planets to each governor's control (up to 1 per governor)
+  const governorHomePlanets = {
+    'empire:crassus': 'p01',
+    'empire:siris': 'p04',
+    'empire:maren': 'p12',
+    'empire:vektis': 'p06'
+  };
+
+  for (const [gov, homePlanetId] of Object.entries(governorHomePlanets)) {
+    if (!governorPlanets[gov]) governorPlanets[gov] = new Set();
+    // Find adjacent planets and add first unclaimed one
+    for (const [p1, p2] of LANES) {
+      if (p1 === homePlanetId) {
+        // Check if p2 is not already controlled
+        let alreadyControlled = false;
+        for (const controlledSet of Object.values(governorPlanets)) {
+          if (controlledSet.has(p2)) { alreadyControlled = true; break; }
+        }
+        if (!alreadyControlled && governorPlanets[gov].size < 4) {
+          governorPlanets[gov].add(p2);
+          break;
+        }
+      } else if (p2 === homePlanetId) {
+        let alreadyControlled = false;
+        for (const controlledSet of Object.values(governorPlanets)) {
+          if (controlledSet.has(p1)) { alreadyControlled = true; break; }
+        }
+        if (!alreadyControlled && governorPlanets[gov].size < 4) {
+          governorPlanets[gov].add(p1);
+          break;
+        }
+      }
+    }
+  }
+
   // Create reverse lookup: planet -> governor
   const planetToGovernor = {};
   for (const [gov, planets] of Object.entries(governorPlanets)) {

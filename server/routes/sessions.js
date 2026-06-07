@@ -80,11 +80,14 @@ router.post('/sessions/:code/join', async (req, res) => {
     const { displayName } = req.body;
     const session = await db.getSessionByCode(req.params.code);
     if (!session)              return res.status(404).json({ error:'Game not found' });
-    if (session.status !== 'lobby') return res.status(400).json({ error:'Game already started' });
+    if (!['lobby', 'active'].includes(session.status))
+      return res.status(400).json({ error:'Game is no longer accepting players' });
 
     const existing = await db.getPlayers(session.id);
     if (existing.length >= CONFIG.MAX_PLAYERS)
       return res.status(400).json({ error:`Game is full (max ${CONFIG.MAX_PLAYERS})` });
+
+    const isHotjoin = session.status === 'active';
 
     const color  = PLAYER_COLORS[existing.length];
     const player = await db.createPlayer(session.id, displayName.trim(), color);
@@ -106,9 +109,13 @@ router.post('/sessions/:code/join', async (req, res) => {
       3, true, 2, 0, player.display_name);
 
     const bonus = CONFIG.FORCE.STARTING_BONUSES[startPlanet.type] || {};
+    if (isHotjoin) {
+      console.log(`[HOTJOIN] ${displayName} joined active game ${session.code}`);
+    }
     res.json({ sessionId:session.id, code:session.code, playerId:player.id,
       startingPlanet: { id:startPlanet.id, name:startPlanet.name, type:startPlanet.type,
-        desc: bonus.desc, forceStrength: forceOpts.strength, alignment: forceOpts.alignment } });
+        desc: bonus.desc, forceStrength: forceOpts.strength, alignment: forceOpts.alignment },
+      isHotjoin });
   } catch(err) {
     console.error('Join session error:', err);
     res.status(500).json({ error:'Failed to join' });

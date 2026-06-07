@@ -27,6 +27,16 @@ module.exports = function registerSocketHandlers(io) {
         socket.join(sessionId);
         socket.data = { sessionId, playerId };
 
+        // If hotjoining during rebel phase, auto-submit them since they didn't act this turn
+        if (session.status === 'active' && session.phase === 'rebel') {
+          const submitted = session.submitted_players || [];
+          if (!submitted.includes(playerId)) {
+            submitted.push(playerId);
+            await db.updateSession(sessionId, { submitted_players: submitted });
+            console.log(`[HOTJOIN] ${player.display_name} auto-submitted for current rebel phase`);
+          }
+        }
+
         // Public state to all
         io.to(sessionId).emit('state_update', await engine.buildPublicState(session, players));
 

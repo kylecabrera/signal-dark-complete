@@ -1011,18 +1011,29 @@ function generateGameCode() {
 
 function buildInitialPlanetState() {
   const CONFIG = require('./config');
+  // Empire starting planets: 3 per governor (Crassus/Siris/Maren/Vektis)
+  const empireControlledPlanets = [
+    'p01', 'p02', 'p06', 'p12',  // Crassus: p01(home), p02, p06, p12
+    'p04', 'p11', 'p14', 'p18',  // Siris: p04(home), p11, p14, p18
+    'p17', 'p22', 'p25',         // Maren: p12(home), p17, p22, p25
+    'p32', 'p45'                 // Vektis: p06(home), p14, p32, p45
+  ];
+
   return PLANETS.map(p => {
     const econ = CONFIG.PLANET_ECON[p.id] || { output: 1, capacity: 3 };
+    const isEmpireControlled = empireControlledPlanets.includes(p.id);
     return {
       id: p.id,
       name: p.name,
       type: p.type || 'standard',
       x: p.x,
       y: p.y,
+      population: p.pop || 0,
       econ_output: econ.output,
       econ_capacity: econ.capacity,
-      loyalty: 50,
+      loyalty: isEmpireControlled ? 100 : 50,
       suspicion: 0,
+      controlled_by: isEmpireControlled ? 'empire' : null,
       production_queue: []
     };
   });

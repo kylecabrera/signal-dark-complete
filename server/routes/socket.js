@@ -200,8 +200,8 @@ module.exports = function registerSocketHandlers(io) {
 
         // Combat initiation — broadcast to involved players
         if (result.combatInitiated) {
-          const activeCombats = await db.getActiveCombats(sessionId);
-          const combat = activeCombats.find(c => c.id === result.combatInitiated);
+          const activeCombatsObj = await db.getActiveCombats(sessionId);
+          const combat = Object.values(activeCombatsObj).find(c => c.id === result.combatInitiated);
           if (combat) {
             socket.emit('combat_initiated', {
               combatId: combat.id,
@@ -221,8 +221,8 @@ module.exports = function registerSocketHandlers(io) {
           const { combatId, round, outcome, attackerUnits, defenderUnits } = result.combatRound;
 
           // Get combat to find involved players
-          const activeCombats = await db.getActiveCombats(sessionId);
-          const combat = activeCombats.find(c => c.id === combatId);
+          const activeCombatsObj = await db.getActiveCombats(sessionId);
+          const combat = Object.values(activeCombatsObj).find(c => c.id === combatId);
           if (combat) {
             const involvedPlayerIds = [];
             if (combat.attackerKey.startsWith('rebel:')) {

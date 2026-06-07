@@ -355,13 +355,25 @@ export function SectorMap({ game }) {
                 )}
 
                 {(() => {
-                  // Show single red triangle if any empire/faction fleets present (excluding police)
-                  const hasImperialUnits = (publicState?.units || [])
-                    .some(u => u.planet_id === planet.id &&
-                             (u.owner?.startsWith('empire:') || u.owner?.startsWith('faction:')) &&
-                             u.unit_type !== 'police_patrol' &&
-                             !u.is_hidden);
-                  return hasImperialUnits ? (
+                  // Show red triangle ONLY for imperial governors or enemy factions (not police, not rebel)
+                  const hasImperialFleets = (publicState?.units || [])
+                    .some(u => {
+                      if (u.planet_id !== planet.id) return false;
+                      if (u.is_hidden) return false;
+
+                      // Police are ground forces, never shown as enemy fleets
+                      if (u.unit_type === 'police_patrol') return false;
+
+                      // Governor fleets: empire:crassus, empire:siris, empire:maren, empire:vektis
+                      if (u.owner?.startsWith('empire:')) return true;
+
+                      // Enemy faction units
+                      if (u.owner?.startsWith('faction:')) return true;
+
+                      return false;
+                    });
+
+                  return hasImperialFleets ? (
                     <polygon key={`fleet-${planet.id}`} points={`${x},${y+5},${x-4},${y-3},${x+4},${y-3}`}
                       fill="#e84040" opacity={0.85} className="imperial-fleet-marker"
                       title="Imperial/Faction Fleet Present" />

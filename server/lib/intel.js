@@ -210,7 +210,7 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
     case 'lockLane': {
       const pa = planets.find(x => x.name === target  || x.id === target);
       const pb = planets.find(x => x.name === target2 || x.id === target2);
-      if (pa && pb) {
+      if (pa && pb && pa.id !== pb.id) {
         const already = locked.some(([a,b])=>(a===pa.id&&b===pb.id)||(a===pb.id&&b===pa.id));
         if (!already) {
           locked.push([pa.id, pb.id]);
@@ -266,10 +266,13 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
     case 'moveUnit': {
       // Governor moves one of their existing units
       const units = await db.getUnits(sessionId);
-      const unit = units.find(u => u.owner === `empire:${governor}` && u.planet_id === (planets.find(x=>x.name===target||x.id===target)?.id));
-      if (unit && target2) {
-        const dest = planets.find(x=>x.name===target2||x.id===target2);
-        if (dest) await db.updateUnit(unit.id, { planet_id: dest.id });
+      const source = planets.find(x=>x.name===target||x.id===target);
+      if (source) {
+        const unit = units.find(u => u.owner === `empire:${governor}` && u.planet_id === source.id);
+        if (unit && target2) {
+          const dest = planets.find(x=>x.name===target2||x.id===target2);
+          if (dest) await db.updateUnit(unit.id, { planet_id: dest.id });
+        }
       }
       break;
     }

@@ -382,8 +382,8 @@ export function SectorMap({ game }) {
             return <line key={i} className={cls} x1={pa_.x} y1={pa_.y} x2={pb_.x} y2={pb_.y} />;
           })}
 
-          {/* Faction Territory Boundaries (Voronoi-based) */}
-          {(() => {
+          {/* Faction Territory Boundaries (Voronoi-based) — Temporarily disabled for debugging */}
+          {false && (() => {
             const enhancedPlanets = planets.map(p => ({
               ...p,
               factionColor: controlColor(p.controlled_by, factionMap)

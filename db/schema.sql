@@ -22,6 +22,7 @@ CREATE TABLE game_sessions (
   watched_lanes       JSONB NOT NULL DEFAULT '[]',
   locked_lanes        JSONB NOT NULL DEFAULT '[]',
   submitted_players   JSONB NOT NULL DEFAULT '[]',
+  active_combats      JSONB NOT NULL DEFAULT '{}',
   winner              TEXT,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()

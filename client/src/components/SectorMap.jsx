@@ -105,6 +105,7 @@ export function SectorMap({ game }) {
       const el = svgRef.current;
       if (!el) return;
       const w = el.clientWidth, h = el.clientHeight;
+      if (w === 0 || h === 0) return; // Not yet rendered
       setDims({ w, h });
       // Auto-fit: scale so the 2000×2000 world fits with 5% padding
       if (!vpInitRef.current && w > 0 && h > 0) {
@@ -113,9 +114,13 @@ export function SectorMap({ game }) {
         setVp({ x: w / 2 - 1000 * scale, y: h / 2 - 1000 * scale, scale });
       }
     }
-    measure();
+    // Use requestAnimationFrame to ensure DOM is ready
+    const frame = requestAnimationFrame(measure);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', measure);
+    };
   }, []);
 
   // Prevent page scroll while hovering map

@@ -1011,17 +1011,27 @@ function generateGameCode() {
 
 function buildInitialPlanetState() {
   const CONFIG = require('./config');
-  // Empire starting planets: 3 per governor (Crassus/Siris/Maren/Vektis)
-  const empireControlledPlanets = [
-    'p01', 'p02', 'p06', 'p12',  // Crassus: p01(home), p02, p06, p12
-    'p04', 'p11', 'p14', 'p18',  // Siris: p04(home), p11, p14, p18
-    'p17', 'p22', 'p25',         // Maren: p12(home), p17, p22, p25
-    'p32', 'p45'                 // Vektis: p06(home), p14, p32, p45
-  ];
+  // Map each governor's planets from INITIAL_ARCHITECT_UNITS
+  const governorPlanets = {};
+  for (const unit of CONFIG.INITIAL_ARCHITECT_UNITS) {
+    if (!unit.owner || !unit.owner.startsWith('empire:')) continue;
+    const gov = unit.owner; // e.g., 'empire:crassus'
+    if (!governorPlanets[gov]) governorPlanets[gov] = new Set();
+    governorPlanets[gov].add(unit.planet_id);
+  }
+
+  // Create reverse lookup: planet -> governor
+  const planetToGovernor = {};
+  for (const [gov, planets] of Object.entries(governorPlanets)) {
+    for (const pid of planets) {
+      // Use highest priority if multiple governors (by insertion order)
+      if (!planetToGovernor[pid]) planetToGovernor[pid] = gov;
+    }
+  }
 
   return PLANETS.map(p => {
     const econ = CONFIG.PLANET_ECON[p.id] || { output: 1, capacity: 3 };
-    const isEmpireControlled = empireControlledPlanets.includes(p.id);
+    const controlledBy = planetToGovernor[p.id];
     return {
       id: p.id,
       name: p.name,
@@ -1031,9 +1041,9 @@ function buildInitialPlanetState() {
       population: p.pop || 0,
       econ_output: econ.output,
       econ_capacity: econ.capacity,
-      loyalty: isEmpireControlled ? 100 : 50,
+      loyalty: controlledBy ? 100 : 50,
       suspicion: 0,
-      controlled_by: isEmpireControlled ? 'empire' : null,
+      controlled_by: controlledBy || null,
       production_queue: []
     };
   });

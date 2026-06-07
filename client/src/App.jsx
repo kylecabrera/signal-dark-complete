@@ -8,6 +8,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { CombatReportModal } from './components/CombatReportModal';
 import CombatModal from './components/CombatModal';
 import { SplashScreen } from './components/SplashScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './app.css';
 
 function GameShell() {
@@ -288,8 +289,10 @@ function ForceMeter({ alignment, side, strength }) {
 
 export default function App() {
   return (
-    <SocketProvider>
-      <GameShell />
-    </SocketProvider>
+    <ErrorBoundary>
+      <SocketProvider>
+        <GameShell />
+      </SocketProvider>
+    </ErrorBoundary>
   );
 }

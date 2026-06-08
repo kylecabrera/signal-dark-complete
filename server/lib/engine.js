@@ -175,13 +175,17 @@ async function applyRebelAction(sessionId, playerId, action) {
     console.log(`Combat validation: combatId=${action.combatId}, playerId=${playerId}, attackerKey=${combat.attackerKey}, defenderKey=${combat.defenderKey}, isAttacker=${isAttacker}, isDefender=${isDefender}`);
     if (!isAttacker && !isDefender) return { ok:false, error:'You are not in this combat' };
 
+    console.log(`Combat validation passed, proceeding with combat round for ${action.combatId}`);
+
     // Deduct one action for the combat round
     const currentPlanet = rebelState.current_planet;
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1, rebelState.credits||0);
 
     // Resolve one round of combat
     const { resolveSingleCombatRound } = require('./units');
+    console.log(`Calling resolveSingleCombatRound for ${action.combatId}`);
     const { outcome, updatedCombat } = await resolveSingleCombatRound(sessionId, action.combatId, combat);
+    console.log(`Combat round resolved: outcome=${outcome}, newRound=${updatedCombat?.round}`);
 
     label = `Combat Round ${updatedCombat.round}`;
     result.combatRound = {

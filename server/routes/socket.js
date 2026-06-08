@@ -209,8 +209,8 @@ module.exports = function registerSocketHandlers(io) {
               layer: combat.layer,
               attackerKey: combat.attackerKey,
               defenderKey: combat.defenderKey,
-              attackerUnits: combat.attacker_units,
-              defenderUnits: combat.defender_units,
+              attackerUnits: combat.attackerUnits,
+              defenderUnits: combat.defenderUnits,
               round: combat.round
             });
           }

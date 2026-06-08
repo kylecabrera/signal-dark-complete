@@ -435,7 +435,7 @@ async function runProductionPhase(sessionId) {
   rebelStates.forEach(rs => rebelCredits[rs.player_id] = 0);
 
   for (const planet of session.planet_state) {
-    if (planet.controlled_by === 'rebel' || planet.controlled_by.startsWith('faction:')) {
+    if (planet.controlled_by === 'rebel' || planet.controlled_by?.startsWith('faction:')) {
       const econ = CONFIG.PLANET_ECON[planet.id];
       if (!econ || econ.output === 0) continue;
 

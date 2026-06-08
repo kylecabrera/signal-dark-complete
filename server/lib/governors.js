@@ -31,11 +31,11 @@ You may include 1-${CONFIG.GOVERNOR_ACTION_SLOTS} actions. Choose based on your 
 // ─────────────────────────────────────────────
 async function buildSharedBrief(session, leaks, units) {
   const factionBrief = await buildGovernorFactionBrief(session.id);
-  const leakSummary  = leaks.length
+  const leakSummary  = leaks?.length
     ? leaks.map(l=>`R${l.round}[${l.severity}]: ${l.text}`).join('\n')
     : 'No confirmed intel this round.';
 
-  const unitSummary = units
+  const unitSummary = (units || [])
     .map(u=>`${u.unit_type}(${u.owner.split(':')[1]}) at ${u.planet_id}/${u.layer} STR:${u.strength} HP:${u.hp}`)
     .join('; ') || 'no units on board';
 

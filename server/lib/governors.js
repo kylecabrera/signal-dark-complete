@@ -48,7 +48,7 @@ async function buildSharedBrief(session, leaks, units) {
     .join(' ');
 
   const rebelPlanets = session.planet_state
-    .filter(p => p.controlled_by === 'rebel' || p.controlled_by.startsWith('faction:'))
+    .filter(p => p.controlled_by === 'rebel' || p.controlled_by?.startsWith('faction:'))
     .map(p => p.name)
     .join(', ') || 'none';
 

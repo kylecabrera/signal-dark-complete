@@ -183,6 +183,7 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
     case 'deployPatrol': {
       const p = planets.find(x => x.name === target || x.id === target);
       if (p) {
+        govState.siris = govState.siris || {};
         govState.siris.patrolTokens = govState.siris.patrolTokens || {};
         govState.siris.patrolTokens[p.id] = true;
         p.suspicion = Math.min(p.suspicion + 1, 4);
@@ -199,6 +200,7 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
     case 'sweep': {
       const p = planets.find(x => x.name === target || x.id === target);
       if (p) {
+        govState.crassus = govState.crassus || {};
         govState.crassus.sweepTargets = govState.crassus.sweepTargets || [];
         govState.crassus.sweepTargets.push(p.id);
         p.suspicion = Math.min(p.suspicion + 1, 4);
@@ -252,11 +254,10 @@ async function applyGovernorAction(sessionId, round, governor, action, planets, 
       // Skip production if planet is sabotaged (production_blocked_until > current round)
       const isBlocked = p && p.production_blocked_until && p.production_blocked_until > round;
       if (p && cfg && !isBlocked) {
-        const pool = `${governor}ProductionPool` in govState[governor]
-          ? govState[governor].productionPool
-          : 0;
+        govState[governor] = govState[governor] || {};
+        const pool = govState[governor].productionPool || 0;
         if (pool >= cfg.cost) {
-          govState[governor].productionPool -= cfg.cost;
+          govState[governor].productionPool = (govState[governor].productionPool || 0) - cfg.cost;
           await db.addToProductionQueue(sessionId, p.id, unit_type,
             `empire:${governor}`, cfg.buildTime);
         }

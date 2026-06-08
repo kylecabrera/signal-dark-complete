@@ -72,6 +72,7 @@ function GameShell() {
           withdraw={game.withdraw}
           socket={game.socket}
           planets={publicState?.planets || []}
+          onClose={() => game.setActiveCombat(null)}
         />
       )}
       {traitorAlert && (

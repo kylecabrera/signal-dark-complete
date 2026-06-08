@@ -879,7 +879,7 @@ async function ensureFactionResearchInitialized(factionId, sessionId) {
 }
 
 // ── Active Combat Tracking ──────────────
-async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, attackerKey, defenderKey) {
+async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, attackerKey, defenderKey, layer = 'orbit') {
   const session = await getSessionById(sessionId);
   if (!session) {
     console.error('startCombat: Session not found');
@@ -892,6 +892,7 @@ async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, at
   activeCombats[combatId] = {
     id: combatId,
     planetId,
+    layer,
     attackerUnits: (attackerUnits || []).map(u => ({ id: u.id, unit_type: u.unit_type, owner: u.owner, hp: u.hp, strength: u.strength, layer: u.layer })),
     defenderUnits: (defenderUnits || []).map(u => ({ id: u.id, unit_type: u.unit_type, owner: u.owner, hp: u.hp, strength: u.strength, layer: u.layer })),
     attackerKey,

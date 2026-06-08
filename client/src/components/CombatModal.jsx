@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function CombatModal({ combat, combatRound, withdraw, socket, planets }) {
+export default function CombatModal({ combat, combatRound, withdraw, socket, planets, onClose }) {
   const [selectedToRemove, setSelectedToRemove] = useState({});
   const [withdrawing, setWithdrawing] = useState(false);
 
@@ -8,6 +8,12 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
 
   const { combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, round, playerSide, planetId } = combat;
   const planetName = (planets || []).find(p => p.id === planetId)?.name || planetId;
+
+  console.log('CombatModal render:', { playerSide, attackerKey, defenderKey, round });
+
+  const handleClose = () => {
+    if (onClose) onClose();
+  };
 
   const handleWithdraw = () => {
     if (withdrawing) {
@@ -77,7 +83,7 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 500,
-    }}>
+    }} onClick={(e) => e.target === e.currentTarget && handleClose()}>
       <div style={{
         background: '#0d1425',
         border: '2px solid #3a7aff',
@@ -88,7 +94,29 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
         maxHeight: '80vh',
         overflow: 'auto',
         boxShadow: '0 0 30px rgba(58, 122, 255, 0.3)',
+        position: 'relative',
       }}>
+        {!playerSide && (
+          <button
+            onClick={handleClose}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'rgba(100, 100, 100, 0.5)',
+              border: '1px solid #606080',
+              color: '#a0a0c0',
+              borderRadius: '2px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              fontFamily: 'var(--mono)',
+              fontSize: '10px',
+              fontWeight: 500,
+            }}
+          >
+            CLOSE
+          </button>
+        )}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',

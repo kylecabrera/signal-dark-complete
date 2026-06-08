@@ -574,7 +574,7 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
 
     // Create persistent combat instead of resolving immediately
-    const combat = await db.startCombat(sessionId, planetId, myUnits, enemyUnits, `rebel:${playerId}`, 'empire');
+    const combat = await db.startCombat(sessionId, planetId, myUnits, enemyUnits, `rebel:${playerId}`, 'empire', targetLayer);
     if (!combat) {
       return { ok:false, error:'Failed to create combat' };
     }

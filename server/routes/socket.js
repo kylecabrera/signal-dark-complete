@@ -202,8 +202,9 @@ module.exports = function registerSocketHandlers(io) {
         if (result.combatInitiated) {
           const activeCombatsObj = await db.getActiveCombats(sessionId);
           const combat = Object.values(activeCombatsObj).find(c => c.id === result.combatInitiated);
+          console.log('Combat initiated:', result.combatInitiated, 'Combat data:', combat);
           if (combat) {
-            socket.emit('combat_initiated', {
+            const combatData = {
               combatId: combat.id,
               planetId: combat.planetId,
               layer: combat.layer,
@@ -212,7 +213,11 @@ module.exports = function registerSocketHandlers(io) {
               attackerUnits: combat.attackerUnits,
               defenderUnits: combat.defenderUnits,
               round: combat.round
-            });
+            };
+            console.log('Sending combat_initiated:', combatData);
+            socket.emit('combat_initiated', combatData);
+          } else {
+            console.log('Combat not found in active combats:', activeCombatsObj);
           }
         }
 
@@ -529,6 +534,7 @@ module.exports = function registerSocketHandlers(io) {
   async function triggerGovernorTurn(io, sessionId) {
     clearTurnTimer(sessionId);
     io.to(sessionId).emit('governor_phase_started', { message:'All rebels submitted — governors convening…' });
+    console.log('Governor phase triggered for session:', sessionId);
 
     try {
       // Add timeout to governor phase (30 seconds max)
@@ -537,8 +543,16 @@ module.exports = function registerSocketHandlers(io) {
         setTimeout(() => reject(new Error('Governor phase timeout - skipping to next turn')), 30000)
       );
 
-      const { session, feedEntries, leaks, combatLog, newUnits } =
-        await Promise.race([governorPromise, timeoutPromise]);
+      console.log('Racing governor promise with timeout...');
+      const result = await Promise.race([governorPromise, timeoutPromise]);
+      console.log('Governor phase result:', result ? 'Success' : 'Null');
+
+      const { session, feedEntries, leaks, combatLog, newUnits } = result || {};
+
+      if (!session) {
+        console.error('No session in governor result!');
+        return;
+      }
 
       const players = await db.getPlayers(sessionId);
 

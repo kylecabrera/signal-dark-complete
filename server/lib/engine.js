@@ -923,18 +923,25 @@ function computeGlobalMeters(planets) {
 // Governor turn — called after all rebels submit
 // ─────────────────────────────────────────────
 async function processGovernorTurn(sessionId) {
+  console.log('=== GOVERNOR TURN START ===');
   let session = await db.getSessionById(sessionId);
-  if (!session || session.status !== 'active') return null;
+  if (!session || session.status !== 'active') {
+    console.log('Session not found or not active');
+    return null;
+  }
 
   await db.updateSession(sessionId, { phase:'governor' });
   session = await db.getSessionById(sessionId);
 
+  console.log('Round:', session.round, 'Alert value:', session.alert_value);
   const moves = await db.getSealedMovesForRound(sessionId, session.round);
   const units  = await db.getUnits(sessionId);
   const vektisMemory = updateVektisMemory(session.vektis_memory, moves);
+  console.log('Moves:', moves.length, 'Units:', units.length);
 
   // Compute intel leaks
   const leaks = await processMovesIntoLeaks(sessionId, session.round, moves, session);
+  console.log('Leaks computed:', leaks.length);
 
   // Update Siris model
   const updatedSiris = updateSirisModel(session.governor_state, leaks, session.round);
@@ -1147,6 +1154,8 @@ async function processGovernorTurn(sessionId) {
     updatedSession.winner  = outcome;
   }
 
+  console.log('Governor turn complete - Feed:', feedEntries.length, 'Combat:', combatLog.length, 'NewUnits:', newUnits.length);
+  console.log('=== GOVERNOR TURN END ===');
   return { session:updatedSession, feedEntries, leaks, combatLog, newUnits };
 }
 

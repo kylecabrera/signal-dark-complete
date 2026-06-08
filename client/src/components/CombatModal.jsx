@@ -145,7 +145,7 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
               textAlign: 'center',
               letterSpacing: '0.1em'
             }}>
-              {attackerKey === 'rebel' ? 'YOUR FORCES' : 'IMPERIAL FORCES'}
+              {attackerKey?.startsWith('rebel') ? 'YOUR FORCES' : 'IMPERIAL FORCES'}
             </div>
             <div style={{
               border: '1px solid #3a5a8a',
@@ -186,7 +186,7 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
               textAlign: 'center',
               letterSpacing: '0.1em'
             }}>
-              {defenderKey === 'rebel' ? 'YOUR FORCES' : 'OPPOSING FORCES'}
+              {defenderKey?.startsWith('rebel') ? 'YOUR FORCES' : 'OPPOSING FORCES'}
             </div>
             <div style={{
               border: '1px solid #3a5a8a',

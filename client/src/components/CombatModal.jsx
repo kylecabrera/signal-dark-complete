@@ -16,8 +16,10 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
   };
 
   const handleWithdraw = () => {
+    console.log('Withdraw clicked - withdrawing:', withdrawing, 'playerSide:', playerSide);
     if (withdrawing) {
       // Submit withdrawal with selected units to remove
+      console.log('Emitting combat_withdraw:', combatId, selectedToRemove);
       socket?.emit('combat_withdraw', {
         combatId,
         unitsToRemove: selectedToRemove,
@@ -29,6 +31,11 @@ export default function CombatModal({ combat, combatRound, withdraw, socket, pla
   };
 
   const handleCombatRound = () => {
+    console.log('Combat round clicked - combatId:', combatId, 'playerSide:', playerSide);
+    if (!playerSide) {
+      console.warn('Cannot take combat round action - not participating in combat');
+      return;
+    }
     combatRound(combatId);
     setSelectedToRemove({});
     setWithdrawing(false);

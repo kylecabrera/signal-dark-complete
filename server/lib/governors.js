@@ -91,7 +91,7 @@ async function callGovernor(system, userMsg, sessionId, governor, round, maxToke
 // ─────────────────────────────────────────────
 async function runSirisVael(session, leaks, units, brief) {
   const { id:sessionId, round, governor_state } = session;
-  const gv = governor_state.siris;
+  const gv = governor_state?.siris || {};
   const suspects = (gv.suspectPlanets||[]).map(id=>session.planet_state.find(p=>p.id===id)?.name).filter(Boolean).join(', ');
   const patrols  = Object.keys(gv.patrolTokens||{}).map(id=>session.planet_state.find(p=>p.id===id)?.name).filter(Boolean).join(', ')||'none';
 
@@ -134,7 +134,7 @@ VALID PLANET NAMES: ${brief.allPlanetNames}`;
 // ─────────────────────────────────────────────
 async function runCrassus(session, leaks, units, brief) {
   const { id:sessionId, round, governor_state } = session;
-  const gv = governor_state.crassus;
+  const gv = governor_state?.crassus || {};
   const myUnits = units.filter(u=>u.owner==='empire:crassus');
 
   const sys = `You are Crassus-9, Governor-General. A brutal warlord. You command through fear and overwhelming force. Your broadcasts are threats wrapped in military jargon. You speak like an Imperial general crushing a rebellion—direct, confident, violent.
@@ -174,7 +174,7 @@ VALID PLANET NAMES: ${brief.allPlanetNames}`;
 // ─────────────────────────────────────────────
 async function runMaren(session, leaks, units, brief) {
   const { id:sessionId, round, governor_state } = session;
-  const gv = governor_state.maren;
+  const gv = governor_state?.maren || {};
   const informers = (gv.informerNetworks||[]).map(id=>session.planet_state.find(p=>p.id===id)?.name).filter(Boolean).join(', ')||'none';
   const lowLoyalty = session.planet_state.filter(p=>p.loyalty<50).map(p=>`${p.name}(${p.loyalty}%)`).join(', ')||'none';
 
@@ -215,7 +215,7 @@ VALID PLANET NAMES: ${brief.allPlanetNames}`;
 // ─────────────────────────────────────────────
 async function runVektis(session, leaks, units, brief, vektisMemory) {
   const { id:sessionId, round, governor_state } = session;
-  const gv = governor_state.vektis;
+  const gv = governor_state?.vektis || {};
   const mem = vektisMemory || {};
 
   const visitSummary = Object.entries(mem.visitedPlanets||{})

@@ -417,13 +417,13 @@ module.exports = function registerSocketHandlers(io) {
                           combat.defenderKey === `rebel:${playerId}` ? 'defender' : null;
         if (!playerSide) return socket.emit('error', { message:'Not involved in this combat' });
 
-        const unitsToKeep = playerSide === 'attacker' ? combat.attacker_units : combat.defender_units;
+        const unitsToKeep = playerSide === 'attacker' ? combat.attackerUnits : combat.defenderUnits;
         const unitsToRemoveIds = Object.keys(unitsToRemove || {}).filter(k => unitsToRemove[k]);
         const remainingUnits = unitsToKeep.filter(u => !unitsToRemoveIds.includes(u.id));
 
         const updatedCombat = {
           ...combat,
-          [playerSide === 'attacker' ? 'attacker_units' : 'defender_units']: remainingUnits
+          [playerSide === 'attacker' ? 'attackerUnits' : 'defenderUnits']: remainingUnits
         };
 
         const involvedPlayerIds = [];
@@ -455,8 +455,8 @@ module.exports = function registerSocketHandlers(io) {
               sock.emit('combat_round_update', {
                 combatId,
                 round: updatedCombat.round,
-                attackerUnits: updatedCombat.attacker_units,
-                defenderUnits: updatedCombat.defender_units,
+                attackerUnits: updatedCombat.attackerUnits,
+                defenderUnits: updatedCombat.defenderUnits,
                 outcome: 'continuing',
                 withdrawal: true
               });

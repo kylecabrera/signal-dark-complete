@@ -187,8 +187,8 @@ async function applyRebelAction(sessionId, playerId, action) {
       combatId: action.combatId,
       round: updatedCombat.round,
       outcome,
-      attackerUnits: updatedCombat.attacker_units,
-      defenderUnits: updatedCombat.defender_units,
+      attackerUnits: updatedCombat.attackerUnits,
+      defenderUnits: updatedCombat.defenderUnits,
     };
 
     // Update combat state

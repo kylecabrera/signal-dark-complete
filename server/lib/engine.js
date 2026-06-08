@@ -172,6 +172,7 @@ async function applyRebelAction(sessionId, playerId, action) {
     // Check that player is involved in this combat
     const isAttacker = combat.attackerKey === `rebel:${playerId}`;
     const isDefender = combat.defenderKey === `rebel:${playerId}`;
+    console.log(`Combat validation: combatId=${action.combatId}, playerId=${playerId}, attackerKey=${combat.attackerKey}, defenderKey=${combat.defenderKey}, isAttacker=${isAttacker}, isDefender=${isDefender}`);
     if (!isAttacker && !isDefender) return { ok:false, error:'You are not in this combat' };
 
     // Deduct one action for the combat round

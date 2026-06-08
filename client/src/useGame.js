@@ -230,8 +230,10 @@ export function useGame() {
       // Determine which side this player is on
       let playerSide = null;
       if (playerId) {
-        if (attackerKey === `rebel:${playerId}`) playerSide = 'attacker';
-        else if (defenderKey === `rebel:${playerId}`) playerSide = 'defender';
+        const isRebelAttacker = attackerKey === 'rebel' || attackerKey === `rebel:${playerId}`;
+        const isRebelDefender = defenderKey === 'rebel' || defenderKey === `rebel:${playerId}`;
+        if (isRebelAttacker) playerSide = 'attacker';
+        else if (isRebelDefender) playerSide = 'defender';
       }
       setActiveCombat({
         combatId,

@@ -71,6 +71,7 @@ function GameShell() {
           combatRound={game.combatRound}
           withdraw={game.withdraw}
           socket={game.socket}
+          planets={publicState?.planets || []}
         />
       )}
       {traitorAlert && (

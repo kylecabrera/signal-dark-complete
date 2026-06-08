@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
-export default function CombatModal({ combat, combatRound, withdraw, socket }) {
+export default function CombatModal({ combat, combatRound, withdraw, socket, planets }) {
   const [selectedToRemove, setSelectedToRemove] = useState({});
   const [withdrawing, setWithdrawing] = useState(false);
 
   if (!combat) return null;
 
-  const { combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, round, playerSide } = combat;
+  const { combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, round, playerSide, planetId } = combat;
+  const planetName = (planets || []).find(p => p.id === planetId)?.name || planetId;
 
   const handleWithdraw = () => {
     if (withdrawing) {
@@ -188,7 +189,7 @@ export default function CombatModal({ combat, combatRound, withdraw, socket }) {
           fontSize: '10px',
           color: '#a8c8e8'
         }}>
-          <div>Round {round + 1}</div>
+          <div>Combat at <span style={{ color: '#fff' }}>{planetName}</span> — Round {round + 1}</div>
           <div style={{ marginTop: '4px', fontSize: '9px', color: '#7a98b8' }}>
             {withdrawing ? '✓ Select units to remove and confirm withdrawal' : 'Continue fighting or withdraw'}
           </div>

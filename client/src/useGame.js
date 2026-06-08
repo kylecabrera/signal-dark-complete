@@ -3,6 +3,7 @@ import { useSocket } from './SocketContext';
 
 export function useGame() {
   const { socket } = useSocket();
+  const playerIdRef = useRef(null);
 
   const [sessionId, setSessionId]       = useState(null);
   const [playerId, setPlayerId]         = useState(null);
@@ -56,6 +57,7 @@ export function useGame() {
 
     socket.on('joined', ({ playerId: pid, displayName, color }) => {
       console.log('joined event received:', pid, displayName);
+      playerIdRef.current = pid;
       setPlayerId(pid);
       setMyColor(color);
       setMyName(displayName);
@@ -182,7 +184,7 @@ export function useGame() {
     socket.on('combat_report', (report) => {
       setCombatReports(prev => [report, ...prev].slice(0, 20));
       setFeedEntries(prev => [{ gov: 'system', text: report.summary }, ...prev]);
-      if (report.involvedPlayerIds?.includes(playerId)) {
+      if (report.involvedPlayerIds?.includes(playerIdRef.current)) {
         setActiveCombatReport(report);
       }
     });
@@ -230,13 +232,13 @@ export function useGame() {
       notify(`FINE REJECTION: ${reason.toUpperCase()}`);
     });
 
-    socket.on('combat_initiated', ({ combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round }) => {
+    socket.on('combat_initiated', ({ combatId, attackerUnits, defenderUnits, attackerKey, defenderKey, planetId, round, layer }) => {
       notify('⚔️ COMBAT INITIATED');
       // Determine which side this player is on
       let playerSide = null;
-      if (playerId) {
-        const isRebelAttacker = attackerKey === 'rebel' || attackerKey === `rebel:${playerId}`;
-        const isRebelDefender = defenderKey === 'rebel' || defenderKey === `rebel:${playerId}`;
+      if (playerIdRef.current) {
+        const isRebelAttacker = attackerKey === 'rebel' || attackerKey === `rebel:${playerIdRef.current}`;
+        const isRebelDefender = defenderKey === 'rebel' || defenderKey === `rebel:${playerIdRef.current}`;
         if (isRebelAttacker) playerSide = 'attacker';
         else if (isRebelDefender) playerSide = 'defender';
       }
@@ -248,6 +250,7 @@ export function useGame() {
         defenderKey,
         planetId,
         round,
+        layer,
         playerSide
       });
     });

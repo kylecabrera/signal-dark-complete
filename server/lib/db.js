@@ -881,7 +881,10 @@ async function ensureFactionResearchInitialized(factionId, sessionId) {
 // ── Active Combat Tracking ──────────────
 async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, attackerKey, defenderKey) {
   const session = await getSessionById(sessionId);
-  if (!session) return null;
+  if (!session) {
+    console.error('startCombat: Session not found');
+    return null;
+  }
 
   const activeCombats = session.active_combats || {};
   const combatId = `${planetId}-${Date.now()}`;
@@ -889,14 +892,16 @@ async function startCombat(sessionId, planetId, attackerUnits, defenderUnits, at
   activeCombats[combatId] = {
     id: combatId,
     planetId,
-    attackerUnits,
-    defenderUnits,
+    attackerUnits: (attackerUnits || []).map(u => ({ id: u.id, unit_type: u.unit_type, owner: u.owner, hp: u.hp, strength: u.strength, layer: u.layer })),
+    defenderUnits: (defenderUnits || []).map(u => ({ id: u.id, unit_type: u.unit_type, owner: u.owner, hp: u.hp, strength: u.strength, layer: u.layer })),
     attackerKey,
     defenderKey,
     round: 0,
     status: 'ongoing',
     createdAt: Date.now()
   };
+
+  console.log('startCombat: Created combat', combatId, 'Attacker units:', (attackerUnits || []).length, 'Defender units:', (defenderUnits || []).length);
 
   await updateSession(sessionId, { active_combats: activeCombats });
   return activeCombats[combatId];

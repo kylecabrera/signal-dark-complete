@@ -574,25 +574,15 @@ async function applyRebelAction(sessionId, playerId, action) {
     }
 
     // Create persistent combat instead of resolving immediately
-    const combatId = `combat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const combatState = {
-      id: combatId,
-      planetId,
-      layer: targetLayer,
-      round: 0,
-      attackerKey: `rebel:${playerId}`,
-      defenderKey: 'empire', // Generic empire defender
-      attacker_units: myUnits,
-      defender_units: enemyUnits,
-      created_at: new Date().toISOString()
-    };
-
-    await db.startCombat(sessionId, planetId, myUnits, enemyUnits, `rebel:${playerId}`, 'empire');
+    const combat = await db.startCombat(sessionId, planetId, myUnits, enemyUnits, `rebel:${playerId}`, 'empire');
+    if (!combat) {
+      return { ok:false, error:'Failed to create combat' };
+    }
 
     covert = false;
     label = `Initiated combat on ${targetLayer} at ${planetId} [OVERT]`;
-    metadata = { target_planet: planetId, layer: targetLayer, combatId };
-    result.combatInitiated = combatId;
+    metadata = { target_planet: planetId, layer: targetLayer, combatId: combat.id };
+    result.combatInitiated = combat.id;
 
     await db.upsertRebelState(sessionId, playerId, currentPlanet, rebelState.actions_used+1,
       rebelState.credits||0);
@@ -1186,11 +1176,19 @@ function checkOutcome(session, players) {
 
 function updateVektisMemory(existing, moves) {
   const mem = existing || { visitedPlanets:{}, actionTypes:[], routePatterns:[], roundsSinceConfirm:0 };
-  moves.forEach(m => {
-    if (m.action_type === 'move') {
+  // Ensure all required properties exist
+  mem.visitedPlanets = mem.visitedPlanets || {};
+  mem.actionTypes = mem.actionTypes || [];
+  mem.routePatterns = mem.routePatterns || [];
+  mem.roundsSinceConfirm = mem.roundsSinceConfirm ?? 0;
+
+  (moves || []).forEach(m => {
+    if (m && m.action_type === 'move') {
       mem.visitedPlanets[m.planet_id] = (mem.visitedPlanets[m.planet_id]||0)+1;
     }
-    mem.actionTypes.push({ type:m.action_type, planet:m.planet_id, round:m.round });
+    if (m) {
+      mem.actionTypes.push({ type:m.action_type, planet:m.planet_id, round:m.round });
+    }
   });
   if (mem.actionTypes.length > 40) mem.actionTypes = mem.actionTypes.slice(-40);
   return mem;

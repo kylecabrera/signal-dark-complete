@@ -170,6 +170,11 @@ export function useGame() {
       notify('GOVERNOR COUNCIL CONVENING…');
     });
 
+    socket.on('rebel_phase_started', ({ phase, round }) => {
+      setGovernorThinking(false);
+      notify('REBEL PHASE RESUMED');
+    });
+
     socket.on('governor_broadcast', (entry) => {
       setFeedEntries(prev => [entry, ...prev].slice(0, 60));
     });
@@ -290,6 +295,7 @@ export function useGame() {
       socket.off('action_rejected');
       socket.off('turn_submitted');
       socket.off('governor_phase_started');
+      socket.off('rebel_phase_started');
       socket.off('governor_broadcast');
       socket.off('combat_report');
       socket.off('units_produced');

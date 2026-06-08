@@ -547,23 +547,32 @@ module.exports = function registerSocketHandlers(io) {
       const result = await Promise.race([governorPromise, timeoutPromise]);
       console.log('Governor phase result:', result ? 'Success' : 'Null');
 
-      const { session, feedEntries, leaks, combatLog, newUnits } = result || {};
-
-      if (!session) {
-        console.error('No session in governor result!');
+      if (!result || !result.session) {
+        console.error('Governor phase failed - no valid result');
+        io.to(sessionId).emit('error', { message: 'Governor phase processing failed' });
+        // Still try to transition back to rebel phase
+        const updatedSession = await db.getSessionById(sessionId);
+        if (updatedSession) {
+          await db.updateSession(sessionId, { phase: 'rebel', submitted_players: [] });
+          const updatedPlayers = await db.getPlayers(sessionId);
+          io.to(sessionId).emit('state_update', await engine.buildPublicState(updatedSession, updatedPlayers));
+          io.to(sessionId).emit('rebel_phase_started', { phase: 'rebel', round: updatedSession.round });
+          startTurnTimer(io, sessionId);
+        }
         return;
       }
 
+      const { session, feedEntries = [], leaks, combatLog = [], newUnits = [] } = result;
       const players = await db.getPlayers(sessionId);
 
       // Stagger feed entries for atmosphere
-      for (const entry of feedEntries) {
+      for (const entry of (feedEntries || [])) {
         io.to(sessionId).emit('governor_broadcast', entry);
         await sleep(300);
       }
 
       // Combat reports and initiation of persistent combats
-      for (const combat of (combatLog||[])) {
+      for (const combat of (combatLog || [])) {
         if (combat.status === 'ongoing' && combat.combatId) {
           // New persistent combat - broadcast to involved players
           const involvedPlayerIds = combat.involvedPlayerIds || [];

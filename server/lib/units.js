@@ -477,10 +477,10 @@ async function runProductionPhase(sessionId) {
   // Generate production points for each controlled planet
   const govProduction = { siris:0, crassus:0, maren:0, vektis:0 };
   for (const planet of session.planet_state) {
-    if (planet.controlled_by === 'empire' || planet.controlled_by.startsWith('empire:')) {
+    if (planet.controlled_by === 'empire' || planet.controlled_by?.startsWith('empire:')) {
       const econ = CONFIG.PLANET_ECON[planet.id];
       if (!econ) continue;
-      const gov = planet.controlled_by.startsWith('empire:')
+      const gov = planet.controlled_by?.startsWith('empire:')
         ? planet.controlled_by.split(':')[1]
         : getAssignedGovernor(planet.id);
       if (govProduction[gov] !== undefined) {

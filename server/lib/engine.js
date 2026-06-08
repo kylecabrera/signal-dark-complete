@@ -862,7 +862,7 @@ async function applyImmediateEffects(sessionId, session, type, planetId, rebelSt
 
     // Loyalty flip: hits 0 → dominant faction (or rebels) claim it, reset to CONFIG.LOYALTY_RESET.rebel
     if (planet.loyalty === 0 &&
-        !planet.controlled_by.startsWith('faction:') &&
+        !planet.controlled_by?.startsWith('faction:') &&
         planet.controlled_by !== 'rebel') {
       const claimingFaction = await determineClaimingFaction(sessionId, planet.id, planets);
       planet.controlled_by = claimingFaction;
@@ -872,7 +872,7 @@ async function applyImmediateEffects(sessionId, session, type, planetId, rebelSt
     }
 
     // Loyalty flip: hits 100 → architect claims it, reset to CONFIG.LOYALTY_RESET.architect
-    if (planet.loyalty === 100 && !planet.controlled_by.startsWith('empire:')) {
+    if (planet.loyalty === 100 && !planet.controlled_by?.startsWith('empire:')) {
       // Default to architect (no governor specified in rebel actions)
       const oldControl = planet.controlled_by;
       planet.controlled_by = 'empire';
